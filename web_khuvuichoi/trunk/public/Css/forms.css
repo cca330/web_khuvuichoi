@@ -1,0 +1,81 @@
+/* vùng tách khỏi admin */
+.page-wrapper {
+    width: 100%;
+    padding: 30px 0;
+}
+
+/* card form */
+.game-form-box {
+    max-width: 650px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+}
+
+/* title */
+.game-form-title {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* form */
+/* Ghi đè CSS admin */
+.content .game-form-title {
+    color: #333;          /* đè màu trắng */
+    font-size: 22px;
+    margin-bottom: 25px;
+}
+
+
+/* full width */
+.game-form textarea,
+.game-form input[type="file"],
+.game-submit {
+    grid-column: 1 / -1;
+}
+
+/* input */
+.game-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+/* focus */
+.game-input:focus {
+    border-color: #1E90FF;
+    outline: none;
+    box-shadow: 0 0 6px rgba(30,144,255,0.4);
+}
+
+/* button */
+body {
+  background: white;
+}
+.form-button {  
+  padding: 10px 12px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #1e90ff;
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.form-button:hover {
+  opacity: 0.9;
+}
+
+.form-button-secondary {
+  background: #7f8c8d;
+  margin-left: 10px;
+}
+

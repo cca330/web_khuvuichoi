@@ -1,0 +1,113 @@
+@import url("https://font.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-image: url("draw/background.jpg");
+  background-size: cover; /* co ảnh vừa khít khung */
+  background-position: center; /* canh giữa ảnh */
+  background-repeat: no-repeat; /* không lặp ảnh */
+}
+
+.panel {
+  width: 420px;
+  color: #fff;
+  border-radius: 10px;
+  padding: 30px 40px;
+  border: 2px solid white;
+  background: rgba(255, 255, 255, 0.08); /* nền trong suốt nhẹ */
+  backdrop-filter: blur(50px); /* làm mờ nền phía sau */
+}
+
+.panel h1 {
+  font-size: 45px;
+  text-align: center;
+}
+
+.panel .txtbox {
+  width: 100%;
+  height: 50px;
+
+  margin: 30px 0;
+}
+
+.panel .txtbox input {
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 40px;
+  font-size: 16px;
+  color: #fff;
+  padding: 20px 45px 20px 20px;
+}
+
+.txtbox input::placeholder {
+  color: #fff;
+}
+
+.txtbox i {
+  position: absolute;
+  right: 50px;
+  padding: 10px;
+  font-size: 30px;
+}
+
+.panel .quenmk {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14.5px;
+  margin: -15px 0 15px 15px;
+}
+
+.quenmk a:hover {
+  text-decoration: underline;
+}
+
+.panel .btnlogin {
+  width: 100%;
+  height: 45px;
+  background: #fff;
+  border: none;
+  outline: none;
+  border-radius: 40px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  cursor: pointer;
+  color: #333;
+  font-weight: 600;
+}
+
+.panel .taotaikhoan {
+  font-size: 14.5px;
+  text-align: center;
+  margin: 20px 0 15px;
+}
+
+.taotaikhoan a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.taotaikhoan a {
+  text-decoration: underline;
+}
+
+.error {
+  color: red;
+
+  margin-bottom: 15px;
+  text-align: center;
+}
