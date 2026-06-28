@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liên Hệ & Đánh Giá - HG Playground</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/bootstrap.min.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.0">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.2">
     <style>
         .contact-form { background: #fff; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .star-rating { font-size: 2rem; color: #ddd; cursor: pointer; }

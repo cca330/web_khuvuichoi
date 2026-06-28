@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/slicknav.min.css"> 
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/header.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.0">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.2">
 </head>
 <body>
 
@@ -29,13 +29,13 @@
     <!-- Header chính -->
     <header class="header">
         <div class="container">
-            <div class="row d-flex justify-content-between">
-                <div>
+            <div class="row header__inner">
+                <div class="header__brand">
                     <div class="header__logo">
                         <a href="<?= BASE_URL ?>/trangchu"><img src="<?= BASE_URL ?>/public/img/lg3.png" width="100px" height="100px" alt="logo nhỏ"></a>
                     </div>
                 </div>
-                <div class="col-lg-9">
+                <div class="header__nav-wrap">
                     <nav class="header__menu">
                         <ul>
                             <li class="active"><a href="<?= BASE_URL ?>/trangchu">Trang Chủ</a></li>
@@ -48,7 +48,7 @@
                     </nav>
                 </div>
                <!-- Phần Account trong header - LUÔN HIỆN nút Tài khoản -->
-                <div class="dropdown ms-3">
+                <div class="dropdown header__account">
                     <a class="btn btn-outline-primary dropdown-toggle d-flex align-items-center" 
                         href="<?= BASE_URL ?>/account" 
                         role="button">
@@ -59,6 +59,25 @@
             </div>
         </div>
     </header>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var currentPath = window.location.pathname.toLowerCase();
+            var navItems = document.querySelectorAll('.header__menu li');
+
+            navItems.forEach(function (item) {
+                var link = item.querySelector('a');
+                var href = link ? link.getAttribute('href').toLowerCase() : '';
+                item.classList.toggle('active', href && currentPath.indexOf(new URL(href, window.location.origin).pathname.toLowerCase()) !== -1);
+            });
+
+            if (currentPath === '/doan/' || currentPath === '/doan') {
+                var homeLink = document.querySelector('.header__menu a[href$="/trangchu"]');
+                if (homeLink) {
+                    homeLink.parentElement.classList.add('active');
+                }
+            }
+        });
+    </script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/jquery-migrate-3.4.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>

@@ -22,7 +22,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-nice-select/1.1.0/css/nice-select.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/slicknav.min.css"> 
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.0">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.2">
 </head>
 <body>
     <footer class="footer spad">

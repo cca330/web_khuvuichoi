@@ -6,7 +6,7 @@
     <title>Sự Kiện Nổi Bật - HG Playground</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/bootstrap.min.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/font-awesome.min.css">
-    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.0">
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.2">
     <style>
         .event-banner { height: 70vh; background-size: cover; background-position: center; position: relative; }
         .event-banner .overlay { background: rgba(0,0,0,0.6); position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
