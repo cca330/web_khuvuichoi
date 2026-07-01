@@ -10,18 +10,18 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout source
-        uses: actions/checkout@v4
-
-      - name: Pull newest code
+      - name: Deploy on Ubuntu
         run: |
           cd /home/user1/Doan
+
+          echo "Current directory:"
+          pwd
+
+          echo "Pull newest code..."
           git pull origin main
 
-      - name: Rebuild Docker
-        run: |
-          cd /home/user1/Doan
+          echo "Rebuild Docker..."
           docker compose up -d --build
 
-      - name: Show containers
-        run: docker ps
+          echo "Running containers:"
+          docker ps
