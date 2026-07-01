@@ -1,6 +1,6 @@
 <?php
 class App {
-    protected $controller = "LoginController";
+    protected $controller = "TrangchuController";
     protected $action = "index";
 
 
@@ -67,7 +67,7 @@ class App {
             $basePath = rtrim(dirname($scriptName), '/\\');
             $urlPath = trim(str_replace($basePath, '', $requestUri), '/');
 
-            if ($urlPath === '' || $urlPath === '' || $urlPath === 'doan/') {
+            if ($urlPath === '' || $urlPath === 'web_khuvuichoi/' || $urlPath === 'doan/') {
                 $urlPath = 'trangchu';
             }
 
