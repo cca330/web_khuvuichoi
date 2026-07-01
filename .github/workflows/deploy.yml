@@ -10,11 +10,31 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Test Runner
+
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Go to project
         run: |
-          echo "===== Runner Test ====="
-          whoami
+          cd /home/user1/Doan
           pwd
-          hostname
-          date
-          ls -la /home/user1/Doan
+
+      - name: Pull newest code
+        run: |
+          cd /home/user1/Doan
+          git pull origin main
+
+      - name: Build and start Docker
+        run: |
+          cd /home/user1/Doan
+          docker compose up -d --build
+
+      - name: Show running containers
+        run: |
+          docker ps
+
+      - name: Deploy Finished
+        run: |
+          echo "=================================="
+          echo " Deploy Success "
+          echo "=================================="
