@@ -11,8 +11,6 @@ jobs:
 
     steps:
 
-      - name: Checkout source
-        uses: actions/checkout@v4
 
       - name: Go to project
         run: |
