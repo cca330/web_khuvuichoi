@@ -2,51 +2,12 @@ FROM php:8.2-apache
 
 RUN docker-php-ext-install pdo pdo_mysql mysqli
 
-COPY . /var/www/html/
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    curl
 
-RUN a2enmod rewriteservices:
-
-  web:
-    build: .
-    container_name: web_container
-
-    ports:
-      - "8080:80"
-
-    volumes:
-      - .:/var/www/html
-
-    depends_on:
-      db:
-        condition: service_healthy
-
-    restart: unless-stopped
-
-  db:
-    image: mysql:8.0
-
-    container_name: mysql_container
-
-    restart: unless-stopped
-
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: dbweb
-
-    volumes:
-      - mysql_data:/var/lib/mysql
-
-    healthcheck:
-      test: ["CMD","mysqladmin","ping","-h","localhost","-p123456"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-volumes:
-
-  mysql_data:FROM php:8.2-apache
-
-RUN docker-php-ext-install pdo pdo_mysql mysqli
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 COPY . /var/www/html/
 
