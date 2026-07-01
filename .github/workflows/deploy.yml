@@ -10,18 +10,11 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Deploy on Ubuntu
+      - name: Test Runner
         run: |
-          cd /home/user1/Doan
-
-          echo "Current directory:"
+          echo "===== Runner Test ====="
+          whoami
           pwd
-
-          echo "Pull newest code..."
-          git pull origin main
-
-          echo "Rebuild Docker..."
-          docker compose up -d --build
-
-          echo "Running containers:"
-          docker ps
+          hostname
+          date
+          ls -la /home/user1/Doan
