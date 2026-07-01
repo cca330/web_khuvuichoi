@@ -1,6 +1,6 @@
 <?php
 class App {
-    protected $controller = "LoginController";
+    protected $controller = "TrangchuController";
     protected $action = "index";
 
 
