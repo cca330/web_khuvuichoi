@@ -1,59 +1,15 @@
-name: PHP CI
-
-on:
-  push:
-    branches:
-      - develop
-      - main
 name: PHP Docker CI
 
 on:
   push:
     branches:
-      - develop
       - main
+      - develop
 
   pull_request:
     branches:
-      - develop
       - main
-
-jobs:
-
-  build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-
-    - name: Checkout Source
-      uses: actions/checkout@v4
-
-    - name: Show Project
-      run: ls -la
-
-    - name: Validate docker compose
-      run: docker compose config
-
-    - name: Build Docker Image
-      run: docker compose build
-
-    - name: Start Container
-      run: docker compose up -d
-
-    - name: Wait MySQL
-      run: sleep 15
-
-    - name: Show Running Container
-      run: docker ps -a
-
-    - name: PHP Syntax Check
-      run: |
-        find . -name "*.php" -exec php -l {} \;
-
-    - name: Stop Container
-      if: always()
-      run: docker compose down      - feature
+      - develop
 
 jobs:
   build:
@@ -65,5 +21,28 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
-      - name: Show files
+      - name: Show project
         run: ls -la
+
+      - name: Validate Docker Compose
+        run: docker compose config
+
+      - name: Build Docker Image
+        run: docker compose build
+
+      - name: Start Containers
+        run: docker compose up -d
+
+      - name: Wait MySQL
+        run: sleep 15
+
+      - name: Show Running Containers
+        run: docker ps -a
+
+      - name: PHP Syntax Check
+        run: |
+          find . -name "*.php" -exec php -l {} \;
+
+      - name: Stop Containers
+        if: always()
+        run: docker compose down
