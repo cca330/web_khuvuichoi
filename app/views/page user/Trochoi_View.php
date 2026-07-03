@@ -31,18 +31,55 @@
             border-radius: 15px; 
             overflow: hidden; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+            margin-bottom: 30px;
+           
+            
+            padding: 10px;
         }
         .game-card:hover { 
             transform: translateY(-10px); 
             box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
         }
-        .game-card img { 
-            transition: all 0.4s; 
-            height: 250px; 
-            object-fit: cover; 
+        #games-list {
+            margin-left: 0;
+            margin-right: 0;
         }
-        .game-card:hover img { 
-            transform: scale(1.1); 
+        #games-list > .col-lg-6,
+        #games-list > .col-md-6 {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+        .slide-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+            margin-bottom: 1.5rem;
+        }
+        .card-body {
+            padding: 24px;
+        }
+        .slider-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.8s ease;
+        }
+        .slider-image.current {
+            transform: translateX(0);
+            z-index: 2;
+        }
+        .slider-image.next-slide {
+            transform: translateX(100%);
+            z-index: 1;
+        }
+        .slider-image.slide-to-left {
+            transform: translateX(-100%);
+        }
+        .slider-image.slide-to-center {
+            transform: translateX(0);
         }
         .badge-maohiem { background: linear-gradient(45deg, #ff416c, #ff4757); }
         .badge-ocean { background: linear-gradient(45deg, #00c6ff, #0072ff); }
@@ -116,14 +153,59 @@
                     case 'Thư Giãn':   $category_class = 'badge-thugian'; break;
                     default:           $category_class = 'badge-primary';
                 }
-                $image = !empty($game['image']) ? $game['image'] : BASE_URL . '/public/img/default-game.jpg';
+                $defaultImage = BASE_URL . '/public/img/default-game.jpg';
+                $image = !empty($game['image']) ? BASE_URL . '/public/uploads/' . $game['image'] : $defaultImage;
+                $slideImages = [];
+                if ($game['name'] === 'VR Game') {
+                    $slideImages = [
+                        BASE_URL . '/public/img/game/vr1.avif',
+                        BASE_URL . '/public/img/game/vr2.jpg',
+                        BASE_URL . '/public/img/game/vr3.jpg',
+                        BASE_URL . '/public/img/game/vr4.jpg'
+                    ];
+                    $image = $slideImages[0];
+                } elseif ($game['name'] === 'Bumper Cars') {
+                    $slideImages = [
+                        BASE_URL . '/public/img/game/pumbercar1.jpg',
+                        BASE_URL . '/public/img/game/pumbercar2.jpg',
+                        BASE_URL . '/public/img/game/pumbercar3.jpg',
+                        BASE_URL . '/public/img/game/pumbercar4.jpeg'
+                    ];
+                    $image = $slideImages[0];
+                } elseif ($game['name'] === 'Ferris Wheel') {
+                    $slideImages = [
+                        BASE_URL . '/public/img/game/ferriswheel1.jpeg',
+                        BASE_URL . '/public/img/game/ferriswheel2.jpg',
+                        BASE_URL . '/public/img/game/ferriswheel3.jpeg',
+                        BASE_URL . '/public/img/game/ferriswheel4.jpg'
+                    ];
+                    $image = $slideImages[0];
+                } elseif ($game['name'] === 'Roller Coaster') {
+                    $slideImages = [
+                        BASE_URL . '/public/img/game/roller-coaster1.jpg',
+                        BASE_URL . '/public/img/game/roller-coaster2.jpg',
+                        BASE_URL . '/public/img/game/roller-coaster3.jpg',
+                        BASE_URL . '/public/img/game/roller-coaster4.jpg'
+                    ];
+                    $image = $slideImages[0];
+                } elseif ($game['name'] === 'Haunted House') {
+                    $slideImages = [
+                        BASE_URL . '/public/img/game/nha-ma1.avif',
+                        BASE_URL . '/public/img/game/nha-ma2.jpg',
+                        BASE_URL . '/public/img/game/nha-ma3.jpg',
+                        BASE_URL . '/public/img/game/nha-ma4.jpg'
+                    ];
+                    $image = $slideImages[0];
+                } 
                 ?>
                 <div class="col-lg-6 col-md-6 mb-5 game-card" 
                      data-category="<?= htmlspecialchars($game['category']) ?>" 
                      data-age="<?= (int)$game['recommended_age'] ?>" 
                      data-price="<?= (float)$game['price'] ?>">
                     <div class="card h-100 border-0">
-                        <img src="<?= htmlspecialchars($image) ?>" class="card-img-top" alt="<?= htmlspecialchars($game['name']) ?>">
+                        <div class="slide-wrapper">
+                            <img src="<?= htmlspecialchars($image) ?>" class="card-img-top slider-image current" alt="<?= htmlspecialchars($game['name']) ?>" data-slides='<?= htmlspecialchars(json_encode($slideImages), ENT_QUOTES, 'UTF-8') ?>'>
+                        </div>
                         <div class="card-body text-center">
                             <span class="badge <?= $category_class ?> text-white px-3 py-2 rounded-pill mb-3">
                                 <?= htmlspecialchars($game['category']) ?>
@@ -186,6 +268,37 @@
                 if (show) $(this).fadeIn();
             });
         }
+
+        // Chuyển ảnh tự động cho VR và Bumper Cars
+        $('.slider-image.current').each(function() {
+            let $current = $(this);
+            const slides = JSON.parse($current.attr('data-slides') || '[]');
+            if (slides.length === 0) return;
+
+            let currentIndex = 0;
+            const $wrapper = $current.closest('.slide-wrapper');
+
+            setInterval(() => {
+                const nextIndex = (currentIndex + 1) % slides.length;
+                const nextSrc = slides[nextIndex];
+                const $next = $current.clone().removeClass('current').addClass('next-slide').attr('src', nextSrc);
+
+                $wrapper.append($next);
+
+                // Force layout before transition
+                $next[0].offsetHeight;
+
+                $current.addClass('slide-to-left');
+                $next.addClass('slide-to-center');
+
+                setTimeout(() => {
+                    $current.remove();
+                    $next.removeClass('next-slide slide-to-left slide-to-center').addClass('current');
+                    $current = $next;
+                    currentIndex = nextIndex;
+                }, 900);
+            }, 5000);
+        });
     </script>
 </body>
 </html>
