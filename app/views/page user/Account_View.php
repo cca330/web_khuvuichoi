@@ -16,47 +16,210 @@
     <style>
         .account {
             padding: 80px 0;
-            background: #f4f8ff;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            min-height: 100vh;
+        }
+        .account .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #2d3748;
+            margin-bottom: 40px;
+            text-align: center;
+            position: relative;
+        }
+        .account .page-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 15px auto 0;
+            border-radius: 2px;
         }
         .account .card {
             border: none;
-            border-radius: 28px;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 24px 80px rgba(63,69,81,0.08);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .account .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.2);
         }
         .account .profile-header {
-            background: linear-gradient(135deg, #4f8cff 0%, #55e3c0 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: #ffffff;
-            padding: 40px 30px;
-            border-radius: 28px 28px 0 0;
+            padding: 50px 30px;
+            border-radius: 24px 24px 0 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .account .profile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .account .profile-header .avatar-wrapper {
+            position: relative;
+            display: inline-block;
         }
         .account .profile-header i {
-            font-size: 4.5rem;
-            margin-bottom: 20px;
+            font-size: 5rem;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
         }
         .account .profile-title {
-            font-size: 1.75rem;
+            font-size: 1.85rem;
             font-weight: 700;
-            margin-bottom: 0;
+            margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .account .profile-list p {
-            margin-bottom: 1.25rem;
-            color: #4a5568;
-            font-size: 1rem;
+        .account .profile-subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            font-weight: 400;
         }
-        .account .profile-list strong {
-            color: #111827;
+        .account .profile-list {
+            padding: 35px;
+        }
+        .account .info-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 20px 0;
+            border-bottom: 1px solid #edf2f7;
+            transition: background 0.2s ease;
+        }
+        .account .info-item:last-child {
+            border-bottom: none;
+        }
+        .account .info-item:hover {
+            background: linear-gradient(90deg, rgba(102,126,234,0.05) 0%, transparent 100%);
+            margin: 0 -20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            border-radius: 12px;
+        }
+        .account .info-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+        }
+        .account .info-icon i {
+            font-size: 1.3rem;
+            color: white;
+        }
+        .account .info-content {
+            flex: 1;
+        }
+        .account .info-label {
+            font-size: 0.85rem;
+            color: #718096;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .account .info-value {
+            font-size: 1.1rem;
+            color: #2d3748;
+            font-weight: 600;
         }
         .account .btn-primary {
-            background: linear-gradient(135deg, #4f8cff 0%, #55e3c0 100%);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
-            box-shadow: 0 12px 30px rgba(79,140,255,0.18);
+            padding: 14px 35px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 8px 25px rgba(102,126,234,0.35);
+            transition: all 0.3s ease;
+        }
+        .account .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102,126,234,0.45);
+            background: linear-gradient(135deg, #5a71d1 0%, #6a4190 100%);
         }
         .account .btn-danger {
+            background: linear-gradient(135deg, #fc5c7d 0%, #e91e63 100%);
+            border: none;
+            padding: 14px 35px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            box-shadow: 0 8px 25px rgba(236,92,125,0.35);
+            transition: all 0.3s ease;
             min-width: 170px;
+        }
+        .account .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(236,92,125,0.45);
+            background: linear-gradient(135deg, #e8456a 0%, #d81557 100%);
         }
         .account .btn-group {
             gap: 15px;
+            padding: 25px 35px 35px;
+            background: #f7fafc;
+            border-top: 1px solid #edf2f7;
+        }
+        .account .welcome-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+        }
+        .account .user-guest {
+            padding: 60px 30px;
+            text-align: center;
+        }
+        .account .user-guest i {
+            font-size: 4rem;
+            color: #cbd5e0;
+            margin-bottom: 20px;
+        }
+        .account .user-guest p {
+            color: #718096;
+            font-size: 1.1rem;
+            margin-bottom: 25px;
+        }
+
+        /* Animation */
+        .account .info-item {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        .account .info-item:nth-child(1) { animation-delay: 0.1s; }
+        .account .info-item:nth-child(2) { animation-delay: 0.2s; }
+        .account .info-item:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -66,51 +229,76 @@
 
     <section class="account spad">
         <div class="container">
-            <h2 class="text-center mb-5">Tài Khoản Cá Nhân</h2>
+            <h2 class="page-title">Tài Khoản Cá Nhân</h2>
 
             <div class="row justify-content-center">
                 <div class="col-lg-8">
                     <div class="card shadow">
                         <div class="profile-header text-center">
-                            <i class="fa fa-user-circle"></i>
+                            <div class="avatar-wrapper">
+                                <i class="fa fa-user-circle"></i>
+                            </div>
+                            <div class="welcome-badge">
+                                <i class="fa fa-wave-hand mr-2"></i>Thành viên
+                            </div>
                             <h4 class="profile-title">
                                 <?= isset($data['user']) ? 'Xin chào, ' . htmlspecialchars($data['user']['username']) . '!' : 'Tài khoản của bạn' ?>
                             </h4>
+                            <p class="profile-subtitle">
+                                <?= isset($data['user']) ? 'Cảm ơn bạn đã sử dụng dịch vụ của HG Playground' : 'Vui lòng đăng nhập để tiếp tục' ?>
+                            </p>
                         </div>
 
-                        <div class="card-body profile-list">
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <p><strong>Tên đăng nhập:</strong><br>
-                                        <?= isset($data['user']) ? htmlspecialchars($data['user']['username']) : 'Chưa có thông tin' ?>
-                                    </p>
+                        <?php if (isset($data['user'])): ?>
+                        <div class="profile-list">
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fa fa-user"></i>
                                 </div>
-                                <div class="col-md-6">
-                                    <p><strong>Email:</strong><br>
-                                        <?= isset($data['user']) && !empty($data['user']['email']) ? htmlspecialchars($data['user']['email']) : 'Chưa cập nhật' ?>
-                                    </p>
+                                <div class="info-content">
+                                    <div class="info-label">Tên đăng nhập</div>
+                                    <div class="info-value"><?= htmlspecialchars($data['user']['username']) ?></div>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <div class="col-md-12">
-                                    <p><strong>Ngày đăng ký:</strong><br>
-                                        <?= isset($data['user']) ? date('d/m/Y H:i', strtotime($data['user']['created_at'])) : 'Chưa có thông tin' ?>
-                                    </p>
+
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fa fa-envelope"></i>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-label">Email</div>
+                                    <div class="info-value"><?= !empty($data['user']['email']) ? htmlspecialchars($data['user']['email']) : '<span class="text-muted">Chưa cập nhật</span>' ?></div>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fa fa-calendar-alt"></i>
+                                </div>
+                                <div class="info-content">
+                                    <div class="info-label">Ngày đăng ký</div>
+                                    <div class="info-value"><?= date('d/m/Y H:i', strtotime($data['user']['created_at'])) ?></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="text-center mt-4 btn-group d-flex justify-content-center flex-wrap">
-                            <?php if (isset($data['user'])): ?>
-                                <a href="<?= BASE_URL ?>/login/logout" class="btn btn-danger btn-lg px-5">Đăng Xuất</a>
-                                <a href="<?= BASE_URL ?>/Order/history" class="btn btn-primary btn-lg px-5">Lịch sử mua hàng</a>
-                            <?php else: ?>
-                                <div class="w-100 text-center">
-                                    <p class="text-muted mb-3">Vui lòng đăng nhập để xem lịch sử mua hàng và quản lý tài khoản.</p>
-                                    <a href="<?= BASE_URL ?>/login" class="btn btn-primary btn-lg px-5">Đăng nhập để tiếp tục</a>
-                                </div>
-                            <?php endif; ?>
+                        <div class="btn-group d-flex justify-content-center flex-wrap">
+                            <a href="<?= BASE_URL ?>/Order/history" class="btn btn-primary">
+                                <i class="fa fa-shopping-bag mr-2"></i>Lịch sử mua hàng
+                            </a>
+                            <a href="<?= BASE_URL ?>/login/logout" class="btn btn-danger">
+                                <i class="fa fa-sign-out-alt mr-2"></i>Đăng Xuất
+                            </a>
                         </div>
+                        <?php else: ?>
+                        <div class="user-guest">
+                            <i class="fa fa-user-clock"></i>
+                            <p>Vui lòng đăng nhập để xem lịch sử mua hàng và quản lý tài khoản.</p>
+                            <a href="<?= BASE_URL ?>/login" class="btn btn-primary">
+                                <i class="fa fa-sign-in-alt mr-2"></i>Đăng nhập ngay
+                            </a>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
