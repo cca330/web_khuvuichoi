@@ -17,37 +17,40 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.2">
 
     <style>
-        .hero__item { 
-            height: 70vh; 
-            background-size: cover !important; 
-            background-position: center !important; 
-            background-repeat: no-repeat !important; 
+        .hero__item {
+            height: 70vh;
+            background-size: cover !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .game-card { 
-            transition: all 0.4s; 
-            border-radius: 15px; 
-            overflow: hidden; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
-            margin-bottom: 30px;
-           
-            
-            padding: 10px;
+        .game-card {
+            transition: all 0.4s;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 15px 0 30px 0;
+            padding: 15px;
+            height: 100%;
         }
-        .game-card:hover { 
-            transform: translateY(-10px); 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+        .game-card .card {
+            height: 100%;
+            border: none;
+        }
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
         #games-list {
-            margin-left: 0;
-            margin-right: 0;
+            margin-left: -15px;
+            margin-right: -15px;
         }
-        #games-list > .col-lg-6,
-        #games-list > .col-md-6 {
+        #games-list > [class*="col-"] {
             padding-left: 15px;
             padding-right: 15px;
+            margin-bottom: 0;
         }
         .slide-wrapper {
             position: relative;
@@ -121,10 +124,6 @@
                             <label>Loại trò chơi</label>
                             <select class="form-control" id="categoryFilter">
                                 <option value="all">Tất cả</option>
-                                <option value="Mạo Hiểm">Mạo Hiểm</option>
-                                <option value="Ocean Park">Ocean Park</option>
-                                <option value="Gia Đình">Gia Đình</option>
-                                <option value="Thư Giãn">Thư Giãn</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -245,29 +244,75 @@
     <script src="<?= BASE_URL ?>/public/Js/main.js"></script>
 
     <script>
-        // Cập nhật giá trị slider
-        $('#ageFilter').on('input', function() {
-            $('#ageValue').text($(this).val());
-        });
-        $('#priceFilter').on('input', function() {
-            $('#priceValue').text(Number($(this).val()).toLocaleString() + 'đ');
-        });
-
-        // Filter client-side
-        function applyFilter() {
-            let category = $('#categoryFilter').val();
-            let age = parseInt($('#ageFilter').val());
-            let price = parseInt($('#priceFilter').val());
-
-            $('.game-card').hide();
-            $('.game-card').each(function() {
-                let show = true;
-                if (category !== 'all' && $(this).data('category') !== category) show = false;
-                if ($(this).data('age') > age) show = false;
-                if ($(this).data('price') > price) show = false;
-                if (show) $(this).fadeIn();
+        // Đợi mọi thứ load xong mới chạy
+        jQuery(function($) {
+            // Cập nhật giá trị slider
+            $('#ageFilter').on('input', function() {
+                $('#ageValue').text($(this).val());
             });
-        }
+            $('#priceFilter').on('input', function() {
+                $('#priceValue').text(Number($(this).val()).toLocaleString() + 'đ');
+            });
+
+            // Tự động tạo dropdown options từ dữ liệu game thực tế
+            setTimeout(function() {
+                let categories = new Set();
+                $('.game-card').each(function() {
+                    let cat = $(this).attr('data-category');
+                    if (cat) categories.add(cat);
+                });
+
+                console.log('Categories trong database:', Array.from(categories));
+
+                // Xóa hết options cũ (trừ "Tất cả")
+                $('#categoryFilter').find('option:not([value="all"])').remove();
+
+                // Thêm options từ database
+                categories.forEach(function(cat) {
+                    $('#categoryFilter').append('<option value="' + cat + '">' + cat + '</option>');
+                });
+
+                console.log('Đã thêm options vào dropdown');
+            }, 500); // Đợi 500ms sau khi page load
+
+            // Filter client-side
+            window.applyFilter = function() {
+                let category = $('#categoryFilter').val();
+                let age = parseInt($('#ageFilter').val());
+                let price = parseInt($('#priceFilter').val());
+
+                // Xóa thông báo cũ trước khi thêm mới
+                $('.no-result').remove();
+
+                let visibleCount = 0;
+                $('.game-card').hide();
+                $('.game-card').each(function() {
+                    let show = true;
+                    // Dùng attr thay vì data để tránh vấn đề với tiếng Việt
+                    let cardCategory = $(this).attr('data-category');
+                    let cardAge = parseInt($(this).attr('data-age'));
+                    let cardPrice = parseFloat($(this).attr('data-price'));
+
+                    if (category !== 'all' && cardCategory !== category) show = false;
+                    if (cardAge > age) show = false;
+                    if (cardPrice > price) show = false;
+                    if (show) {
+                        $(this).fadeIn();
+                        visibleCount++;
+                    }
+                });
+
+                // Hiển thị thông báo nếu không có kết quả
+                if (visibleCount === 0) {
+                    $('#games-list').append('<div class="col-12 text-center py-5 no-result"><h4>Không tìm thấy trò chơi nào phù hợp!</h4><p>Thử thay đổi bộ lọc để xem thêm kết quả.</p></div>');
+                }
+            }
+
+            // Auto filter khi thay đổi dropdown
+            $('#categoryFilter').on('change', function() {
+                window.applyFilter();
+            });
+        });
 
         // Chuyển ảnh tự động cho VR và Bumper Cars
         $('.slider-image.current').each(function() {
