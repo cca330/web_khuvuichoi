@@ -15,7 +15,12 @@ class CartController {
     public function index() {
 
         if (!isset($_SESSION['user_id'])) {
-            die('Bạn chưa đăng nhập');
+            // Hiện thông báo và chuyển đến trang đăng nhập
+            echo '<script>
+                    alert("Bạn cần đăng nhập để xem giỏ hàng!");
+                    window.location.href = "' . BASE_URL . '/login";
+                  </script>';
+            exit;
         }
 
         $userId = (int)$_SESSION['user_id'];
@@ -68,7 +73,12 @@ class CartController {
     public function addGate() {
 
         if (!isset($_SESSION['user_id'])) {
-            die('Bạn chưa đăng nhập');
+            // Hiện thông báo và chuyển đến trang đăng nhập
+            echo '<script>
+                    alert("Bạn cần đăng nhập để thêm vé cổng!");
+                    window.location.href = "' . BASE_URL . '/login";
+                  </script>';
+            exit;
         }
 
         if (!isset($_POST['gate_id'])) {
@@ -114,7 +124,12 @@ class CartController {
     public function applyPromo() {
 
         if (!isset($_SESSION['user_id'])) {
-            die('Bạn chưa đăng nhập');
+            // Hiện thông báo và chuyển đến trang đăng nhập
+            echo '<script>
+                    alert("Bạn cần đăng nhập để sử dụng mã giảm giá!");
+                    window.location.href = "' . BASE_URL . '/login";
+                  </script>';
+            exit;
         }
 
         $code = $_POST['promo_code'] ?? '';
@@ -138,7 +153,12 @@ class CartController {
     public function checkout() {
 
         if (!isset($_SESSION['user_id'])) {
-            die('Bạn chưa đăng nhập');
+            // Hiện thông báo và chuyển đến trang đăng nhập
+            echo '<script>
+                    alert("Bạn cần đăng nhập để thanh toán!");
+                    window.location.href = "' . BASE_URL . '/login";
+                  </script>';
+            exit;
         }
 
         $userId = (int)$_SESSION['user_id'];

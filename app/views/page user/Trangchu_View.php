@@ -24,6 +24,224 @@
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/slicknav.min.css"> 
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/style1.css?v=1.2">
+    <style>
+        /* ===== PHẦN SỰ KIỆN NỔI BẬT - THIẾT KẾ MỚI ===== */
+        .event-section {
+            padding: 80px 0;
+            background: linear-gradient(180deg, #f8f9fa 0%, #e8ecf1 100%);
+            position: relative;
+        }
+
+        .event-section .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1a202c;
+            margin-bottom: 20px;
+        }
+
+        .event-section .section-title p {
+            font-size: 1.1rem;
+            color: #718096;
+            line-height: 1.8;
+        }
+
+        /* Event Slider Container */
+        .event-slider-container {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+            margin-top: 30px;
+        }
+
+        .event-slider-wrapper {
+            position: relative;
+            height: 520px;
+            overflow: hidden;
+        }
+
+        .event-slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+
+        .event-slide.active {
+            opacity: 1;
+        }
+
+        .event-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Event Caption - Hiển thị trên ảnh */
+        .event-caption {
+            position: absolute;
+            bottom: 60px;
+            left: 50px;
+            right: 50px;
+            padding: 25px 35px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.9) 0%, rgba(118,75,162,0.9) 100%);
+            border-radius: 16px;
+            color: #fff;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .event-slide.active .event-caption {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .event-caption h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .event-caption p {
+            font-size: 1rem;
+            margin-bottom: 0;
+            opacity: 0.9;
+        }
+
+        /* Nút prev/next */
+        .slider-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 55px;
+            height: 55px;
+            background: rgba(255,255,255,0.9);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .slider-btn:hover {
+            background: #fff;
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .slider-btn i {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .prev-btn {
+            left: 20px;
+        }
+
+        .next-btn {
+            right: 20px;
+        }
+
+        /* Chấm điều hướng */
+        .slider-nav {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .slider-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider-dot.active {
+            background: #fff;
+            transform: scale(1.3);
+        }
+
+        .slider-dot:hover {
+            background: rgba(255,255,255,0.8);
+        }
+
+        /* Button */
+        .event-section .btn-danger {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 14px 35px;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102,126,234,0.35);
+        }
+
+        .event-section .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102,126,234,0.45);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .event-section {
+                padding: 50px 0;
+            }
+
+            .event-section .section-title h2 {
+                font-size: 1.8rem;
+            }
+
+            .event-slider-wrapper {
+                height: 350px;
+            }
+
+            .event-caption {
+                left: 20px;
+                right: 20px;
+                bottom: 50px;
+                padding: 20px;
+                transform: translateY(0);
+                opacity: 1;
+            }
+
+            .event-caption h3 {
+                font-size: 1.2rem;
+            }
+
+            .event-caption p {
+                font-size: 0.9rem;
+            }
+
+            .slider-btn {
+                width: 45px;
+                height: 45px;
+            }
+
+            .prev-btn {
+                left: 10px;
+            }
+
+            .next-btn {
+                right: 10px;
+            }
+        }
+    </style>
 </head>
 <body>    
     <?php include 'app/views/Layouts/header.php'?>
@@ -137,7 +355,7 @@
 
     
     <!-- ================= SỰ KIỆN NỔI BẬT ================= -->
-<section class="from-blog spad">
+<section class="from-blog spad event-section">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
@@ -151,125 +369,103 @@
             </div>
         </div>
 
-        <!-- TAB MENU -->
-        <div class="play">
-            <ul class="nav nav-pills row" id="pills-tab" role="tablist">
-
-                <!-- Countdown Năm Mới 2026 -->
-                <li class="nav-item col-lg-3 col-md-6 mb-3">
-                    <a class="nav-link active" id="countdown-tab" data-toggle="pill" href="#countdown" role="tab">
-                        <div class="content">
-                            <div class="content-overlay"></div>
-                            <div class="box">
-                               
-                                <p>Countdown 2026</p>
-                            </div>
-                            <div class="content-details fadeIn-top">
-                                <h3>Đêm Countdown Chào Năm Mới 2026</h3>
-                                <p>
-                                    Pháo hoa rực rỡ, đại nhạc hội với ca sĩ nổi tiếng, DJ bùng nổ,
-                                    countdown hoành tráng đón khoảnh khắc giao thừa.
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-
-                <!-- Lễ Hội Ánh Sáng -->
-                <li class="nav-item col-lg-3 col-md-6 mb-3">
-                    <a class="nav-link" id="lights-tab" data-toggle="pill" href="#lights" role="tab">
-                        <div class="content">
-                            <div class="content-overlay"></div>
-                            <div class="box">
-                                <p>Lễ Hội Ánh Sáng</p>
-                            </div>
-                            <div class="content-details fadeIn-top">
-                                <h3>Lễ Hội Ánh Sáng Magic Light 2025</h3>
-                                <p>
-                                    Hàng triệu đèn LED lung linh, đường hầm ánh sáng, biểu diễn drone light,
-                                    không gian cổ tích sống động mỗi tối cuối tuần.
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-
-                <!-- Water Splash Festival -->
-                <li class="nav-item col-lg-3 col-md-6 mb-3">
-                    <a class="nav-link" id="water-tab" data-toggle="pill" href="#water" role="tab">
-                        <div class="content">
-                            <div class="content-overlay"></div>
-                            <div class="box">
-                                <p>Water Splash</p>
-                            </div>
-                            <div class="content-details fadeIn-top">
-                                <h3>Water Splash Festival 2026</h3>
-                                <p>
-                                    Lễ hội té nước lớn nhất năm, DJ pool party, bắn súng nước,
-                                    foam party và hàng ngàn phần quà hấp dẫn.
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-
-                <!-- Halloween Night -->
-                <li class="nav-item col-lg-3 col-md-6 mb-3">
-                    <a class="nav-link" id="halloween-tab" data-toggle="pill" href="#halloween" role="tab">
-                        <div class="content">
-                            <div class="content-overlay"></div>
-                            <div class="box">
-                                <p>Halloween Night</p>
-                            </div>
-                            <div class="content-details fadeIn-top">
-                                <h3>Halloween Horror Night 2025</h3>
-                                <p>
-                                    Nhà ma kinh dị, hóa trang zombie, diễu hành ma quái,
-                                    trò chơi thử thách can đảm và quà tặng bí ẩn.
-                                </p>
-                            </div>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <!-- TAB CONTENT - Carousel ảnh lớn -->
-        <div class="tab-content mt-5" id="pills-tabContent">
-            <!-- Countdown -->
-            <div class="tab-pane fade show active" id="countdown" role="tabpanel">
-                <div class="banner5__slider owl-carousel">
-                    <img src="<?= BASE_URL ?>/public/img/event-slider-1.png" alt="Countdown pháo hoa">
+        <!-- SLIDER TỔNG HỢP - Tất cả sự kiện -->
+        <div class="event-slider-container">
+            <div class="event-slider-wrapper" id="slider-events">
+                <!-- Countdown 2026 -->
+                <div class="event-slide active">
+                    <img src="<?= BASE_URL ?>/public/img/event-slider-33.jpg" alt="Countdown pháo hoa">
+                    <div class="event-caption">
+                        <h3>Đêm Countdown Chào Năm Mới 2026</h3>
+                        <p>Pháo hoa rực rỡ, đại nhạc hội với ca sĩ nổi tiếng</p>
+                    </div>
+                </div>
+                <div class="event-slide">
                     <img src="<?= BASE_URL ?>/public/img/event-slider-2.png" alt="Sân khấu countdown">
-                    <img src="<?= BASE_URL ?>/public/img/event-slider-3.png" alt="Đám đông countdown">
+                    <div class="event-caption">
+                        <h3>Đêm Countdown Chào Năm Mới 2026</h3>
+                        <p>DJ bùng nổ, countdown hoành tráng đón giao thừa</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Lễ Hội Ánh Sáng -->
-            <div class="tab-pane fade" id="lights" role="tabpanel">
-                <div class="banner5__slider owl-carousel">
+                <div class="event-slide">
+                    <img src="<?= BASE_URL ?>/public/img/event-slider-34.webp" alt="Đám đông countdown">
+                    <div class="event-caption">
+                        <h3>Đêm Countdown Chào Năm Mới 2026</h3>
+                        <p>Khoảnh khắc giao thừa đáng nhớ</p>
+                    </div>
+                </div>
+                <!-- Lễ Hội Ánh Sáng -->
+                <div class="event-slide">
                     <img src="<?= BASE_URL ?>/public/img/event-slider1.png" alt="Đèn LED lung linh">
+                    <div class="event-caption">
+                        <h3>Lễ Hội Ánh Sáng Magic Light</h3>
+                        <p>Hàng triệu đèn LED lung linh</p>
+                    </div>
+                </div>
+                <div class="event-slide">
                     <img src="<?= BASE_URL ?>/public/img/event-slider2.png" alt="Drone light show">
+                    <div class="event-caption">
+                        <h3>Lễ Hội Ánh Sáng Magic Light</h3>
+                        <p>Biểu diễn drone light show</p>
+                    </div>
+                </div>
+                <div class="event-slide">
                     <img src="<?= BASE_URL ?>/public/img/event-slider3.png" alt="Đường hầm ánh sáng">
+                    <div class="event-caption">
+                        <h3>Lễ Hội Ánh Sáng Magic Light</h3>
+                        <p>Không gian cổ tích sống động</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Water Splash -->
-            <div class="tab-pane fade" id="water" role="tabpanel">
-                <div class="banner5__slider owl-carousel">
+                <!-- Water Splash -->
+                <div class="event-slide">
                     <img src="<?= BASE_URL ?>/public/img/event-slide1.png.png" alt="Té nước vui nhộn">
+                    <div class="event-caption">
+                        <h3>Water Splash Festival 2026</h3>
+                        <p>Lễ hội té nước lớn nhất năm</p>
+                    </div>
+                </div>
+                <div class="event-slide">
                     <img src="<?= BASE_URL ?>/public/img/event-slide2.png.png" alt="Pool party">
-                    <img src="<?= BASE_URL ?>/public/img/event-slide3.png" alt="Foam party">
+                    <div class="event-caption">
+                        <h3>Water Splash Festival 2026</h3>
+                        <p>DJ pool party bùng nổ</p>
+                    </div>
+                </div>
+                
+                <!-- Halloween -->
+                <div class="event-slide">
+                    <img src="<?= BASE_URL ?>/public/img/event-slid1.png" alt="Nhà ma kinh dị">
+                    <div class="event-caption">
+                        <h3>Halloween Horror Night</h3>
+                        <p>Nhà ma kinh dị</p>
+                    </div>
+                </div>
+                <div class="event-slide">
+                    <img src="<?= BASE_URL ?>/public/img/event-slid2.png" alt="Hóa trang Halloween">
+                    <div class="event-caption">
+                        <h3>Halloween Horror Night</h3>
+                        <p>Hóa trang zombie, ma quái</p>
+                    </div>
+                </div>
+                <div class="event-slide">
+                    <img src="<?= BASE_URL ?>/public/img/event-slid3.png" alt="Diễu hành ma quái">
+                    <div class="event-caption">
+                        <h3>Halloween Horror Night</h3>
+                        <p>Diễu hành ma quái</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Halloween -->
-            <div class="tab-pane fade" id="halloween" role="tabpanel">
-                <div class="banner5__slider owl-carousel">
-                    <img src="<?= BASE_URL ?>/public/img/event-slid1.png" alt="Nhà ma kinh dị">
-                    <img src="<?= BASE_URL ?>/public/img/event-slid2.png" alt="Hóa trang Halloween">
-                    <img src="<?= BASE_URL ?>/public/img/event-slid3.png" alt="Diễu hành ma quái">
-                </div>
-            </div>
+            <!-- Nút prev/next -->
+            <button class="slider-btn prev-btn" onclick="changeSlide(-1)">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            <button class="slider-btn next-btn" onclick="changeSlide(1)">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+
+            <!-- Chấm điều hướng -->
+            <div class="slider-nav" id="nav-events"></div>
         </div>
 
         <!-- NÚT XEM TẤT CẢ SỰ KIỆN -->
@@ -600,6 +796,70 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/SlickNav/1.0.10/jquery.slicknav.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mixitup/3.3.1/mixitup.min.js"></script>
     <script src="<?= BASE_URL ?>/public/Js/main.js"></script>
+
+    <!-- Script hiệu ứng auto-slide cho phần sự kiện -->
+    <script>
+        // Slider tổng hợp
+        (function() {
+            const wrapper = document.getElementById('slider-events');
+            const nav = document.getElementById('nav-events');
+            if (!wrapper || !nav) return;
+
+            const slides = wrapper.querySelectorAll('.event-slide');
+            let currentIndex = 0;
+            let autoPlayInterval;
+
+            // Tạo các nút dot
+            slides.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = 'slider-dot' + (index === 0 ? ' active' : '');
+                dot.addEventListener('click', () => goToSlide(index));
+                nav.appendChild(dot);
+            });
+
+            // Hàm chuyển slide
+            function goToSlide(index) {
+                slides.forEach(slide => slide.classList.remove('active'));
+                nav.querySelectorAll('.slider-dot').forEach(dot => dot.classList.remove('active'));
+
+                slides[index].classList.add('active');
+                nav.children[index].classList.add('active');
+                currentIndex = index;
+            }
+
+            // Hàm chuyển slide tiếp theo
+            function nextSlide() {
+                const nextIndex = (currentIndex + 1) % slides.length;
+                goToSlide(nextIndex);
+            }
+
+            // Hàm chuyển slide khi click prev/next
+            window.changeSlide = function(direction) {
+                stopAutoPlay();
+                let newIndex = currentIndex + direction;
+                if (newIndex < 0) newIndex = slides.length - 1;
+                if (newIndex >= slides.length) newIndex = 0;
+                goToSlide(newIndex);
+                startAutoPlay();
+            }
+
+            // Auto play - chuyển mỗi 4 giây
+            function startAutoPlay() {
+                autoPlayInterval = setInterval(nextSlide, 4000);
+            }
+
+            function stopAutoPlay() {
+                clearInterval(autoPlayInterval);
+            }
+
+            // Sự kiện hover thì tạm dừng
+            wrapper.addEventListener('mouseenter', stopAutoPlay);
+            wrapper.addEventListener('mouseleave', startAutoPlay);
+
+            // Bắt đầu auto play
+            startAutoPlay();
+        })();
+    </script>
 
 </body>
 </html>
