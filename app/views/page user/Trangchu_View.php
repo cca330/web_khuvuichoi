@@ -498,149 +498,80 @@
                 </div>
             </div>
         <div class="row featured__filter">
-            <!-- class="col-lg-3 col-md-4 col-sm-6 mix oranges fastfood" -->
+            <?php
+            // Map category từ database sang class filter
+            $categoryMap = [
+                'Adventure' => 'oranges',
+                'Mạo hiểm' => 'oranges',
+                'Mạo Hiểm' => 'oranges',
+                'VR' => 'fresh-meat',
+                'Relaxation' => 'fresh-meat',
+                'Thư giãn' => 'fresh-meat',
+                'Family' => 'vegetables',
+                'Gia đình' => 'vegetables',
+                'Kids' => 'fastfood',
+                'Trẻ em' => 'fastfood',
+                'Horror' => 'relax',
+            ];
+            
+            if (!empty($games)): 
+                $count = 0;
+                foreach ($games as $game):
+                    if ($count >= 4) break; // Chỉ hiển thị 4 trò chơi
+                    $count++;
+                    
+                    $filterClass = $categoryMap[$game['category']] ?? 'oranges';
+                    $gameName = $game['name'] ?? 'Trò chơi';
+                    $description = substr($game['description'] ?? '', 0, 60);
+                    $price = number_format($game['price'] ?? 0, 0, ',', '.');
+                    $age = $game['recommended_age'] ?? 0;
+                    
+                    // Lấy ảnh đầu tiên từ danh sách ảnh
+                    $image = '';
+                    if (!empty($game['image'])) {
+                        $images = explode(',', $game['image']);
+                        $image = BASE_URL . '/public/uploads/' . trim($images[0]);
+                    } else {
+                        $image = BASE_URL . '/public/img/default-game.jpg';
+                    }
+            ?>
+            <div class="col-lg-3 col-md-4 col-sm-6 mix <?= $filterClass ?>">
+                <div class="card mb-4">
+                    <img class="card-img-top" src="<?= $image ?>" alt="<?= htmlspecialchars($gameName) ?>" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title"><?= htmlspecialchars($gameName) ?></h5>
+                        <div class="content pb-2 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <img src="<?= BASE_URL ?>/public/img/ic1.png" alt="">
+                                <span class="pl-2" style="font-size:13px;">Từ <?= $age ?>+ tuổi</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
+                                <span class="pl-2" style="font-size:13px;"><?= htmlspecialchars($description) ?></span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
+                                <span class="pl-2" style="font-size:13px;"><?= $price ?>đ</span>
+                            </div>
+                        </div>
 
-<div class="col-lg-3 col-md-4 col-sm-6 mix oranges ">
-    <div class="card mb-4">
-        <img class="card-img-top" src="<?= BASE_URL ?>/public/img/maohiem.png" alt="Trò chơi mạo hiểm">
-        <div class="card-body">
-            <h5 class="card-title">Trò chơi mạo hiểm</h5>
-            <div class="content pb-2 border-bottom">
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic1.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Trên 12 tuổi</span>
-                </div>
-                
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">An toàn cao</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Combo 350.000 VND</span>
+                        <div class="row pt-4">
+                            <div class="col-lg-7">
+                                <span style="font-size:13px;"><?= htmlspecialchars($game['category'] ?? 'Trò chơi') ?></span>
+                            </div>
+                            <div class="col-lg-5">
+                                <a class="booknow" href="<?= BASE_URL ?>/Trochoi">Chi tiết</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="row pt-4">
-                <div class="col-lg-7">
-                    <span style="font-size:13px;">Cảm giác mạnh </span>
-                </div>
-                <div class="col-lg-5">
-                    <a class="booknow" href="/Doan/trochoi">Chơi ngay</a>
-                </div>
+            <?php endforeach; ?>
+            <?php else: ?>
+            <div class="col-12 text-center py-5">
+                <p>Chưa có trò chơi nào để hiển thị</p>
             </div>
-        </div>
-    </div>
-</div>
-
-<div class="col-lg-3 col-md-4 col-sm-6 mix fresh-meat">
-    <div class="card mb-4">
-        <img class="card-img-top" src="<?= BASE_URL ?>/public/img/giadinh.png" alt="Trò chơi gia đình">
-        <div class="card-body">
-            <h5 class="card-title">Trò chơi Thư giãn</h5>
-
-            <div class="content pb-2 border-bottom">
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic1.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Mọi lứa tuổi</span>
-                </div>
-
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">An toàn cho trẻ em</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Combo 350.000 VND</span>
-                </div>
-            </div>
-
-            <div class="row pt-4">
-                <div class="col-lg-7">
-                    <span style="font-size:13px;">Vui nhộn – gắn kết</span>
-                </div>
-                <div class="col-lg-5">
-                    <a class="booknow" href="/Doan/trochoi">Chơi ngay</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="col-lg-3 col-md-4 col-sm-6 mix vegetables">
-    <div class="card mb-4">
-        <img class="card-img-top" src="<?= BASE_URL ?>/public/img/oceanpark.png" alt="Ocean Park">
-        <div class="card-body">
-            <h5 class="card-title">Ocean Park</h5>
-
-            <div class="content pb-2 border-bottom">
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic1.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Mọi lứa tuổi</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic3.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Trượt nước – hồ sóng</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Nhân viên cứu hộ</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Combo 500.000 VND</span>
-                </div>
-            </div>
-
-            <div class="row pt-4">
-                <div class="col-lg-7">
-                    <span style="font-size:13px;">Mát mẻ - năng động</span>
-                </div>
-                <div class="col-lg-5">
-                    <a class="booknow" href="/Doan/trochoi">Khám phá</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="col-lg-3 col-md-4 col-sm-6 mix relax">
-    <div class="card mb-4">
-        <img class="card-img-top" src="<?= BASE_URL ?>/public/img/thugian.png" alt="Trò chơi thư giãn">
-        <div class="card-body">
-            <h5 class="card-title">Trò chơi trẻ em</h5>
-
-            <div class="content pb-2 border-bottom">
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic1.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">3 - 12 tuổi</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic3.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Vòng quay – tàu điện</span>
-                </div>
-                <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Không gian thoáng</span>
-                </div>
-            </div>
-            <div class="d-flex align-items-center">
-                    <img src="<?= BASE_URL ?>/public/img/ic2.png" alt="">
-                    <span class="pl-2" style="font-size:13px;">Combo 200.000 VND</span>
-                </div>
-
-            <div class="row pt-4">
-                <div class="col-lg-7">
-                    <span style="font-size:13px;">Nhẹ nhàng – chill</span>
-                </div>
-                <div class="col-lg-5">
-                    <a class="booknow" href="/Doan/trochoi">Xem thêm</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
+            <?php endif; ?>
         </div>
     </div>
 </section>
