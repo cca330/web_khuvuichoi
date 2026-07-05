@@ -17,6 +17,42 @@ class GamesController extends Controller{
     public function store(){
         if($_SERVER['REQUEST_METHOD'] !== 'POST') return;
         $model=$this->model("GameModel");
+        
+        // Xử lý upload nhiều ảnh
+        $imageNames = [];
+        
+        if(isset($_FILES['images'])){
+            $targetDir = "public/uploads/";
+            
+            // Tạo folder nếu chưa tồn tại
+            if (!file_exists($targetDir)) {
+                mkdir($targetDir, 0777, true);
+            }
+            
+            // Xử lý từng file
+            for($i = 0; $i < count($_FILES['images']['name']); $i++){
+                // Chỉ xử lý những file ảnh hợp lệ
+                $fileType = strtolower(pathinfo($_FILES['images']['name'][$i], PATHINFO_EXTENSION));
+                $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                
+                if(in_array($fileType, $allowedTypes) && $_FILES['images']['error'][$i] == 0){
+                    // Tạo tên file unique
+                    $fileName = basename($_FILES['images']['name'][$i]);
+                    $fileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName);
+                    $fileName = time() . '_' . $i . '_' . $fileName;
+                    
+                    $targetFile = $targetDir . $fileName;
+                    
+                    if(move_uploaded_file($_FILES['images']['tmp_name'][$i], $targetFile)){
+                        $imageNames[] = $fileName;
+                    }
+                }
+            }
+        }
+        
+        // Lưu danh sách ảnh (ngăn cách bằng dấu phẩy)
+        $imageString = !empty($imageNames) ? implode(',', $imageNames) : '';
+        
         $data=[
             "name" => $_POST['name'],
             "description" => $_POST['description'],
@@ -24,12 +60,8 @@ class GamesController extends Controller{
             "recommended_age" => $_POST['recommended_age'],
             "allowed_ticket" => $_POST['allowed_ticket'],
             "status" => $_POST['status'],
-            "image" => $_FILES['image']['name']
+            "image" => $imageString
         ];
-        move_uploaded_file(
-            $_FILES['image']['tmp_name'],
-            "public/uploads/" . $data['image']
-        );
         $model->create($data);
         header("Location: " . BASE_URL . "/Games");
     }
@@ -50,10 +82,9 @@ class GamesController extends Controller{
         // Xử lý upload ảnh
         $image = $_POST['old_image'] ?? null; // mặc định giữ ảnh cũ
 
-        if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $image = $_FILES['image']['name'];
-
-            // Đường dẫn tuyệt đối tới folder uploads
+        // Kiểm tra nếu có ảnh mới được upload
+        if(isset($_FILES['images']) && !empty($_FILES['images']['name'][0])){
+            $imageNames = [];
             $targetDir = __DIR__ . '/../../public/uploads/';
 
             // Tạo folder nếu chưa tồn tại
@@ -61,7 +92,30 @@ class GamesController extends Controller{
                 mkdir($targetDir, 0777, true);
             }
 
-            move_uploaded_file($_FILES['image']['tmp_name'], $targetDir . $image);
+            // Xử lý từng file
+            for($i = 0; $i < count($_FILES['images']['name']); $i++){
+                // Chỉ xử lý những file ảnh hợp lệ
+                $fileType = strtolower(pathinfo($_FILES['images']['name'][$i], PATHINFO_EXTENSION));
+                $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                
+                if(in_array($fileType, $allowedTypes) && $_FILES['images']['error'][$i] == 0){
+                    // Tạo tên file unique
+                    $fileName = basename($_FILES['images']['name'][$i]);
+                    $fileName = preg_replace('/[^a-zA-Z0-9._-]/', '_', $fileName);
+                    $fileName = time() . '_' . $i . '_' . $fileName;
+                    
+                    $targetFile = $targetDir . $fileName;
+                    
+                    if(move_uploaded_file($_FILES['images']['tmp_name'][$i], $targetFile)){
+                        $imageNames[] = $fileName;
+                    }
+                }
+            }
+
+            // Nếu có ảnh mới, lưu danh sách ảnh mới
+            if(!empty($imageNames)){
+                $image = implode(',', $imageNames);
+            }
         }
 
         // Dữ liệu gửi vào DB
@@ -70,7 +124,7 @@ class GamesController extends Controller{
             "description" => $_POST['description'],
             "price" => $_POST['price'],
             "recommended_age" => $_POST['recommended_age'],
-            "allowed_ticket" => $_POST['allowed_ticket'], // chú ý chính tả
+            "allowed_ticket" => $_POST['allowed_ticket'],
             "status" => $_POST['status'],
             "image" => $image
         ];

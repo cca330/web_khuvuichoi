@@ -152,50 +152,68 @@
                     case 'Thư Giãn':   $category_class = 'badge-thugian'; break;
                     default:           $category_class = 'badge-primary';
                 }
+                
                 $defaultImage = BASE_URL . '/public/img/default-game.jpg';
-                $image = !empty($game['image']) ? BASE_URL . '/public/uploads/' . $game['image'] : $defaultImage;
                 $slideImages = [];
-                if ($game['name'] === 'VR Game') {
-                    $slideImages = [
-                        BASE_URL . '/public/img/game/vr1.avif',
-                        BASE_URL . '/public/img/game/vr2.jpg',
-                        BASE_URL . '/public/img/game/vr3.jpg',
-                        BASE_URL . '/public/img/game/vr4.jpg'
-                    ];
-                    $image = $slideImages[0];
-                } elseif ($game['name'] === 'Bumper Cars') {
-                    $slideImages = [
-                        BASE_URL . '/public/img/game/pumbercar1.jpg',
-                        BASE_URL . '/public/img/game/pumbercar2.jpg',
-                        BASE_URL . '/public/img/game/pumbercar3.jpg',
-                        BASE_URL . '/public/img/game/pumbercar4.jpeg'
-                    ];
-                    $image = $slideImages[0];
-                } elseif ($game['name'] === 'Ferris Wheel') {
-                    $slideImages = [
-                        BASE_URL . '/public/img/game/ferriswheel1.jpeg',
-                        BASE_URL . '/public/img/game/ferriswheel2.jpg',
-                        BASE_URL . '/public/img/game/ferriswheel3.jpeg',
-                        BASE_URL . '/public/img/game/ferriswheel4.jpg'
-                    ];
-                    $image = $slideImages[0];
-                } elseif ($game['name'] === 'Roller Coaster') {
-                    $slideImages = [
-                        BASE_URL . '/public/img/game/roller-coaster1.jpg',
-                        BASE_URL . '/public/img/game/roller-coaster2.jpg',
-                        BASE_URL . '/public/img/game/roller-coaster3.jpg',
-                        BASE_URL . '/public/img/game/roller-coaster4.jpg'
-                    ];
-                    $image = $slideImages[0];
-                } elseif ($game['name'] === 'Haunted House') {
-                    $slideImages = [
-                        BASE_URL . '/public/img/game/nha-ma1.avif',
-                        BASE_URL . '/public/img/game/nha-ma2.jpg',
-                        BASE_URL . '/public/img/game/nha-ma3.jpg',
-                        BASE_URL . '/public/img/game/nha-ma4.jpg'
-                    ];
-                    $image = $slideImages[0];
-                } 
+                $image = $defaultImage;
+                
+                // Xử lý ảnh từ database (có thể là nhiều ảnh ngăn cách bằng dấu phẩy)
+                if (!empty($game['image'])) {
+                    $imageList = array_filter(array_map('trim', explode(',', $game['image'])));
+                    if (!empty($imageList)) {
+                        // Chuyển đổi thành URL đầy đủ
+                        foreach ($imageList as $img) {
+                            $slideImages[] = BASE_URL . '/public/uploads/' . $img;
+                        }
+                        // Lấy ảnh đầu tiên làm ảnh chính
+                        $image = $slideImages[0];
+                    }
+                }
+                
+                // Nếu không có ảnh từ database, dùng ảnh cố định (hardcoded)
+                if (empty($slideImages)) {
+                    if ($game['name'] === 'VR Game') {
+                        $slideImages = [
+                            BASE_URL . '/public/img/game/vr1.avif',
+                            BASE_URL . '/public/img/game/vr2.jpg',
+                            BASE_URL . '/public/img/game/vr3.jpg',
+                            BASE_URL . '/public/img/game/vr4.jpg'
+                        ];
+                        $image = $slideImages[0];
+                    } elseif ($game['name'] === 'Bumper Cars') {
+                        $slideImages = [
+                            BASE_URL . '/public/img/game/pumbercar1.jpg',
+                            BASE_URL . '/public/img/game/pumbercar2.jpg',
+                            BASE_URL . '/public/img/game/pumbercar3.jpg',
+                            BASE_URL . '/public/img/game/pumbercar4.jpeg'
+                        ];
+                        $image = $slideImages[0];
+                    } elseif ($game['name'] === 'Ferris Wheel') {
+                        $slideImages = [
+                            BASE_URL . '/public/img/game/ferriswheel1.jpeg',
+                            BASE_URL . '/public/img/game/ferriswheel2.jpg',
+                            BASE_URL . '/public/img/game/ferriswheel3.jpeg',
+                            BASE_URL . '/public/img/game/ferriswheel4.jpg'
+                        ];
+                        $image = $slideImages[0];
+                    } elseif ($game['name'] === 'Roller Coaster') {
+                        $slideImages = [
+                            BASE_URL . '/public/img/game/roller-coaster1.jpg',
+                            BASE_URL . '/public/img/game/roller-coaster2.jpg',
+                            BASE_URL . '/public/img/game/roller-coaster3.jpg',
+                            BASE_URL . '/public/img/game/roller-coaster4.jpg'
+                        ];
+                        $image = $slideImages[0];
+                    } elseif ($game['name'] === 'Haunted House') {
+                        $slideImages = [
+                            BASE_URL . '/public/img/game/nha-ma1.avif',
+                            BASE_URL . '/public/img/game/nha-ma2.jpg',
+                            BASE_URL . '/public/img/game/nha-ma3.jpg',
+                            BASE_URL . '/public/img/game/nha-ma4.jpg'
+                        ];
+                        $image = $slideImages[0];
+                    }
+                }
                 ?>
                 <div class="col-lg-6 col-md-6 mb-5 game-card" 
                      data-category="<?= htmlspecialchars($game['category']) ?>" 
