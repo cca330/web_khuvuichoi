@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Login</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/login.css?v1.2"> 
+    <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/login.css?v=1.5"> 
 </head>
 <body>
 

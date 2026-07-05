@@ -92,6 +92,63 @@
         .account .profile-list {
             padding: 35px;
         }
+
+        @media (max-width: 767px) {
+            .account {
+                padding: 40px 0;
+            }
+
+            .account .page-title {
+                font-size: 1.6rem;
+                margin-bottom: 24px;
+            }
+
+            .account .profile-header {
+                padding: 32px 20px;
+            }
+
+            .account .profile-title {
+                font-size: 1.35rem;
+            }
+
+            .account .profile-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .account .profile-list {
+                padding: 20px;
+            }
+
+            .account .info-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .account .info-icon {
+                width: 44px;
+                height: 44px;
+                margin-right: 0;
+            }
+
+            .account .info-value {
+                font-size: 1rem;
+                word-break: break-word;
+            }
+
+            .account .btn-group {
+                padding: 20px;
+                gap: 10px;
+            }
+
+            .account .btn-group .btn {
+                width: 100%;
+            }
+
+            .account .user-guest {
+                padding: 36px 18px;
+            }
+        }
         .account .info-item {
             display: flex;
             align-items: flex-start;

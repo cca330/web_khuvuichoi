@@ -393,6 +393,13 @@ p {
   padding: 26px;
 }
 
+@media (max-width: 767px) {
+  .account .card,
+  .panel {
+    padding: 18px !important;
+  }
+}
+
 .content__gioithieu,
 .content__about {
   padding: 28px 30px;

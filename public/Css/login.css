@@ -8,24 +8,37 @@
 }
 
 body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
   min-height: 100vh;
+  padding: 20px;
   background-image: url("draw/background.jpg");
-  background-size: cover; /* co ảnh vừa khít khung */
-  background-position: center; /* canh giữa ảnh */
-  background-repeat: no-repeat; /* không lặp ảnh */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .panel {
-  width: 420px;
+  width: 100%;
   color: #fff;
-  border-radius: 10px;
+  border-radius: 16px;
   padding: 30px 40px;
   border: 2px solid white;
-  background: rgba(255, 255, 255, 0.08); /* nền trong suốt nhẹ */
-  backdrop-filter: blur(50px); /* làm mờ nền phía sau */
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(50px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+  margin: 0 auto;
+}
+
+.panel form {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .panel {
+    max-width: 430px;
+  }
 }
 
 .panel h1 {
@@ -33,11 +46,55 @@ body {
   text-align: center;
 }
 
+@media (max-width: 767px) {
+  body {
+    padding: 16px !important;
+    align-items: flex-start !important;
+  }
+
+  .panel {
+    width: 100% !important;
+    padding: 24px 18px !important;
+    border-radius: 14px;
+  }
+
+  .panel h1 {
+    font-size: 32px;
+  }
+
+  .panel .txtbox {
+    margin: 20px 0;
+  }
+
+  .panel .txtbox input {
+    font-size: 15px;
+    padding: 18px 45px 18px 18px;
+  }
+
+  .txtbox i {
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 22px;
+  }
+
+  .panel .quenmk {
+    flex-direction: column;
+    gap: 8px;
+    margin: -8px 0 14px 0;
+  }
+
+  .panel .btnlogin {
+    height: 44px;
+    font-size: 15px;
+  }
+}
+
 .panel .txtbox {
   width: 100%;
   height: 50px;
-
-  margin: 30px 0;
+  position: relative;
+  margin: 20px 0;
 }
 
 .panel .txtbox input {
@@ -59,7 +116,9 @@ body {
 
 .txtbox i {
   position: absolute;
-  right: 50px;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
   padding: 10px;
   font-size: 30px;
 }
