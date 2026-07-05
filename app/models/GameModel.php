@@ -15,6 +15,13 @@ class GameModel {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Lấy game theo status
+    public function getByStatus($status) {
+        $stmt = $this->pdo->prepare("SELECT * FROM games WHERE status = ? ORDER BY id ASC");
+        $stmt->execute([$status]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Tìm 1 game
     public function find($id) {
         $stmt = $this->pdo->prepare("SELECT * FROM games WHERE id = ?");

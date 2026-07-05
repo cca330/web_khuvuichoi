@@ -216,21 +216,21 @@
                 }
                 ?>
                 <div class="col-lg-6 col-md-6 mb-5 game-card" 
-                     data-category="<?= htmlspecialchars($game['category']) ?>" 
-                     data-age="<?= (int)$game['recommended_age'] ?>" 
-                     data-price="<?= (float)$game['price'] ?>">
+                     data-category="<?= htmlspecialchars($game['category'] ?? '') ?>" 
+                     data-age="<?= (int)($game['recommended_age'] ?? 0) ?>" 
+                     data-price="<?= (float)($game['price'] ?? 0) ?>">
                     <div class="card h-100 border-0">
                         <div class="slide-wrapper">
-                            <img src="<?= htmlspecialchars($image) ?>" class="card-img-top slider-image current" alt="<?= htmlspecialchars($game['name']) ?>" data-slides='<?= htmlspecialchars(json_encode($slideImages), ENT_QUOTES, 'UTF-8') ?>'>
+                            <img src="<?= htmlspecialchars($image ?? '') ?>" class="card-img-top slider-image current" alt="<?= htmlspecialchars($game['name'] ?? 'Game') ?>" data-slides='<?= htmlspecialchars(json_encode($slideImages ?? []), ENT_QUOTES, 'UTF-8') ?>'>
                         </div>
                         <div class="card-body text-center">
                             <span class="badge <?= $category_class ?> text-white px-3 py-2 rounded-pill mb-3">
-                                <?= htmlspecialchars($game['category']) ?>
+                                <?= htmlspecialchars($game['category'] ?? '') ?>
                             </span>
-                            <h4><?= htmlspecialchars($game['name']) ?></h4>
+                            <h4><?= htmlspecialchars($game['name'] ?? 'Trò chơi') ?></h4>
                             <p><?= htmlspecialchars(substr($game['description'] ?? 'Chưa có mô tả', 0, 100)) ?>...</p>
-                            <p><strong>Giá:</strong> <?= number_format($game['price'], 0, ',', '.') ?>đ | 
-                               <strong>Tuổi:</strong> <?= $game['recommended_age'] ?>+</p>
+                            <p><strong>Giá:</strong> <?= number_format($game['price'] ?? 0, 0, ',', '.') ?>đ | 
+                               <strong>Tuổi:</strong> <?= $game['recommended_age'] ?? 0 ?>+</p>
                            
                         </div>
                     </div>

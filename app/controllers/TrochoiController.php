@@ -8,7 +8,8 @@ class TrochoiController {
     }
 
     public function index() {
-    $trochoiList = $this->trochoiModel->getAll();
+    // Chỉ lấy những game đang mở (status = 'OPEN')
+    $trochoiList = $this->trochoiModel->getByStatus('OPEN');
 
 
     // Truyền biến trực tiếp vào view (scope chung)
