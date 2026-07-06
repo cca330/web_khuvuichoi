@@ -3,7 +3,7 @@
 
     <ul class="menu">
         <!-- <li><a href="<?=BASE_URL?>/Dashboard">📊 Dashboard</a></li> -->
-         <li><a href="<?=BASE_URL?>/Reports"> 📄Báo cáo thống kê</a></li>
+         <li><a href="<?=BASE_URL?>/Revenue"> 📄Doanh thu</a></li>
         <li><a href="<?=BASE_URL?>/Games">🎮 Quản lý trò chơi</a></li>
         <li><a href="<?=BASE_URL?>/User"> 👤Quản lý người dùng</a></li>
         <li><a href="<?=BASE_URL?>/Ticket">🎫 Quản lý vé đã bán</a></li>
