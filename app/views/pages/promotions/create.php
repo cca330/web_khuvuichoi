@@ -1,7 +1,12 @@
-<div class="page-wrapper">
-  <div class="game-form-box">
-    <h2 class="game-form-title">🎁 Thêm mã khuyến mãi</h2>
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Thêm mã khuyến mãi</h1>
+      <p class="muted">Tạo mã khuyến mãi mới cho hệ thống</p>
+    </div>
+  </div>
 
+  <div class="game-form-box">
     <form method="post"
           action="<?= BASE_URL ?>/Promotions/store"
           class="game-form">
@@ -9,7 +14,6 @@
       <input type="text"
              name="code"
              placeholder="Mã khuyến mãi"
-             class="game-input"
              required>
 
       <input type="number"
@@ -17,20 +21,17 @@
              placeholder="Giảm (%)"
              min="1"
              max="100"
-             class="game-input"
              required>
 
       <input type="date"
              name="start_date"
-             class="game-input"
              required>
 
       <input type="date"
              name="end_date"
-             class="game-input"
              required>
 
-      <select name="type" class="game-input" required>
+      <select name="type" required>
         <option value="">-- Chọn loại khuyến mãi --</option>
         <option value="ALL">Giảm tất cả (ALL)</option>
         <option value="GAME">Chỉ giảm GAME</option>
@@ -39,9 +40,9 @@
       <!-- Status mặc định ACTIVE -->
       <input type="hidden" name="status" value="ACTIVE">
 
-      <button type="submit" class="form-button">💾 Lưu khuyến mãi</button>
+      <button type="submit" class="btn primary">💾 Lưu khuyến mãi</button>
       <a href="javascript:history.back()"
-         class="form-button form-button-secondary">Quay lại</a>
+         class="btn danger">Quay lại</a>
     </form>
   </div>
 </div>

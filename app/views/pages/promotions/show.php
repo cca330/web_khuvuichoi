@@ -1,11 +1,17 @@
-<div class="page-wrapper">
+<div class="container">
+  <div class="header">
+    <div>
+      <h1>Chi tiết khuyến mãi</h1>
+      <p class="muted">Thông tin chi tiết và thống kê của mã khuyến mãi</p>
+    </div>
+  </div>
 
   <!-- CARD THÔNG TIN KHUYẾN MÃI -->
   <div class="promo-card">
     <div class="promo-header">
       <h2>🎁 Khuyến mãi</h2>
-      <span class="badge <?= $promotion['status'] ?>">
-        <?= $promotion['status'] ?>
+      <span class="badge <?= $promotion['status'] == 'ACTIVE' ? 'green' : 'red' ?>">
+        <?= htmlspecialchars($promotion['status']) ?>
       </span>
     </div>
 
@@ -17,7 +23,7 @@
 
       <div>
         <span>Giảm</span>
-        <strong><?= $promotion['discount'] ?>%</strong>
+        <strong><?= htmlspecialchars($promotion['discount']) ?>%</strong>
       </div>
 
       <div>
@@ -53,7 +59,6 @@
   <!-- ACTION -->
   <div class="promo-actions">
     <a href="<?= BASE_URL ?>/Promotions/edit/<?= $promotion['id'] ?>" class="btn primary">✏️ Sửa</a>
-    <a href="<?= BASE_URL ?>/Promotions" class="btn secondary">⬅ Quay lại</a>
+    <a href="<?= BASE_URL ?>/Promotions" class="btn danger">⬅ Quay lại</a>
   </div>
-
 </div>
