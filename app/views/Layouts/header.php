@@ -41,7 +41,7 @@
                             <li class="active"><a href="<?= BASE_URL ?>/trangchu">Trang Chủ</a></li>
                             <li><a href="<?= BASE_URL ?>/trochoi">Trò Chơi</a></li>
                             <li><a href="<?= BASE_URL ?>/tintuc">Tin Tức & Sự Kiện</a></li>
-                            <li><a href="<?= BASE_URL ?>/cart">Giỏ Hàng</a></li>
+                            <li><a href="<?= BASE_URL ?>/cart">Đặt vé</a></li>
                             <li><a href="<?= BASE_URL ?>/Khuyenmai">Khuyến Mãi</a></li>
                             <li><a href="<?= BASE_URL ?>/lienhe">Liên Hệ & Phản Hồi</a></li>
                         </ul>

@@ -1,11 +1,13 @@
 <?php
 require_once __DIR__ . "/../models/TicketModel.php";
 
-class TicketController
+class TicketController extends Controller
 {
     public function index()
     {
-        include __DIR__ . "/../views/pages/admin_ticket.php";
+        $this->view("Master", [
+            "page" => "admin_ticket"
+        ]);
     }
 
     // API: list tickets

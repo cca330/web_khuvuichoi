@@ -284,8 +284,7 @@ td .btn:last-child {
 .detail-body,
 .detail-thongso,
 .filters,
-.report-tabs,
-table {
+.report-tabs {
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius);
@@ -574,54 +573,92 @@ textarea:focus {
 }
 
 /* ===== TABLES ===== */
-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
+.content .table-wrap,
+.content .table-wrapper {
+  overflow: hidden;
+  margin: 20px 0;
+  padding: 0;
   background: var(--admin-surface);
   border: 1px solid var(--admin-border);
   border-radius: var(--admin-radius);
-  overflow: hidden;
   box-shadow: var(--admin-shadow);
 }
 
-table thead tr th:first-child {
-  border-top-left-radius: var(--admin-radius);
-}
-table thead tr th:last-child {
-  border-top-right-radius: var(--admin-radius);
-}
-table tbody tr:last-child td:first-child {
-  border-bottom-left-radius: var(--admin-radius);
-}
-table tbody tr:last-child td:last-child {
-  border-bottom-right-radius: var(--admin-radius);
+.content .table-wrap table,
+.content .table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-top: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
 }
 
-th,
-td {
+.content .table-wrap table th,
+.content .table-wrap table td,
+.content .table-wrapper table th,
+.content .table-wrapper table td {
   padding: 14px 16px;
-  border-bottom: 1px solid #edf2f7;
+  border: none;
+  border-bottom: 1px solid var(--admin-border);
   text-align: left;
   vertical-align: middle;
 }
 
-th {
+.content .table-wrap table th,
+.content .table-wrapper table th {
   background: #f8fafc;
   color: #334155;
   font-size: 13px;
+  font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-tr:hover td {
+.content .table-wrap table tbody tr:last-child td,
+.content .table-wrapper table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.content .table-wrap table tr:hover td,
+.content .table-wrapper table tr:hover td {
   background: rgba(37, 99, 235, 0.03);
 }
 
-.table-wrap,
-.table-wrapper {
-  overflow: hidden;
-  margin: 20px 0;
+/* User list – override global Style.css table rules */
+.content .admin-table table th,
+.content .admin-table table td,
+.content .user-table table th,
+.content .user-table table td {
+  padding: 14px 18px;
+  border: none;
+  border-bottom: 1px solid var(--admin-border);
+  text-align: left;
+}
+
+.content .admin-table table th,
+.content .user-table table th {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.content .admin-table table tbody tr:last-child td,
+.content .user-table table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.content .admin-table table tr:hover td,
+.content .user-table table tr:hover td {
+  background: rgba(37, 99, 235, 0.04);
+}
+
+.content .admin-table tbody tr.row-click,
+.content .admin-table tbody tr[data-href],
+.content .table-wrap tbody tr[onclick] {
+  cursor: pointer;
 }
 
 /* ===== BADGES / STATUS ===== */
@@ -1024,16 +1061,6 @@ canvas {
   border-color: var(--admin-primary);
 }
 
-/* Table wrapper consistency */
-.table-wrap,
-.table-wrapper {
-  background: var(--admin-surface);
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid var(--admin-border);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
-  margin: 20px 0;
-}
 
 /* Detail footer actions */
 .detail-footer {
@@ -1100,4 +1127,210 @@ canvas {
   .search-box {
     width: 100%;
   }
+}
+
+/* ===== UNIFIED ADMIN PAGE TEMPLATE (user_list pattern) ===== */
+.content .container > .report-tabs {
+  margin-bottom: 22px;
+}
+
+.content .container .admin-section-title,
+.content .container > h3 {
+  margin: 24px 0 14px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--admin-text);
+}
+
+.content .container .stats .card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  min-height: 100px;
+}
+
+.content .container .stats .card span,
+.content .container .stats .card p {
+  font-size: 14px;
+  color: var(--admin-muted);
+  margin: 0;
+}
+
+.content .container .stats .card h2,
+.content .container .stats .card h1 {
+  margin: 0;
+  font-size: 28px;
+  color: var(--admin-text);
+}
+
+.content .container .stats .card.blue {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+.content .container .stats .card.blue h2,
+.content .container .stats .card.blue h1 {
+  color: #1d4ed8;
+}
+
+.content .container .stats .card.green {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+.content .container .stats .card.green h2,
+.content .container .stats .card.green h1 {
+  color: #047857;
+}
+
+.content .container .stats .card.gray {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.content .container .stats .card.purple {
+  background: #faf5ff;
+  border-color: #e9d5ff;
+}
+.content .container .stats .card.purple h2,
+.content .container .stats .card.purple h1 {
+  color: #7c3aed;
+}
+
+.content .container .stats .card .icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.content .container .stats .card .icon.blue {
+  background: #e0edff;
+  color: #2563eb;
+}
+.content .container .stats .card .icon.yellow {
+  background: #fff6bf;
+  color: #d97706;
+}
+
+.content .container .stats .card:has(.icon) {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.content .container .filters.filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 20px;
+}
+
+.content .container .filters.filter-toolbar input[type="text"],
+.content .container .filters.filter-toolbar select {
+  width: auto;
+  min-width: 180px;
+  flex: 1;
+  max-width: 280px;
+}
+
+.content .container .filters.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  width: 100%;
+}
+
+.content .container .filters.filter-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.content .container .filters h3 {
+  margin: 0 0 16px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+
+.content .container .page-wrapper {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+
+.content .container .game-form-box,
+.content .container .promo-card {
+  margin-top: 0;
+}
+
+.content .container .review {
+  margin-top: 16px;
+  padding: 20px 24px;
+  border-radius: var(--admin-radius);
+  border: 1px solid var(--admin-border);
+  background: var(--admin-surface);
+  box-shadow: var(--admin-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.content .container .review::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--admin-primary);
+  border-radius: var(--admin-radius) 0 0 var(--admin-radius);
+}
+
+.content .container .review .review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.content .container .review .stars {
+  color: #f59e0b;
+  font-size: 15px;
+}
+
+.content .container .review .title {
+  font-size: 13px;
+  color: var(--admin-muted);
+  margin-bottom: 8px;
+}
+
+.content .container .review .text {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--admin-text);
+}
+
+.content .container canvas {
+  margin: 16px 0 24px;
+}
+
+.content .container .empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--admin-muted);
+  background: var(--admin-surface-2);
+  border-radius: var(--admin-radius);
+  border: 1px dashed var(--admin-border);
 }

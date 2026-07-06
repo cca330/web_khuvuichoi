@@ -1,10 +1,13 @@
 <?php
 require_once __DIR__ . "/../models/UserModel.php";
 
-class UserController {
-
-    public function index() {
-        include __DIR__ . "/../views/pages/user_list.php";
+class UserController extends Controller
+{
+    public function index()
+    {
+        $this->view("Master", [
+            "page" => "user_list"
+        ]);
     }
 
     public function apiList() {

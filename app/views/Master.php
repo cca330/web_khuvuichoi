@@ -5,7 +5,7 @@
     <title>MVC</title>
     <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/Style.css?v=1.6">
     <?php if (empty($hideSidebar)): ?>
-        <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/admin.css?v=1.0">
+        <link rel="stylesheet" href="<?= BASE_URL ?>/public/Css/admin.css?v=1.2">
     <?php endif; ?>
 
     <?php if (!empty($useFormCss)): ?>

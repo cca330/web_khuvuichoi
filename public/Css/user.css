@@ -145,19 +145,41 @@ h1 {
   border: 1px solid #eef2f6;
   margin: 20px 0;
 }
-table {
+
+.table-wrap table {
   width: 100%;
   border-collapse: collapse;
+  border: none;
+  box-shadow: none;
+  margin-top: 0;
+  border-radius: 0;
+  background: transparent;
 }
-thead {
-  background: #fbfdff;
-}
-th,
-td {
-  padding: 14px;
+
+.table-wrap table th,
+.table-wrap table td {
+  padding: 14px 18px;
   text-align: left;
   font-size: 14px;
-  border-bottom: 1px solid #f3f4f6;
+  border: none;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.table-wrap table th {
+  background: #f8fafc;
+  color: #334155;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+}
+
+.table-wrap table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-wrap table tr:hover td {
+  background: #f9fafb;
 }
 
 /* PAGINATION */
