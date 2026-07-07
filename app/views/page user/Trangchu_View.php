@@ -253,7 +253,7 @@
             <div class="col-lg-12">
                 <div class="hero__item set-bg" data-setbg="<?= BASE_URL ?>/public/img/banner.png">
                     <div class="hero__text">
-                        <span>K vui chơi giải trí hàng đầu Việt Nam</span>
+                        <span>Kh vui chơi giải trí hàng đầu Việt Nam</span>
                         <h2>HG - Khu vui chơi giải trí</h2>
                         <p> Khám phá nụ cười, gắn kết trái tim!</p>
                     </div>

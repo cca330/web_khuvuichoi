@@ -13,17 +13,16 @@ jobs:
     runs-on: self-hosted
 
     steps:
-
-
       - name: Go to project
         run: |
           cd /home/user1/Doan
           pwd
 
-      - name: Pull newest code
+      - name: Update source
         run: |
           cd /home/user1/Doan
-          git pull origin main
+          git fetch origin
+          git reset --hard origin/main
 
       - name: Build and start Docker
         run: |
