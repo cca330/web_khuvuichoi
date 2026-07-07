@@ -23,8 +23,6 @@
 
     <?php include 'app/views/Layouts/header.php'; ?>
 
-   
-
     <!-- Banner chung trang sự kiện -->
     <section class="event-banner set-bg" data-setbg="<?= BASE_URL ?>/public/img/events/banner-events-total.png">
         <div class="overlay d-flex align-items-center justify-content-center">
@@ -38,135 +36,64 @@
     <section class="spad bg-light">
         <div class="container">
 
-            <!-- 1. Countdown Năm Mới 2026 -->
-            <div class="row section-divider">
-                <div class="col-lg-6">
-                    <img src="<?= BASE_URL ?>/public/img/event-slider1.png" class="img-fluid rounded shadow" alt="Countdown Năm Mới">
-                </div>
-                <div class="col-lg-6">
-                    <h2 class="event-title">Đêm Countdown Chào Năm Mới 2026</h2>
-                    <p><strong>Thời gian:</strong> 16/2/2025 - 17/02/2026 | 19:00 - 00:30</p>
-                    <p><strong>Địa điểm:</strong> Sân khấu chính ngoài trời</p>
-                    <p class="lead">Pháo hoa rực rỡ, đại nhạc hội với ca sĩ nổi tiếng, DJ bùng nổ, countdown hoành tráng đón khoảnh khắc giao thừa.</p>
+            <?php if (!empty($eventData)): ?>
+                <?php foreach ($eventData as $data): ?>
+                    <?php $event = $data['event']; ?>
+                    <?php $images = $data['images']; ?>
+                    <?php $schedules = $data['schedules']; ?>
 
-                    <h4>Lịch Trình Chi Tiết</h4>
-                    <ol>
-                        <li>19:00 - Mở cửa đón khách</li>
-                        <li>20:00 - Biểu diễn acoustic</li>
-                        <li>22:00 - Đại nhạc hội với ca sĩ khách mời</li>
-                        <li>23:55 - Countdown chính thức</li>
-                        <li>00:00 - Pháo hoa chào năm mới</li>
-                    </ol>
+                    <!-- Lấy ảnh đầu tiên làm ảnh chính -->
+                    <?php $mainImage = !empty($images) ? $images[0]['image'] : BASE_URL . '/public/img/events/default.png'; ?>
 
-                    <div class="text-center mt-5">
-                        <a href="#" class="buy-btn text-white">Comming soon</a>
-                    </div>
-                </div>
-            </div>
+                    <div class="row section-divider">
+                        <!-- Ảnh sự kiện -->
+                        <div class="col-lg-6">
+                            <img src="<?= htmlspecialchars($mainImage) ?>" class="img-fluid rounded shadow" alt="<?= htmlspecialchars($event['title']) ?>">
+                        </div>
 
-            <!-- 2. Lễ Hội Ánh Sáng Magic Light 2025 -->
-            <div class="row section-divider">
-                <div class="col-lg-6 order-lg-2">
-                    <img src="<?= BASE_URL ?>/public/img/event-slider-1.png" class="img-fluid rounded shadow" alt="Lễ Hội Ánh Sáng">
-                </div>
-                <div class="col-lg-6 order-lg-1">
-                    <h2 class="event-title">Lễ Hội Ánh Sáng Magic Light 2026</h2>
-                    <p><strong>Thời gian:</strong> 10/2/2025 - 15/2/2026 | 17:00 - 22:00 hàng ngày</p>
-                    <p><strong>Địa điểm:</strong> Toàn khu công viên</p>
-                    <p class="lead">Hàng triệu đèn LED lung linh, đường hầm ánh sáng, biểu diễn drone light, không gian cổ tích sống động mỗi tối cuối tuần.</p>
+                        <!-- Thông tin sự kiện -->
+                        <div class="col-lg-6">
+                            <h2 class="event-title"><?= htmlspecialchars($event['title']) ?></h2>
 
-                    <h4>Lịch Trình Chi Tiết</h4>
-                    <ol>
-                        <li>17:00 - Mở cửa</li>
-                        <li>18:30 - Biểu diễn ánh sáng đầu tiên</li>
-                        <li>20:00 - Drone light show (cuối tuần)</li>
-                        <li>21:30 - Đỉnh cao ánh sáng toàn khu</li>
-                    </ol>
+                            <p><strong>Thời gian:</strong>
+                                <?= date('d/m/Y', strtotime($event['start_datetime'])) ?> - <?= date('d/m/Y', strtotime($event['end_datetime'])) ?>
+                                | <?= date('H:i', strtotime($event['start_datetime'])) ?> - <?= date('H:i', strtotime($event['end_datetime'])) ?>
+                            </p>
+                            <p><strong>Địa điểm:</strong> <?= htmlspecialchars($event['location'] ?? 'Chưa cập nhật') ?></p>
+                            <p class="lead"><?= htmlspecialchars($event['description'] ?? 'Chưa có mô tả') ?></p>
 
+                            <!-- Lịch trình chi tiết -->
+                            <?php if (!empty($schedules)): ?>
+                                <h4>Lịch Trình Chi Tiết</h4>
+                                <ol>
+                                    <?php foreach ($schedules as $schedule): ?>
+                                        <li><?= htmlspecialchars($schedule['schedule_time']) ?> - <?= htmlspecialchars($schedule['title']) ?></li>
+                                    <?php endforeach; ?>
+                                </ol>
+                            <?php endif; ?>
 
-                    <h4>Mẹo Tham Gia</h4>
-                    <div class="tip-box">
-                        <ul>
-                            <li>Mang máy ảnh để chụp ảnh đẹp</li>
-                            <li>Đi giày thoải mái vì phải di chuyển nhiều</li>
-                            <li>Đến từ 18h để tránh đông</li>
-                        </ul>
+                            <!-- Nút mua vé -->
+                            <div class="text-center mt-5">
+                                <?php if ($event['status'] == 'COMING_SOON'): ?>
+                                    <a href="#" class="buy-btn text-white">Coming soon</a>
+                                <?php elseif ($event['status'] == 'ONGOING'): ?>
+                                    <a href="/datve" class="buy-btn text-white">Đặt vé ngay</a>
+                                <?php elseif ($event['status'] == 'FINISHED'): ?>
+                                    <button class="btn btn-secondary" disabled>Đã kết thúc</button>
+                                <?php else: ?>
+                                    <button class="btn btn-danger" disabled>Đã hủy</button>
+                                <?php endif; ?>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="text-center mt-5">
-                        <a href="/datve" class="buy-btn text-white">Coming soon</a>
-                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="text-center py-5">
+                    <h3 class="text-muted">Hiện chưa có sự kiện nào</h3>
+                    <p>Vui lòng quay lại sau!</p>
                 </div>
-            </div>
-
-            <!-- 3. Water Splash Festival 2026 -->
-            <div class="row section-divider">
-                <div class="col-lg-6">
-                    <img src="<?= BASE_URL ?>/public/img/event-slide2.png.png" class="img-fluid rounded shadow" alt="Water Splash Festival">
-                </div>
-                <div class="col-lg-6">
-                    <h2 class="event-title">Water Splash Festival 2026</h2>
-                    <p><strong>Thời gian:</strong> 01/04/2026 - 30/04/2026 | 10:00 - 22:00 hàng ngày</p>
-                    <p><strong>Địa điểm:</strong> Khu Ocean Park</p>
-                    <p class="lead">Lễ hội té nước lớn nhất năm, DJ pool party, bắn súng nước, foam party và hàng ngàn phần quà hấp dẫn.</p>
-
-                    <h4>Lịch Trình Chi Tiết</h4>
-                    <ol>
-                        <li>10:00 - Mở cửa khu nước</li>
-                        <li>14:00 - Foam party chính</li>
-                        <li>16:00 - Trò chơi té nước tập thể</li>
-                        <li>20:00 - DJ pool party đêm</li>
-                    </ol>
-
-                   
-                    <h4>Mẹo Tham Gia</h4>
-                    <div class="tip-box">
-                        <ul>
-                            <li>Mang quần áo bơi và khăn lau</li>
-                            <li>Để đồ cá nhân ở tủ đồ miễn phí</li>
-                            <li>Uống nhiều nước để tránh mất nước</li>
-                        </ul>
-                    </div>
-
-                    <div class="text-center mt-5">
-                        <a href="#" class="buy-btn text-white">>Coming soon</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- 4. Halloween Horror Night 2025 -->
-            <div class="row section-divider">
-                <div class="col-lg-6 order-lg-2">
-                    <img src="<?= BASE_URL ?>/public/img/event-slid3.png" class="img-fluid rounded shadow" alt="Halloween Horror Night">
-                </div>
-                <div class="col-lg-6 order-lg-1">
-                    <h2 class="event-title">Halloween Horror Night 2025</h2>
-                    <p><strong>Thời gian:</strong> 25/10/2025 - 02/11/2025 | 18:00 - 23:00 hàng ngày</p>
-                    <p><strong>Địa điểm:</strong> Khu Horror Zone</p>
-                    <p class="lead">Nhà ma kinh dị, hóa trang zombie, diễu hành ma quái, trò chơi thử thách can đảm và quà tặng bí ẩn.</p>
-
-                    <h4>Lịch Trình Chi Tiết</h4>
-                    <ol>
-                        <li>18:00 - Mở cửa</li>
-                        <li>19:00 - Diễu hành zombie</li>
-                        <li>20:00 - Nhà ma mở cửa</li>
-                        <li>22:00 - Biểu diễn kinh dị cuối</li>
-                    </ol>
-
-                    <h4>Mẹo Tham Gia</h4>
-                    <div class="tip-box">
-                        <ul>
-                            <li>Không phù hợp trẻ dưới 12 tuổi</li>
-                            <li>Mang giày thể thao để chạy khi cần!</li>
-                            <li>Chụp ảnh với zombie miễn phí</li>
-                        </ul>
-                    </div>
-
-                    <div class="text-center mt-5">
-                        <a href="#" class="buy-btn text-white">>Coming soon</a>
-                    </div>
-                </div>
-            </div>
+            <?php endif; ?>
 
         </div>
     </section>

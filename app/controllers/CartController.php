@@ -114,7 +114,7 @@ class CartController {
 
         Order::updateTotal($orderId);
 
-        header("Location: /Doan/cart");
+        header("Location: " . BASE_URL . "/cart");
         exit;
     }
 
@@ -143,7 +143,7 @@ class CartController {
 
         $_SESSION['promo_msg'] = $result['error'] ?? 'Áp mã thành công';
 
-        header("Location: ?url=cart");
+        header("Location: " . BASE_URL . "/cart");
         exit;
     }
 
@@ -166,7 +166,7 @@ class CartController {
         $order = Order::getPendingByUser($userId);
         if (!$order) {
             $_SESSION['error'] = 'Không có đơn hàng để thanh toán';
-            header("Location: /Doan/cart");
+            header("Location: " . BASE_URL . "/cart");
             exit;
         }
 
@@ -180,7 +180,7 @@ class CartController {
 
         if ($finalTotal <= 0) {
             $_SESSION['error'] = 'Giỏ hàng trống, không thể thanh toán';
-            header("Location: /Doan/cart");
+            header("Location: " . BASE_URL . "/cart");
             exit;
         }
 
@@ -201,7 +201,7 @@ class CartController {
 
         $_SESSION['payment_success'] = true;
 
-        header("Location: /Doan/cart");
+        header("Location: " . BASE_URL . "/cart");
         exit;
     }
 
@@ -241,7 +241,7 @@ class CartController {
         }
 
         Order::updateTotal($orderId);
-        header("Location: ?url=cart");
+        header("Location: " . BASE_URL . "/cart");
         exit;
     }
 
@@ -281,7 +281,7 @@ class CartController {
         Order::updateTotal($item['order_id']);
         Promotion::clearByOrder($item['order_id']);
 
-        header("Location: ?url=cart");
+        header("Location: " . BASE_URL . "/cart");
         exit;
     }
 
@@ -305,7 +305,53 @@ class CartController {
         Order::updateTotal($item['order_id']);
         Promotion::clearByOrder($item['order_id']);
 
-        header("Location: ?url=cart");
+        header("Location: " . BASE_URL . "/cart");
+        exit;
+    }
+
+    // =========================
+    // AJAX: LẤY DỮ LIỆU GIỎ HÀNG
+    // =========================
+    public function getCartData() {
+        if (!isset($_SESSION['user_id'])) {
+            echo json_encode(['error' => 'Chưa đăng nhập']);
+            exit;
+        }
+
+        $userId = (int)$_SESSION['user_id'];
+        $order = Order::getPendingByUser($userId);
+        $discountTotal = $order ? Promotion::getDiscountByOrder($order['id']) : 0;
+        $items = $order ? OrderItem::getByOrder($order['id']) : [];
+
+        $groupedItems = [];
+        foreach ($items as $item) {
+            if ($item['item_type'] === 'GATE') {
+                $gateInfo = GateTicket::find($item['item_id']);
+                $item['name'] = $gateInfo['name'];
+                $groupedItems[$item['id']] = [
+                    'gate' => $item,
+                    'games' => []
+                ];
+            }
+        }
+        foreach ($items as $item) {
+            if ($item['item_type'] === 'GAME' && isset($groupedItems[$item['parent_item_id']])) {
+                $gameInfo = Game::find($item['item_id']);
+                $item['name'] = $gameInfo['name'];
+                $groupedItems[$item['parent_item_id']]['games'][] = $item;
+            }
+        }
+
+        $finalTotal = $order ? max(0, $order['total_price'] - $discountTotal) : 0;
+
+        echo json_encode([
+            'success' => true,
+            'order' => $order,
+            'groupedItems' => $groupedItems,
+            'total_price' => $order ? $order['total_price'] : 0,
+            'discount' => $discountTotal,
+            'final_total' => $finalTotal
+        ]);
         exit;
     }
 }

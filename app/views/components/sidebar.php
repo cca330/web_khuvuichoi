@@ -10,6 +10,7 @@
         <li><a href="<?=BASE_URL?>/Gate_tickets">🎟️ Quản lý loại vé cổng</a></li>
         <li><a href="<?=BASE_URL?>/Feedback">💬 Đánh giá</a></li>
         <li><a href="<?=BASE_URL?>/Promotions">🎁 Quản lý khuyến mãi</a></li>
+        <li><a href="<?=BASE_URL?>/Events">🎡 Quản lý sự kiện</a></li>
         <li><a href="<?=BASE_URL?>/login" class="logout">🚪 Đăng xuất</a></li>
     </ul>
 </aside>
