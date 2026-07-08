@@ -30,7 +30,13 @@
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                     <h5 class="card-title mb-0"><?= htmlspecialchars($promotion['code']) ?></h5>
-                                    <span class="badge badge-paid"><?= htmlspecialchars($promotion['type']) ?></span>
+                                    <?php // FIX: $promotion['type'] khong con ton tai - doi sang
+                                          // hien thi pham vi ap dung (scope_names) ?>
+                                    <span class="badge badge-paid">
+                                        <?= !empty($promotion['scope_names'])
+                                            ? htmlspecialchars($promotion['scope_names'])
+                                            : 'Tất cả loại vé' ?>
+                                    </span>
                                 </div>
 
                                 <p class="mb-2"><strong>Giảm giá:</strong> <?= (int)$promotion['discount'] ?>%</p>

@@ -130,10 +130,8 @@
                             <label>Độ tuổi tối thiểu: <span id="ageValue">0</span>+</label>
                             <input type="range" class="form-control-range" min="0" max="18" value="0" id="ageFilter">
                         </div>
-                        <div class="form-group">
-                            <label>Giá vé tối đa: <span id="priceValue">300.000đ</span></label>
-                            <input type="range" class="form-control-range" min="0" max="300000" step="10000" value="300000" id="priceFilter">
-                        </div>
+                        <!-- FIX: bỏ filter "Giá vé tối đa" - games không còn có giá riêng
+                             trong mô hình mới (chỉ mua vé cổng, vào chơi tự do mọi trò). -->
                         <button class="btn btn-primary btn-block mt-4" onclick="applyFilter()">Áp Dụng Lọc</button>
                     </div>
                 </div>
@@ -152,76 +150,29 @@
                     case 'Thư Giãn':   $category_class = 'badge-thugian'; break;
                     default:           $category_class = 'badge-primary';
                 }
-                
+
                 $defaultImage = BASE_URL . '/public/img/default-game.jpg';
+
+                // FIX: games.image (chuỗi nối bằng dấu phẩy) không còn
+                // tồn tại. Ảnh giờ nằm ở bảng game_images - Controller
+                // cần truy vấn riêng và gắn vào $game['images'] (mảng
+                // tên file) cho từng game trước khi đưa ra view này.
                 $slideImages = [];
                 $image = $defaultImage;
-                
-                // Xử lý ảnh từ database (có thể là nhiều ảnh ngăn cách bằng dấu phẩy)
-                if (!empty($game['image'])) {
-                    $imageList = array_filter(array_map('trim', explode(',', $game['image'])));
-                    if (!empty($imageList)) {
-                        // Chuyển đổi thành URL đầy đủ
-                        foreach ($imageList as $img) {
-                            $slideImages[] = BASE_URL . '/public/uploads/' . $img;
-                        }
-                        // Lấy ảnh đầu tiên làm ảnh chính
-                        $image = $slideImages[0];
+
+                if (!empty($game['images'])) {
+                    foreach ($game['images'] as $img) {
+                        $slideImages[] = BASE_URL . '/public/uploads/' . $img;
                     }
-                }
-                
-                // Nếu không có ảnh từ database, dùng ảnh cố định (hardcoded)
-                if (empty($slideImages)) {
-                    if ($game['name'] === 'VR Game') {
-                        $slideImages = [
-                            BASE_URL . '/public/img/game/vr1.avif',
-                            BASE_URL . '/public/img/game/vr2.jpg',
-                            BASE_URL . '/public/img/game/vr3.jpg',
-                            BASE_URL . '/public/img/game/vr4.jpg'
-                        ];
-                        $image = $slideImages[0];
-                    } elseif ($game['name'] === 'Bumper Cars') {
-                        $slideImages = [
-                            BASE_URL . '/public/img/game/pumbercar1.jpg',
-                            BASE_URL . '/public/img/game/pumbercar2.jpg',
-                            BASE_URL . '/public/img/game/pumbercar3.jpg',
-                            BASE_URL . '/public/img/game/pumbercar4.jpeg'
-                        ];
-                        $image = $slideImages[0];
-                    } elseif ($game['name'] === 'Ferris Wheel') {
-                        $slideImages = [
-                            BASE_URL . '/public/img/game/ferriswheel1.jpeg',
-                            BASE_URL . '/public/img/game/ferriswheel2.jpg',
-                            BASE_URL . '/public/img/game/ferriswheel3.jpeg',
-                            BASE_URL . '/public/img/game/ferriswheel4.jpg'
-                        ];
-                        $image = $slideImages[0];
-                    } elseif ($game['name'] === 'Roller Coaster') {
-                        $slideImages = [
-                            BASE_URL . '/public/img/game/roller-coaster1.jpg',
-                            BASE_URL . '/public/img/game/roller-coaster2.jpg',
-                            BASE_URL . '/public/img/game/roller-coaster3.jpg',
-                            BASE_URL . '/public/img/game/roller-coaster4.jpg'
-                        ];
-                        $image = $slideImages[0];
-                    } elseif ($game['name'] === 'Haunted House') {
-                        $slideImages = [
-                            BASE_URL . '/public/img/game/nha-ma1.avif',
-                            BASE_URL . '/public/img/game/nha-ma2.jpg',
-                            BASE_URL . '/public/img/game/nha-ma3.jpg',
-                            BASE_URL . '/public/img/game/nha-ma4.jpg'
-                        ];
-                        $image = $slideImages[0];
-                    }
+                    $image = $slideImages[0];
                 }
                 ?>
                 <div class="col-lg-6 col-md-6 mb-5 game-card" 
                      data-category="<?= htmlspecialchars($game['category'] ?? '') ?>" 
-                     data-age="<?= (int)($game['recommended_age'] ?? 0) ?>" 
-                     data-price="<?= (float)($game['price'] ?? 0) ?>">
+                     data-age="<?= (int)($game['recommended_age'] ?? 0) ?>">
                     <div class="card h-100 border-0">
                         <div class="slide-wrapper">
-                            <img src="<?= htmlspecialchars($image ?? '') ?>" class="card-img-top slider-image current" alt="<?= htmlspecialchars($game['name'] ?? 'Game') ?>" data-slides='<?= htmlspecialchars(json_encode($slideImages ?? []), ENT_QUOTES, 'UTF-8') ?>'>
+                            <img src="<?= htmlspecialchars($image) ?>" class="card-img-top slider-image current" alt="<?= htmlspecialchars($game['name'] ?? 'Game') ?>" data-slides='<?= htmlspecialchars(json_encode($slideImages), ENT_QUOTES, 'UTF-8') ?>'>
                         </div>
                         <div class="card-body text-center">
                             <span class="badge <?= $category_class ?> text-white px-3 py-2 rounded-pill mb-3">
@@ -229,9 +180,12 @@
                             </span>
                             <h4><?= htmlspecialchars($game['name'] ?? 'Trò chơi') ?></h4>
                             <p><?= htmlspecialchars(substr($game['description'] ?? 'Chưa có mô tả', 0, 100)) ?>...</p>
-                            <p><strong>Giá:</strong> <?= number_format($game['price'] ?? 0, 0, ',', '.') ?>đ | 
-                               <strong>Tuổi:</strong> <?= $game['recommended_age'] ?? 0 ?>+</p>
-                           
+                            <!-- FIX: bỏ hiển thị giá - miễn phí khi đã có vé cổng -->
+                            <p><strong>Tuổi:</strong> <?= $game['recommended_age'] ?? 0 ?>+
+                               <?php if (($game['allowed_ticket'] ?? 'ALL') === 'ADULT'): ?>
+                                   &nbsp;|&nbsp;<span class="text-danger">Chỉ dành cho vé người lớn</span>
+                               <?php endif; ?>
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -268,9 +222,6 @@
             $('#ageFilter').on('input', function() {
                 $('#ageValue').text($(this).val());
             });
-            $('#priceFilter').on('input', function() {
-                $('#priceValue').text(Number($(this).val()).toLocaleString() + 'đ');
-            });
 
             // Tự động tạo dropdown options từ dữ liệu game thực tế
             setTimeout(function() {
@@ -297,7 +248,6 @@
             window.applyFilter = function() {
                 let category = $('#categoryFilter').val();
                 let age = parseInt($('#ageFilter').val());
-                let price = parseInt($('#priceFilter').val());
 
                 // Xóa thông báo cũ trước khi thêm mới
                 $('.no-result').remove();
@@ -306,14 +256,11 @@
                 $('.game-card').hide();
                 $('.game-card').each(function() {
                     let show = true;
-                    // Dùng attr thay vì data để tránh vấn đề với tiếng Việt
                     let cardCategory = $(this).attr('data-category');
                     let cardAge = parseInt($(this).attr('data-age'));
-                    let cardPrice = parseFloat($(this).attr('data-price'));
 
                     if (category !== 'all' && cardCategory !== category) show = false;
                     if (cardAge > age) show = false;
-                    if (cardPrice > price) show = false;
                     if (show) {
                         $(this).fadeIn();
                         visibleCount++;
@@ -332,7 +279,7 @@
             });
         });
 
-        // Chuyển ảnh tự động cho VR và Bumper Cars
+        // Chuyển ảnh tự động cho các game có nhiều ảnh
         $('.slider-image.current').each(function() {
             let $current = $(this);
             const slides = JSON.parse($current.attr('data-slides') || '[]');

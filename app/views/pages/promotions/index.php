@@ -18,7 +18,7 @@
           <th>Giảm (%)</th>
           <th>Thời gian</th>
           <th>Trạng thái</th>
-          <th>Loại mã</th>
+          <th>Phạm vi áp dụng</th>
           <th>Hành động</th>
         </tr>
       </thead>
@@ -34,7 +34,15 @@
               <?= htmlspecialchars($p['status']) ?>
             </span>
           </td>
-          <td><?= htmlspecialchars($p['type']) ?></td>
+          <td>
+            <?php // FIX: doi tu $p['type'] (khong con ton tai) sang
+                  // scope_names duoc GROUP_CONCAT san trong getAll() ?>
+            <?php if (!empty($p['scope_names'])): ?>
+              <span class="badge blue"><?= htmlspecialchars($p['scope_names']) ?></span>
+            <?php else: ?>
+              <span class="badge grey">Tất cả loại vé</span>
+            <?php endif; ?>
+          </td>
           <td>
             <a class="btn" href="<?= BASE_URL ?>/Promotions/show/<?= $p['id'] ?>">Chi tiết</a>
             <a class="btn" href="<?= BASE_URL ?>/Promotions/edit/<?= $p['id'] ?>">Sửa</a>

@@ -12,11 +12,11 @@
       <h2 id="totalTickets">0</h2>
     </div>
     <div class="card green">
-      <span>Chưa sử dụng</span>
+      <span>Còn hiệu lực</span>
       <h2 id="unusedTickets">0</h2>
     </div>
     <div class="card gray">
-      <span>Đã sử dụng</span>
+      <span>Hết hạn / Đã hủy</span>
       <h2 id="usedTickets">0</h2>
     </div>
     <div class="card purple">

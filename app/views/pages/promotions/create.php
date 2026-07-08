@@ -31,11 +31,23 @@
              name="end_date"
              required>
 
-      <select name="type" required>
-        <option value="">-- Chọn loại khuyến mãi --</option>
-        <option value="ALL">Giảm tất cả (ALL)</option>
-        <option value="GAME">Chỉ giảm GAME</option>
-      </select>
+      <!-- FIX: thay select "type" (ALL/GAME - khong con hop le) bang
+           checkbox chon tung loai ve cu the. Khong tick gi ca = ap
+           dung cho TAT CA loai ve. -->
+      <div style="grid-column:1/-1;">
+        <label style="display:block; margin-bottom:8px; font-weight:500;">
+          Phạm vi áp dụng (không chọn gì = áp dụng cho tất cả loại vé)
+        </label>
+        <div style="display:flex; flex-wrap:wrap; gap:12px;">
+          <?php foreach ($gateTickets as $gt): ?>
+            <label style="display:flex; align-items:center; gap:6px; font-weight:normal;">
+              <input type="checkbox" name="gate_ticket_ids[]" value="<?= $gt['id'] ?>">
+              <?= htmlspecialchars($gt['name']) ?>
+              <?php if ($gt['is_combo']): ?><span class="badge blue">Combo</span><?php endif; ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+      </div>
 
       <!-- Status mặc định ACTIVE -->
       <input type="hidden" name="status" value="ACTIVE">

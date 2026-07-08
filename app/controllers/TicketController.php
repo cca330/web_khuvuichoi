@@ -36,18 +36,24 @@ class TicketController extends Controller
     }
 
     // API: check ticket
+    // API: check ticket (quet tai cong)
     public function apiCheck()
     {
         $data = json_decode(file_get_contents("php://input"), true);
 
         if (!isset($data['ticket_code'])) {
-            echo "INVALID";
+            header("Content-Type: application/json");
+            echo json_encode(['ok' => false, 'message' => 'INVALID_INPUT']);
             return;
         }
 
-        $model = new TicketModel();
-        $ok = $model->useTicket($data['ticket_code']);
+        $staffId  = $_SESSION['user_id'] ?? null; // tuy vao he thong auth cua ban
+        $gateName = $data['gate_name'] ?? null;
 
-        echo $ok ? "OK" : "FAILED";
+        $model = new TicketModel();
+        $result = $model->useTicket($data['ticket_code'], $staffId, $gateName);
+
+        header("Content-Type: application/json");
+        echo json_encode($result);
     }
 }

@@ -25,7 +25,6 @@
         <tr>
           <th>ID</th>
           <th>Tên</th>
-          <th>Giá</th>
           <th>Độ tuổi</th>
           <th>Loại vé</th>
           <th>Trạng thái</th>
@@ -37,7 +36,6 @@
         <tr>
           <td><?= $game['id'] ?></td>
           <td><?= htmlspecialchars($game['name']) ?></td>
-          <td><?= number_format($game['price']) ?> đ</td>
           <td><?= $game['recommended_age'] ?>+</td>
           <td><?= $game['allowed_ticket'] ?></td>
           <td>

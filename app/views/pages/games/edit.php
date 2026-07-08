@@ -10,21 +10,14 @@
 
             <input type="text"
                    name="name"
-                   value="<?= $game['name'] ?>"
+                   value="<?= htmlspecialchars($game['name']) ?>"
                    placeholder="Tên game"
                    class="game-input"
                    required>
 
             <textarea name="description"
                       placeholder="Mô tả"
-                      class="game-input"><?= $game['description'] ?></textarea>
-
-            <input type="number"
-                   name="price"
-                   value="<?= $game['price'] ?>"
-                   placeholder="Giá"
-                   class="game-input"
-                   required>
+                      class="game-input"><?= htmlspecialchars($game['description']) ?></textarea>
 
             <input type="number"
                    name="recommended_age"
@@ -50,24 +43,26 @@
                 </option>
             </select>
 
-            <?php if ($game['image']): ?>
+            <?php if (!empty($images)): ?>
                 <div style="grid-column:1/-1; margin-bottom:10px;">
-                    <label style="display: block; margin-bottom: 8px; color: #666; font-weight: 500;">📸 Ảnh hiện tại:</label>
+                    <label style="display: block; margin-bottom: 8px; color: #666; font-weight: 500;">📸 Ảnh hiện tại (<?= count($images) ?>):</label>
                     <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <?php 
-                        $images = array_filter(explode(',', $game['image']));
-                        foreach($images as $img): 
-                        ?>
-                            <img src="<?= BASE_URL ?>/public/uploads/<?= trim($img) ?>"
+                        <?php foreach($images as $img): ?>
+                            <img src="<?= BASE_URL ?>/public/uploads/<?= htmlspecialchars($img) ?>"
                                  width="100"
                                  height="100"
                                  style="border-radius:8px; object-fit:cover;">
                         <?php endforeach; ?>
                     </div>
+                    <small style="display:block; margin-top:8px; color:#999;">
+                        Nếu bạn chọn ảnh mới bên dưới, TOÀN BỘ ảnh hiện tại sẽ bị thay thế.
+                    </small>
+                </div>
+            <?php else: ?>
+                <div style="grid-column:1/-1; margin-bottom:10px;">
+                    <p class="muted">Chưa có ảnh nào cho trò chơi này.</p>
                 </div>
             <?php endif ?>
-
-            <input type="hidden" name="old_image" value="<?= $game['image'] ?>">
 
             <div style="margin-top: 15px;">
                 <label style="display: block; margin-bottom: 8px; color: #666; font-weight: 500;">📁 Thêm ảnh mới (folder hoặc riêng lẻ):</label>

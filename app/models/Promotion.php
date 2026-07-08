@@ -12,15 +12,22 @@ class Promotion {
     // LẤY DANH SÁCH MÃ ACTIVE
     // =========================
     public static function getActivePromotions() {
-        $conn = self::db();
-        $sql = "
-            SELECT * FROM promotions
-            WHERE status = 'ACTIVE'
-            AND (start_date IS NULL OR start_date <= CURDATE())
-            AND (end_date IS NULL OR end_date >= CURDATE())
-        ";
-        return $conn->query($sql)->fetchAll();
-    }
+    $conn = self::db();
+    $sql = "
+        SELECT
+            p.*,
+            GROUP_CONCAT(gt.name SEPARATOR ', ') AS scope_names
+        FROM promotions p
+        LEFT JOIN promotion_gate_tickets pgt ON pgt.promotion_id = p.id
+        LEFT JOIN gate_tickets gt ON gt.id = pgt.gate_ticket_id
+        WHERE p.status = 'ACTIVE'
+          AND (p.start_date IS NULL OR p.start_date <= CURDATE())
+          AND (p.end_date IS NULL OR p.end_date >= CURDATE())
+        GROUP BY p.id
+        ORDER BY p.id DESC
+    ";
+    return $conn->query($sql)->fetchAll();
+}
 
     // =========================
     // LẤY PROMOTION ĐANG ÁP CHO ORDER
@@ -34,6 +41,34 @@ class Promotion {
         ");
         $stmt->execute([$orderId]);
         return $stmt->fetch();
+    }
+
+    // =========================
+    // TÍNH TỔNG TIỀN CÁC ORDER_ITEMS NẰM TRONG PHẠM VI ÁP DỤNG
+    // CỦA 1 PROMOTION (dựa vào promotion_gate_tickets).
+    // Nếu promotion không có dòng nào trong promotion_gate_tickets
+    // => áp dụng cho TẤT CẢ loại vé (ALL).
+    // =========================
+    private static function getBaseTotal($conn, $orderId, $promotionId) {
+        $sql = "
+            SELECT SUM(oi.quantity * oi.price) AS total
+            FROM order_items oi
+            WHERE oi.order_id = ?
+              AND (
+                    NOT EXISTS (
+                        SELECT 1 FROM promotion_gate_tickets
+                        WHERE promotion_id = ?
+                    )
+                    OR oi.gate_ticket_id IN (
+                        SELECT gate_ticket_id FROM promotion_gate_tickets
+                        WHERE promotion_id = ?
+                    )
+              )
+        ";
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$orderId, $promotionId, $promotionId]);
+        $total = $stmt->fetchColumn();
+        return $total !== false ? (float)$total : 0;
     }
 
     // =========================
@@ -68,42 +103,8 @@ class Promotion {
         ");
         $stmt->execute([$orderId]);
 
-        // 3️⃣ Tính tổng tiền theo loại mã
-        switch ($promo['type']) {
-            case 'ALL':
-                $sql = "
-                    SELECT SUM(quantity * price)
-                    FROM order_items
-                    WHERE order_id = ?
-                ";
-                break;
-
-            case 'GAME':
-                $sql = "
-                    SELECT SUM(quantity * price)
-                    FROM order_items
-                    WHERE order_id = ?
-                    AND item_type = 'GAME'
-                ";
-                break;
-
-            case 'TICKET':
-                $sql = "
-                    SELECT SUM(quantity * price)
-                    FROM order_items
-                    WHERE order_id = ?
-                    AND item_type = 'GATE'
-                ";
-                break;
-
-            default:
-                return ['error' => 'Loại mã không hợp lệ'];
-        }
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$orderId]);
-        $baseTotal = $stmt->fetchColumn();
-        $baseTotal = $baseTotal !== false ? $baseTotal : 0;
+        // 3️⃣ Tính tổng tiền các order_items nằm trong phạm vi áp dụng của mã
+        $baseTotal = self::getBaseTotal($conn, $orderId, $promo['id']);
 
         if ($baseTotal <= 0) {
             return ['error' => 'Không có sản phẩm phù hợp để áp mã'];
@@ -162,28 +163,12 @@ class Promotion {
 
         if (!$promo) {
             self::clearByOrder($orderId);
+            Order::updateTotal($orderId);
             return;
         }
 
-        // Tính lại baseTotal theo loại mã
-        switch ($promo['type']) {
-            case 'ALL':
-                $sql = "SELECT SUM(quantity * price) FROM order_items WHERE order_id = ?";
-                break;
-            case 'GAME':
-                $sql = "SELECT SUM(quantity * price) FROM order_items WHERE order_id = ? AND item_type = 'GAME'";
-                break;
-            case 'TICKET':
-                $sql = "SELECT SUM(quantity * price) FROM order_items WHERE order_id = ? AND item_type = 'GATE'";
-                break;
-            default:
-                return;
-        }
-
-        $stmt = $conn->prepare($sql);
-        $stmt->execute([$orderId]);
-        $baseTotal = $stmt->fetchColumn();
-        $baseTotal = $baseTotal !== false ? $baseTotal : 0;
+        // Tính lại baseTotal theo phạm vi áp dụng (promotion_gate_tickets)
+        $baseTotal = self::getBaseTotal($conn, $orderId, $promo['id']);
 
         // ❗ Không còn item phù hợp → xóa mã
         if ($baseTotal <= 0) {

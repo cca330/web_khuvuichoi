@@ -27,8 +27,12 @@
       </div>
 
       <div>
-        <span>Loại</span>
-        <strong><?= htmlspecialchars($promotion['type']) ?></strong>
+        <span>Phạm vi áp dụng</span>
+        <?php // FIX: thay $promotion['type'] (khong con ton tai) bang
+              // $scopeNames (mang ten loai ve, do Controller truyen vao) ?>
+        <strong>
+          <?= !empty($scopeNames) ? htmlspecialchars(implode(', ', $scopeNames)) : 'Tất cả loại vé' ?>
+        </strong>
       </div>
 
       <div>

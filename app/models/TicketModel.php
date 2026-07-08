@@ -3,40 +3,31 @@ require_once __DIR__ . "/../../core/Database.php";
 
 class TicketModel
 {
-    private $pdo;
-
-    public function __construct()
+    private function db()
     {
-        $db = new Database();
-        $this->pdo = $db->getPDO();
+        return Database::getConnection();
     }
 
-    // Lấy danh sách vé (có filter)
+    /**
+     * Danh sach ve da ban (chi lay ve thuoc don da PAID).
+     * $status: '' | ACTIVE | EXPIRED | CANCELLED
+     * $type:   '' | SINGLE | COMBO
+     */
     public function getTickets($status = "", $type = "")
     {
-        $sql = "
-            SELECT 
-                t.id,
-                t.ticket_code,
-                t.order_id,
-                t.item_type,
-                t.item_id,
-                t.status,
-                t.created_at,
-                t.used_at,
-                CASE 
-                    WHEN t.item_type = 'GATE' THEN gt.name
-                    ELSE 'Game Ticket'
-                END AS item_name,
-                CASE 
-                    WHEN t.item_type = 'GATE' THEN gt.price
-                    ELSE 0
-                END AS price
-            FROM tickets t
-            LEFT JOIN gate_tickets gt 
-                ON t.item_type = 'GATE' AND t.item_id = gt.id
-            WHERE 1
-        ";
+        $conn = $this->db();
+
+        $sql = "SELECT
+                    t.id, t.ticket_code, t.status, t.admits_adult, t.admits_child,
+                    t.valid_date, t.created_at,
+                    o.id AS order_id,
+                    gt.name AS gate_ticket_name, gt.type AS gate_ticket_type, gt.is_combo,
+                    oi.price
+                FROM tickets t
+                JOIN order_items oi ON oi.id = t.order_item_id
+                JOIN orders o ON o.id = oi.order_id
+                JOIN gate_tickets gt ON gt.id = t.gate_ticket_id
+                WHERE o.status = 'PAID'";
 
         $params = [];
 
@@ -45,52 +36,118 @@ class TicketModel
             $params[] = $status;
         }
 
-        if ($type !== "") {
-            $sql .= " AND t.item_type = ?";
-            $params[] = $type;
+        if ($type === "SINGLE") {
+            $sql .= " AND gt.is_combo = 0";
+        } elseif ($type === "COMBO") {
+            $sql .= " AND gt.is_combo = 1";
         }
 
         $sql .= " ORDER BY t.created_at DESC";
 
-        $stmt = $this->pdo->prepare($sql);
+        $stmt = $conn->prepare($sql);
         $stmt->execute($params);
-
         return $stmt->fetchAll();
     }
 
-    // Thống kê
+    /**
+     * Thong ke tong quan cho trang doanh thu ve.
+     */
+    /**
+     * Thong ke tong quan cho trang doanh thu ve.
+     * Luu y: 'unused' = ve con hieu luc (status=ACTIVE), 'used' = ve
+     * het han/da huy (EXPIRED/CANCELLED). Day KHONG phai la da-quet-
+     * hay-chua (1 ve ACTIVE co the da duoc quet IN/OUT nhieu lan trong
+     * ngay). Neu can thong ke theo da-quet, phai join ticket_scans.
+     */
     public function getStats()
     {
-        $sql = "
-            SELECT
-                COUNT(*) AS total,
-                SUM(CASE WHEN t.status = 'UNUSED' THEN 1 ELSE 0 END) AS unused,
-                SUM(CASE WHEN t.status = 'USED' THEN 1 ELSE 0 END) AS used,
-                SUM(
-                    CASE 
-                        WHEN t.item_type = 'GATE' THEN gt.price
-                        ELSE 0
-                    END
-                ) AS revenue
-            FROM tickets t
-            LEFT JOIN gate_tickets gt 
-                ON t.item_type = 'GATE' AND t.item_id = gt.id
-        ";
+        $conn = $this->db();
 
-        return $this->pdo->query($sql)->fetch();
+        $sql = "SELECT
+                    COUNT(*) AS total,
+                    SUM(CASE WHEN t.status = 'ACTIVE' THEN 1 ELSE 0 END) AS unused,
+                    SUM(CASE WHEN t.status IN ('EXPIRED','CANCELLED') THEN 1 ELSE 0 END) AS used,
+                    COALESCE(SUM(oi.price), 0) AS revenue
+                FROM tickets t
+                JOIN order_items oi ON oi.id = t.order_item_id
+                JOIN orders o ON o.id = oi.order_id
+                WHERE o.status = 'PAID'";
+
+        $row = $conn->query($sql)->fetch();
+
+        return [
+            'total'   => (int)($row['total'] ?? 0),
+            'unused'  => (int)($row['unused'] ?? 0),
+            'used'    => (int)($row['used'] ?? 0),
+            'revenue' => (float)($row['revenue'] ?? 0),
+        ];
     }
 
-    // Check vé (QR)
-    public function useTicket($code)
+    /**
+     * Quet ve tai cong: xac nhan hop le roi tu dong ghi log
+     * ticket_scans (IN neu lan truoc la OUT hoac chua tung quet,
+     * OUT neu lan truoc la IN). Khong con thay doi tickets.status
+     * vi ve duoc dung nhieu lan/ngay.
+     *
+     * @param string $ticketCode
+     * @param int|null $staffId  id nhan vien thuc hien quet (neu co)
+     * @param string|null $gateName ten cong quet
+     * @return array ['ok' => bool, 'message' => string, 'scan_type' => string|null]
+     */
+    public function useTicket($ticketCode, $staffId = null, $gateName = null)
     {
-        $stmt = $this->pdo->prepare("
-            UPDATE tickets 
-            SET status = 'USED', used_at = NOW()
-            WHERE ticket_code = ? AND status = 'UNUSED'
-        ");
+        $conn = $this->db();
+        $conn->beginTransaction();
 
-        $stmt->execute([$code]);
+        try {
+            // Khoa dong ve lai de tranh 2 request quet trung nhau cung luc
+            $stmt = $conn->prepare(
+                "SELECT * FROM tickets WHERE ticket_code = ? FOR UPDATE"
+            );
+            $stmt->execute([$ticketCode]);
+            $ticket = $stmt->fetch();
 
-        return $stmt->rowCount() > 0; // true nếu update thành công
+            if (!$ticket) {
+                $conn->rollBack();
+                return ['ok' => false, 'message' => 'TICKET_NOT_FOUND', 'scan_type' => null];
+            }
+
+            if ($ticket['status'] !== 'ACTIVE') {
+                $conn->rollBack();
+                return ['ok' => false, 'message' => 'TICKET_' . $ticket['status'], 'scan_type' => null];
+            }
+
+            if ($ticket['valid_date'] !== date('Y-m-d')) {
+                $conn->rollBack();
+                return ['ok' => false, 'message' => 'TICKET_NOT_VALID_TODAY', 'scan_type' => null];
+            }
+
+            // Lay lan quet gan nhat de biet ve dang O TRONG hay O NGOAI
+            $stmt = $conn->prepare(
+                "SELECT scan_type FROM ticket_scans
+                 WHERE ticket_id = ?
+                 ORDER BY scanned_at DESC, id DESC
+                 LIMIT 1"
+            );
+            $stmt->execute([$ticket['id']]);
+            $lastScan = $stmt->fetch();
+
+            // Chua quet lan nao hoac lan truoc la OUT -> lan nay la IN
+            // Lan truoc la IN -> lan nay la OUT
+            $scanType = (!$lastScan || $lastScan['scan_type'] === 'OUT') ? 'IN' : 'OUT';
+
+            $stmt = $conn->prepare(
+                "INSERT INTO ticket_scans (ticket_id, scan_type, gate_name, staff_id)
+                 VALUES (?, ?, ?, ?)"
+            );
+            $stmt->execute([$ticket['id'], $scanType, $gateName, $staffId]);
+
+            $conn->commit();
+
+            return ['ok' => true, 'message' => 'SCANNED', 'scan_type' => $scanType];
+        } catch (Exception $e) {
+            $conn->rollBack();
+            return ['ok' => false, 'message' => 'ERROR', 'scan_type' => null];
+        }
     }
 }
