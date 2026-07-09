@@ -27,15 +27,16 @@
 
   <div class="filters filter-toolbar">
     <input type="text" id="searchInput" placeholder="Tìm theo mã vé...">
-    <select>
+    <select id="statusSelect">
       <option value="">Tất cả trạng thái</option>
-      <option value="UNUSED">Chưa sử dụng</option>
-      <option value="USED">Đã sử dụng</option>
+      <option value="ACTIVE">Còn hiệu lực</option>
+      <option value="EXPIRED">Hết hạn</option>
+      <option value="CANCELLED">Đã hủy</option>
     </select>
-    <select>
+    <select id="typeSelect">
       <option value="">Tất cả loại</option>
-      <option value="GATE">Vé cổng</option>
-      <option value="GAME">Vé trò chơi</option>
+      <option value="SINGLE">Vé đơn</option>
+      <option value="COMBO">Combo</option>
     </select>
   </div>
 

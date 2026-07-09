@@ -29,7 +29,7 @@ document.getElementById("btnLogin").addEventListener("click", function () {
       data = data.trim();
 
       if (data === "ADMIN") {
-        window.location.href = "index.php?controller=reports&action=index";
+        window.location.href = "index.php?controller=ticket&action=index";
       } else if (data === "USER") {
         window.location.href = "index.php?controller=trangchu&action=index";
       } else {
