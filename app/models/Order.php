@@ -73,6 +73,16 @@ class Order {
         $stmt->execute([$orderId]);
     }
 
+    public static function markFailed($orderId) {
+        $conn = self::db();
+        $stmt = $conn->prepare(
+            "UPDATE orders 
+             SET status = 'FAILED'
+             WHERE id = ? AND status = 'PENDING'"
+        );
+        $stmt->execute([$orderId]);
+    }
+
     public static function find($orderId) {
         $conn = self::db();
         $stmt = $conn->prepare("SELECT * FROM orders WHERE id = ?");

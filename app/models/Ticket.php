@@ -9,6 +9,30 @@ class TicketModel
     }
 
     /**
+     * Lay danh sach ve theo order_id
+     * @param int $orderId
+     * @return array
+     */
+    public function getTicketsByOrder($orderId)
+    {
+        $conn = $this->db();
+
+        $sql = "SELECT
+                    t.id, t.ticket_code, t.status, t.admits_adult, t.admits_child,
+                    t.valid_date, t.created_at,
+                    gt.name AS gate_ticket_name, gt.type AS gate_ticket_type, gt.is_combo
+                FROM tickets t
+                JOIN order_items oi ON oi.id = t.order_item_id
+                JOIN gate_tickets gt ON gt.id = t.gate_ticket_id
+                WHERE oi.order_id = ?
+                ORDER BY t.id ASC";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->execute([$orderId]);
+        return $stmt->fetchAll();
+    }
+
+    /**
      * Danh sach ve da ban (chi lay ve thuoc don da PAID).
      * $status: '' | ACTIVE | EXPIRED | CANCELLED
      * $type:   '' | SINGLE | COMBO
@@ -81,6 +105,69 @@ class TicketModel
             'used'    => (int)($row['used'] ?? 0),
             'revenue' => (float)($row['revenue'] ?? 0),
         ];
+    }
+
+    /**
+     * Sinh ticket tu order sau khi thanh toan thanh cong.
+     * Moi order_item voi quantity > 0 se sinh quantity dong tickets.
+     * @param int $orderId
+     */
+    public static function generateByOrder($orderId)
+    {
+        $conn = Database::getConnection();
+        $conn->beginTransaction();
+
+        try {
+            // Lay cac order_items cua order
+            $stmt = $conn->prepare("
+                SELECT oi.id, oi.gate_ticket_id, oi.quantity, oi.price,
+                       gt.admits_adult, gt.admits_child
+                FROM order_items oi
+                JOIN gate_tickets gt ON gt.id = oi.gate_ticket_id
+                WHERE oi.order_id = ?
+            ");
+            $stmt->execute([$orderId]);
+            $items = $stmt->fetchAll();
+
+            $validDate = date('Y-m-d');
+            $prefix = 'QR-' . date('Ymd') . '-';
+
+            foreach ($items as $item) {
+                // Sinh quantity tickets cho moi order_item
+                for ($i = 0; $i < $item['quantity']; $i++) {
+                    // Tao ticket code unique
+                    $ticketCode = $prefix . str_pad(rand(0, 99999), 5, '0', STR_PAD_LEFT);
+
+                    // Kiem tra trung lap (rare case)
+                    $checkStmt = $conn->prepare("SELECT id FROM tickets WHERE ticket_code = ?");
+                    $checkStmt->execute([$ticketCode]);
+                    if ($checkStmt->fetch()) {
+                        // Neu trung, tiep tuc random
+                        $i--;
+                        continue;
+                    }
+
+                    $insertStmt = $conn->prepare("
+                        INSERT INTO tickets 
+                        (order_item_id, gate_ticket_id, ticket_code, admits_adult, admits_child, valid_date, status)
+                        VALUES (?, ?, ?, ?, ?, ?, 'ACTIVE')
+                    ");
+                    $insertStmt->execute([
+                        $item['id'],
+                        $item['gate_ticket_id'],
+                        $ticketCode,
+                        $item['admits_adult'],
+                        $item['admits_child'],
+                        $validDate
+                    ]);
+                }
+            }
+
+            $conn->commit();
+        } catch (Exception $e) {
+            $conn->rollBack();
+            throw $e;
+        }
     }
 
     /**

@@ -62,48 +62,23 @@
         <th>Thao tác</th>
     </tr>
 
-    <?php foreach ($groupedItems as $group): ?>
-
-    <tr class="cart-group-row">
-        <td><span class="badge badge-gate">GATE</span></td>
-        <td><?= htmlspecialchars($group['gate']['name']) ?></td>
-        <td><?= $group['gate']['quantity'] ?></td>
-        <td><?= number_format($group['gate']['price']) ?>đ</td>
+    <?php foreach ($groupedItems as $item): ?>
+    <tr>
+        <td><span class="badge badge-gate">VÉ</span></td>
         <td>
-            <button class="btn btn-minus" onclick="updateQty(<?= $group['gate']['id'] ?>, 'minus')">−</button>
-            <button class="btn btn-plus" onclick="updateQty(<?= $group['gate']['id'] ?>, 'plus')">+</button>
-            <button class="btn btn-delete" onclick="deleteItem(<?= $group['gate']['id'] ?>)">❌</button>
+            <b><?= htmlspecialchars($item['ticket_name']) ?></b>
+            <?php if ($item['is_combo']): ?>
+                <small class="text-muted">(Combo: <?= $item['admits_adult'] ?> NL + <?= $item['admits_child'] ?> TE)</small>
+            <?php endif; ?>
+        </td>
+        <td><?= $item['quantity'] ?></td>
+        <td><?= number_format($item['price']) ?>đ</td>
+        <td>
+            <button class="btn btn-minus" onclick="updateQty(<?= $item['id'] ?>, 'minus')">−</button>
+            <button class="btn btn-plus" onclick="updateQty(<?= $item['id'] ?>, 'plus')">+</button>
+            <button class="btn btn-delete" onclick="deleteItem(<?= $item['id'] ?>)">❌</button>
         </td>
     </tr>
-
-    <?php foreach ($group['games'] as $game): ?>
-    <tr>
-        <td><span class="badge badge-game">GAME</span></td>
-        <td><?= htmlspecialchars($game['name']) ?></td>
-        <td><?= $game['quantity'] ?></td>
-        <td><?= number_format($game['price']) ?>đ</td>
-        <td>
-            <button class="btn btn-minus" onclick="updateQty(<?= $game['id'] ?>, 'minus')">−</button>
-            <button class="btn btn-plus" onclick="updateQty(<?= $game['id'] ?>, 'plus')">+</button>
-            <button class="btn btn-delete" onclick="deleteItem(<?= $game['id'] ?>)">❌</button>
-        </td>
-    </tr>
-    <?php endforeach; ?>
-
-    <tr>
-    <td colspan="5">
-        <select id="gameSelect_<?= $group['gate']['id'] ?>">
-            <option value="">🎮 Chọn game</option>
-            <?php foreach ($group['available_games'] as $g): ?>
-                <option value="<?= $g['id'] ?>">
-                    <?= htmlspecialchars($g['name']) ?> (<?= number_format($g['price']) ?>đ)
-                </option>
-            <?php endforeach; ?>
-        </select>
-        <button class="btn btn-add" onclick="addGame(<?= $order['id'] ?>, <?= $group['gate']['id'] ?>)">➕ Thêm game</button>
-    </td>
-    </tr>
-
     <?php endforeach; ?>
     </table>
     <?php endif; ?>
@@ -120,7 +95,7 @@
     <option value="">🎟️ Chọn mã</option>
     <?php foreach ($promotions as $p): ?>
         <option value="<?= $p['code'] ?>">
-            <?= $p['code'] ?> (<?= $p['discount'] ?>% - <?= $p['type'] ?>)
+            <?= $p['code'] ?> (<?= $p['discount'] ?>%<?= !empty($p['scope_names']) ? ' - ' . $p['scope_names'] : '' ?>)
         </option>
     <?php endforeach; ?>
 </select>
@@ -132,16 +107,10 @@
 <div class="cart-section cart-summary">
 <h3>💰 Thanh toán</h3>
 
-<p><b>Tạm tính:</b> <span id="totalPrice"><?= number_format($order['total_price']) ?>đ</span></p>
-<p><b>Giảm giá:</b> <span id="discountTotal"><?= number_format($discountTotal) ?>đ</span></p>
-
+<div id="checkoutButton">
 <?php
     $finalTotal = max(0, $order['total_price'] - $discountTotal);
 ?>
-
-<p class="total">
-    Tổng thanh toán: <span id="finalTotal"><?= number_format($finalTotal) ?>đ</span>
-</p>
 
 <?php if ($finalTotal <= 0): ?>
 
@@ -151,16 +120,17 @@
     </button>
 
     <p class="text-muted mt-2">
-        Vui lòng thêm vé hoặc trò chơi để tiếp tục thanh toán
+        Vui lòng thêm vé để tiếp tục thanh toán
     </p>
 
 <?php else: ?>
 
-<button class="btn btn-add btn-lg" onclick="checkout()">
-    🎉 Thanh toán
+<button class="btn btn-add btn-lg" onclick="window.location.href='<?= BASE_URL ?>/cart/checkout'">
+    🎉 Tiến hành thanh toán
 </button>
 
 <?php endif; ?>
+</div>
 
 </div>
 
@@ -189,40 +159,32 @@ function updateCartDisplay(data) {
     } else {
         html = '<table class="cart-table"><tr><th>Loại</th><th>Tên</th><th>SL</th><th>Giá</th><th>Thao tác</th></tr>';
 
-        for (let gateId in data.groupedItems) {
-            let group = data.groupedItems[gateId];
-            html += '<tr class="cart-group-row">' +
-                '<td><span class="badge badge-gate">GATE</span></td>' +
-                '<td>' + group.gate.name + '</td>' +
-                '<td>' + group.gate.quantity + '</td>' +
-                '<td>' + group.gate.price.toLocaleString() + 'đ</td>' +
+        data.groupedItems.forEach(function(item) {
+            let comboInfo = item.is_combo ? ' <small class="text-muted">(Combo: ' + item.admits_adult + ' NL + ' + item.admits_child + ' TE)</small>' : '';
+            html += '<tr>' +
+                '<td><span class="badge badge-gate">VÉ</span></td>' +
+                '<td><b>' + item.ticket_name + '</b>' + comboInfo + '</td>' +
+                '<td>' + item.quantity + '</td>' +
+                '<td>' + item.price.toLocaleString() + 'đ</td>' +
                 '<td>' +
-                '<button class="btn btn-minus" onclick="updateQty(' + group.gate.id + ', \'minus\')">−</button> ' +
-                '<button class="btn btn-plus" onclick="updateQty(' + group.gate.id + ', \'plus\')">+</button> ' +
-                '<button class="btn btn-delete" onclick="deleteItem(' + group.gate.id + ')">❌</button>' +
+                '<button class="btn btn-minus" onclick="updateQty(' + item.id + ', \'minus\')">−</button> ' +
+                '<button class="btn btn-plus" onclick="updateQty(' + item.id + ', \'plus\')">+</button> ' +
+                '<button class="btn btn-delete" onclick="deleteItem(' + item.id + ')">❌</button>' +
                 '</td></tr>';
-
-            for (let i = 0; i < group.games.length; i++) {
-                let game = group.games[i];
-                html += '<tr>' +
-                    '<td><span class="badge badge-game">GAME</span></td>' +
-                    '<td>' + game.name + '</td>' +
-                    '<td>' + game.quantity + '</td>' +
-                    '<td>' + game.price.toLocaleString() + 'đ</td>' +
-                    '<td>' +
-                    '<button class="btn btn-minus" onclick="updateQty(' + game.id + ', \'minus\')">−</button> ' +
-                    '<button class="btn btn-plus" onclick="updateQty(' + game.id + ', \'plus\')">+</button> ' +
-                    '<button class="btn btn-delete" onclick="deleteItem(' + game.id + ')">❌</button>' +
-                    '</td></tr>';
-            }
-        }
+        });
         html += '</table>';
     }
 
     document.getElementById('cartContent').innerHTML = html;
-    document.getElementById('totalPrice').textContent = data.total_price.toLocaleString() + 'đ';
-    document.getElementById('discountTotal').textContent = data.discount.toLocaleString() + 'đ';
-    document.getElementById('finalTotal').textContent = data.final_total.toLocaleString() + 'đ';
+
+    // Update checkout button
+    let checkoutHtml = '';
+    if (data.final_total <= 0) {
+        checkoutHtml = '<button class="btn btn-secondary btn-lg" disabled title="Giỏ hàng đang trống">🚫 Không thể thanh toán</button><p class="text-muted mt-2">Vui lòng thêm vé để tiếp tục thanh toán</p>';
+    } else {
+        checkoutHtml = '<button class="btn btn-add btn-lg" onclick="window.location.href=\'' + BASE_URL + '/cart/checkout\'">🎉 Tiến hành thanh toán</button>';
+    }
+    document.getElementById('checkoutButton').innerHTML = checkoutHtml;
 }
 
 function addGate(gateId) {
@@ -236,22 +198,6 @@ function addGate(gateId) {
     });
 }
 
-function addGame(orderId, gateItemId) {
-    const gameId = document.getElementById('gameSelect_' + gateItemId).value;
-    if (!gameId) {
-        alert('Vui lòng chọn game!');
-        return;
-    }
-
-    $.ajax({
-        url: BASE_URL + '/cart/addGame',
-        type: 'POST',
-        data: { order_id: orderId, gate_item_id: gateItemId, game_id: gameId },
-        success: function() {
-            reloadCart();
-        }
-    });
-}
 
 function updateQty(itemId, action) {
     $.ajax({

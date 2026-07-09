@@ -28,19 +28,6 @@ class Game {
     }
 
     // =========================
-    // LẤY GIÁ GAME
-    // =========================
-    public static function getPrice($id) {
-        $conn = self::db();
-
-        $stmt = $conn->prepare("SELECT price FROM games WHERE id = ?");
-        $stmt->execute([$id]);
-
-        $price = $stmt->fetchColumn();
-        return $price !== false ? $price : 0;
-    }
-
-    // =========================
     // ✅ BỔ SUNG: LẤY TÊN GAME
     // (PHỤC VỤ HIỂN THỊ)
     // =========================
