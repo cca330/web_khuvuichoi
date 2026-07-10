@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../core/Controller.php';
+session_start();
 require_once __DIR__ . '/../models/Order.php';
 require_once __DIR__ . '/../models/Ticket.php';
 
@@ -8,7 +8,7 @@ class UserTicketController extends Controller {
     // =========================
     // XEM VÉ ĐIỆN TỬ
     // =========================
-    public function view() {
+    public function showTicket() {
 
         if (!isset($_SESSION['user_id'])) {
             echo '<script>
@@ -73,7 +73,8 @@ class UserTicketController extends Controller {
             "order" => $order,
             "customerInfo" => $customerInfo,
             "tickets" => $tickets,
-            "paymentMethods" => $paymentMethods
+            "paymentMethods" => $paymentMethods,
+            "hideSidebar" => true
         ]);
     }
 
@@ -95,7 +96,8 @@ class UserTicketController extends Controller {
 
         $this->view("Master", [
             "page" => "ticket/history",
-            "orders" => $orders
+            "orders" => $orders,
+            "hideSidebar" => true
         ]);
     }
 }

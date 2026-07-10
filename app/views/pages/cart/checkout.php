@@ -10,16 +10,19 @@
         <div class="form-group">
             <label>Họ tên:</label>
             <input type="text" id="customerName" value="<?= htmlspecialchars($_SESSION['username'] ?? '') ?>" class="form-control">
+            <div id="errorName" class="error-message"></div>
         </div>
         
         <div class="form-group">
             <label>Số điện thoại:</label>
-            <input type="tel" id="customerPhone" value="" class="form-control" placeholder="Nhập số điện thoại">
+            <input type="tel" id="customerPhone" value="" class="form-control" placeholder="Nhập số điện thoại" pattern="[0-9]{10,11}" title="Số điện thoại phải là 10-11 chữ số" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+            <div id="errorPhone" class="error-message"></div>
         </div>
         
         <div class="form-group">
             <label>Email:</label>
-            <input type="email" id="customerEmail" value="" class="form-control" placeholder="Nhập email">
+            <input type="email" id="customerEmail" value="" class="form-control" placeholder="Nhập email" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" title="Email không đúng định dạng">
+            <div id="errorEmail" class="error-message"></div>
         </div>
     </div>
 
@@ -51,23 +54,7 @@
         </table>
     </div>
 
-    <!-- ===== MÃ GIẢM GIÁ ===== -->
-    <div class="checkout-section">
-        <h3>🎁 Mã giảm giá</h3>
-        
-        <p id="promoMsg"></p>
-        
-        <select id="promoCode">
-            <option value="">🎟️ Chọn mã</option>
-            <?php foreach ($promotions as $p): ?>
-                <option value="<?= $p['code'] ?>">
-                    <?= $p['code'] ?> (<?= $p['discount'] ?>%<?= !empty($p['scope_names']) ? ' - ' . $p['scope_names'] : '' ?>)
-                </option>
-            <?php endforeach; ?>
-        </select>
-        
-        <button class="btn btn-plus" onclick="applyPromo()">Áp dụng</button>
-    </div>
+    
 
     <!-- ===== PHƯƠNG THỨC THANH TOÁN ===== -->
     <div class="checkout-section">
@@ -138,7 +125,8 @@ const ORDER_ID = <?= $order['id'] ?? 0 ?>;
 function applyPromo() {
     const promoCode = document.getElementById('promoCode').value;
     if (!promoCode) {
-        alert('Vui lòng chọn mã giảm giá!');
+        document.getElementById('alertModalBody').textContent = 'Vui lòng chọn mã giảm giá!';
+        $('#alertModal').modal('show');
         return;
     }
 
@@ -158,7 +146,8 @@ function applyPromo() {
             }
         },
         error: function() {
-            alert('Có lỗi xảy ra!');
+            document.getElementById('alertModalBody').textContent = 'Có lỗi xảy ra!';
+            $('#alertModal').modal('show');
         }
     });
 }
@@ -168,38 +157,94 @@ function processPayment() {
     const customerPhone = document.getElementById('customerPhone').value;
     const customerEmail = document.getElementById('customerEmail').value;
     const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+    
+    // Xóa tất cả thông báo lỗi cũ
+    document.getElementById('errorName').textContent = '';
+    document.getElementById('errorName').style.display = 'none';
+    document.getElementById('errorPhone').textContent = '';
+    document.getElementById('errorPhone').style.display = 'none';
+    document.getElementById('errorEmail').textContent = '';
+    document.getElementById('errorEmail').style.display = 'none';
+    
+    let hasError = false;
+    let firstErrorField = null;
 
-    if (!customerName || !customerPhone) {
-        alert('Vui lòng nhập họ tên và số điện thoại!');
-        return;
+    // Validate họ tên
+    if (!customerName) {
+        document.getElementById('errorName').textContent = 'Vui lòng nhập họ tên!';
+        document.getElementById('errorName').style.display = 'block';
+        hasError = true;
+        if (!firstErrorField) firstErrorField = document.getElementById('customerName');
     }
 
-    if (!confirm('Xác nhận thanh toán ' + document.getElementById('finalTotal').textContent + '?')) {
-        return;
-    }
-
-    $.ajax({
-        url: BASE_URL + '/cart/processPayment',
-        type: 'POST',
-        data: {
-            order_id: ORDER_ID,
-            customer_name: customerName,
-            customer_phone: customerPhone,
-            customer_email: customerEmail,
-            payment_method: paymentMethod
-        },
-        success: function(response) {
-            const data = JSON.parse(response);
-            if (data.success) {
-                window.location.href = BASE_URL + '/index.php?controller=UserTicket&action=view&id=' + data.order_id;
-            } else {
-                alert(data.error || 'Thanh toán thất bại!');
-            }
-        },
-        error: function() {
-            alert('Có lỗi xảy ra!');
+    // Validate số điện thoại
+    if (!customerPhone) {
+        document.getElementById('errorPhone').textContent = 'Vui lòng nhập số điện thoại!';
+        document.getElementById('errorPhone').style.display = 'block';
+        hasError = true;
+        if (!firstErrorField) firstErrorField = document.getElementById('customerPhone');
+    } else {
+        const phoneRegex = /^[0-9]{10,11}$/;
+        if (!phoneRegex.test(customerPhone)) {
+            document.getElementById('errorPhone').textContent = 'Số điện thoại phải là 10-11 chữ số!';
+            document.getElementById('errorPhone').style.display = 'block';
+            hasError = true;
+            if (!firstErrorField) firstErrorField = document.getElementById('customerPhone');
         }
-    });
+    }
+
+    // Validate email nếu có nhập
+    if (customerEmail) {
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(customerEmail)) {
+            document.getElementById('errorEmail').textContent = 'Email không đúng định dạng!';
+            document.getElementById('errorEmail').style.display = 'block';
+            hasError = true;
+            if (!firstErrorField) firstErrorField = document.getElementById('customerEmail');
+        }
+    }
+
+    // Nếu có lỗi, cuộn đến ô nhập đầu tiên bị lỗi
+    if (hasError) {
+        if (firstErrorField) {
+            firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+    }
+
+    // Hiển thị modal xác nhận thanh toán
+    document.getElementById('confirmationModalBody').textContent = 'Xác nhận thanh toán ' + document.getElementById('finalTotal').textContent + '?';
+    $('#confirmationModal').modal('show');
+    
+    // Xử lý khi người dùng bấm xác nhận
+    document.getElementById('confirmPaymentBtn').onclick = function() {
+        $('#confirmationModal').modal('hide');
+        
+        $.ajax({
+            url: BASE_URL + '/cart/processPayment',
+            type: 'POST',
+            data: {
+                order_id: ORDER_ID,
+                customer_name: customerName,
+                customer_phone: customerPhone,
+                customer_email: customerEmail,
+                payment_method: paymentMethod
+            },
+            success: function(response) {
+                const data = JSON.parse(response);
+                if (data.success) {
+                    window.location.href = BASE_URL + '/index.php?controller=UserTicket&action=showTicket&id=' + data.order_id;
+                } else {
+                    document.getElementById('alertModalBody').textContent = data.error || 'Thanh toán thất bại!';
+                    $('#alertModal').modal('show');
+                }
+            },
+            error: function() {
+                document.getElementById('alertModalBody').textContent = 'Có lỗi xảy ra!';
+                $('#alertModal').modal('show');
+            }
+        });
+    };
 }
 </script>
 
@@ -280,4 +325,52 @@ function processPayment() {
     color: #007bff;
     margin: 20px 0;
 }
+
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 10px;
+    display: none;
+}
 </style>
+
+<!-- Bootstrap Modal for Confirmation -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">Xác nhận thanh toán</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="confirmationModalBody">
+                <!-- Message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmPaymentBtn">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Modal for Alerts -->
+<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="alertModalBody">
+                <!-- Message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>

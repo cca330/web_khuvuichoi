@@ -18,6 +18,12 @@ class TrangchuController extends Controller
         $feedbacks = $this->feedbackModel->getLatestFeedbacks(3);
         // Lấy game đang mở để hiển thị trên trang chủ
         $games = $this->gameModel->getByStatus('OPEN');
+        
+        // Lấy ảnh cho từng game từ bảng game_images
+        foreach ($games as &$game) {
+            $images = $this->gameModel->getImages($game['id']);
+            $game['images'] = $images;
+        }
 
         $data = [
             'feedbacks' => $feedbacks,

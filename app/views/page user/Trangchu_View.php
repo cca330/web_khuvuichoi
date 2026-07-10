@@ -523,14 +523,12 @@
                     $filterClass = $categoryMap[$game['category']] ?? 'oranges';
                     $gameName = $game['name'] ?? 'Trò chơi';
                     $description = substr($game['description'] ?? '', 0, 60);
-                    $price = number_format($game['price'] ?? 0, 0, ',', '.');
                     $age = $game['recommended_age'] ?? 0;
                     
-                    // Lấy ảnh đầu tiên từ danh sách ảnh
+                    // Lấy ảnh đầu tiên từ bảng game_images
                     $image = '';
-                    if (!empty($game['image'])) {
-                        $images = explode(',', $game['image']);
-                        $image = BASE_URL . '/public/uploads/' . trim($images[0]);
+                    if (!empty($game['images']) && is_array($game['images'])) {
+                        $image = BASE_URL . '/public/uploads/' . trim($game['images'][0]);
                     } else {
                         $image = BASE_URL . '/public/img/default-game.jpg';
                     }
@@ -548,10 +546,6 @@
                             <div class="d-flex align-items-center">
                                 <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
                                 <span class="pl-2" style="font-size:13px;"><?= htmlspecialchars($description) ?></span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <img src="<?= BASE_URL ?>/public/img/ic4.png" alt="">
-                                <span class="pl-2" style="font-size:13px;"><?= $price ?>đ</span>
                             </div>
                         </div>
 

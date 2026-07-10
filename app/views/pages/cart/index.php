@@ -211,22 +211,28 @@ function updateQty(itemId, action) {
 }
 
 function deleteItem(itemId) {
-    if (!confirm('Xóa item này?')) return;
-
-    $.ajax({
-        url: BASE_URL + '/cart/deleteItem',
-        type: 'POST',
-        data: { item_id: itemId },
-        success: function() {
-            reloadCart();
-        }
-    });
+    document.getElementById('confirmDeleteBody').textContent = 'Bạn có chắc muốn xóa vé này không?';
+    $('#confirmDeleteModal').modal('show');
+    
+    document.getElementById('confirmDeleteBtn').onclick = function() {
+        $('#confirmDeleteModal').modal('hide');
+        
+        $.ajax({
+            url: BASE_URL + '/cart/deleteItem',
+            type: 'POST',
+            data: { item_id: itemId },
+            success: function() {
+                reloadCart();
+            }
+        });
+    };
 }
 
 function applyPromo() {
     const promoCode = document.getElementById('promoCode').value;
     if (!promoCode) {
-        alert('Vui lòng chọn mã giảm giá!');
+        document.getElementById('alertModalBody').textContent = 'Vui lòng chọn mã giảm giá!';
+        $('#alertModal').modal('show');
         return;
     }
 
@@ -242,18 +248,87 @@ function applyPromo() {
 }
 
 function checkout() {
-    if (!confirm('Xác nhận thanh toán?')) return;
-
-    $.ajax({
-        url: BASE_URL + '/cart/checkout',
-        type: 'POST',
-        success: function() {
-            alert('🎉 Thanh toán thành công!');
-            reloadCart();
-        },
-        error: function() {
-            alert('Có lỗi xảy ra!');
-        }
-    });
+    document.getElementById('confirmCheckoutBody').textContent = 'Xác nhận thanh toán?';
+    $('#confirmCheckoutModal').modal('show');
+    
+    document.getElementById('confirmCheckoutBtn').onclick = function() {
+        $('#confirmCheckoutModal').modal('hide');
+        
+        $.ajax({
+            url: BASE_URL + '/cart/checkout',
+            type: 'POST',
+            success: function() {
+                document.getElementById('alertModalBody').textContent = '🎉 Thanh toán thành công!';
+                $('#alertModal').modal('show');
+                reloadCart();
+            },
+            error: function() {
+                document.getElementById('alertModalBody').textContent = 'Có lỗi xảy ra!';
+                $('#alertModal').modal('show');
+            }
+        });
+    };
 }
 </script>
+
+<!-- Bootstrap Modal for Delete Confirmation -->
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmDeleteModalLabel">Xác nhận xóa</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="confirmDeleteBody">
+                <!-- Message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Xóa</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Modal for Checkout Confirmation -->
+<div class="modal fade" id="confirmCheckoutModal" tabindex="-1" role="dialog" aria-labelledby="confirmCheckoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmCheckoutModalLabel">Xác nhận thanh toán</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="confirmCheckoutBody">
+                <!-- Message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmCheckoutBtn">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap Modal for Alerts -->
+<div class="modal fade" id="alertModal" tabindex="-1" role="dialog" aria-labelledby="alertModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="alertModalLabel">Thông báo</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="alertModalBody">
+                <!-- Message will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
