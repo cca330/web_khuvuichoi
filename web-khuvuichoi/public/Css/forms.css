@@ -1,0 +1,131 @@
+/* vùng tách khỏi admin */
+.page-wrapper {
+    width: 100%;
+    padding: 30px 0;
+}
+
+/* card form */
+.game-form-box {
+    max-width: 650px;
+    margin: 0 auto;
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 14px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+}
+
+/* title */
+.game-form-title {
+    text-align: center;
+    font-size: 22px;
+    margin-bottom: 25px;
+    color: #333;
+}
+
+/* form */
+/* Ghi đè CSS admin */
+.content .game-form-title {
+    color: #333;          /* đè màu trắng */
+    font-size: 22px;
+    margin-bottom: 25px;
+}
+
+
+/* full width */
+.game-form textarea,
+.game-form input[type="file"],
+.game-submit {
+    grid-column: 1 / -1;
+}
+
+/* label */
+.game-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 14px;
+}
+
+/* input */
+.game-input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    margin-bottom: 20px;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+/* focus */
+.game-input:focus {
+    border-color: #1E90FF;
+    outline: none;
+    box-shadow: 0 0 6px rgba(30,144,255,0.4);
+    background: #fff;
+}
+
+/* select styling */
+.game-input select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* textarea */
+.game-input textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* file input */
+.game-input[type="file"] {
+    padding: 10px;
+    background: #f9f9f9;
+    border: 2px dashed #ddd;
+}
+
+/* button */
+body {
+  background: white;
+}
+.form-button {
+  padding: 10px 12px;
+  margin-top: 10px;
+  border-radius: 6px;
+  border: none;
+  background: #1e90ff;
+  color: white;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.form-button:hover {
+  opacity: 0.9;
+}
+
+.form-button-secondary {
+  background: #7f8c8d;
+  margin-left: 10px;
+}
+
+/* current image preview */
+.current-image {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.current-image img {
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+

@@ -1,0 +1,32 @@
+services:
+  web:
+    build: .
+    container_name: web_container
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_container
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: dbweb
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database:/docker-entrypoint-initdb.d
+
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mysql_data:
