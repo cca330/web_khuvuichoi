@@ -6,7 +6,9 @@ import { TicketScan, ScanType } from './entities/ticket-scan.entity';
 import { GateTicket } from './entities/gate-ticket.entity';
 import { FilterTicketsDto } from './dto/filter-tickets.dto';
 import { ScanTicketDto } from './dto/scan-ticket.dto';
-
+import { FilterRevenueDto } from './dto/filter-revenue.dto';
+import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
+import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
 @Injectable()
 export class TicketsService {
   constructor(
@@ -20,31 +22,23 @@ export class TicketsService {
 
   // Lấy danh sách vé đã bán (chỉ lấy vé thuộc đơn đã PAID)
   async findAll(filter: FilterTicketsDto) {
+    const paidItems = await this.ticketRepository.manager.query(
+      `SELECT oi.id FROM order_items oi
+       JOIN orders o ON o.id = oi.order_id
+       WHERE o.status = 'PAID'`,
+    );
+    const paidItemIds = paidItems.map((r: any) => r.id);
+    if (paidItemIds.length === 0) return [];
+
     const queryBuilder = this.ticketRepository
       .createQueryBuilder('ticket')
       .leftJoinAndSelect('ticket.gateTicket', 'gateTicket')
-      .leftJoin('ticket.orderItemId', 'orderItem')
-      .leftJoin('orderItem.orderId', 'order')
-      .where('order.status = :orderStatus', { orderStatus: 'PAID' })
-      .select([
-        'ticket.id',
-        'ticket.ticketCode',
-        'ticket.status',
-        'ticket.admitsAdult',
-        'ticket.admitsChild',
-        'ticket.validDate',
-        'ticket.createdAt',
-        'gateTicket.name',
-        'gateTicket.type',
-        'gateTicket.isCombo',
-        'orderItem.price',
-      ])
+      .where('ticket.orderItemId IN (:...ids)', { ids: paidItemIds })
       .orderBy('ticket.createdAt', 'DESC');
 
     if (filter.status) {
       queryBuilder.andWhere('ticket.status = :status', { status: filter.status });
     }
-
     if (filter.type === 'SINGLE') {
       queryBuilder.andWhere('gateTicket.isCombo = :isCombo', { isCombo: 0 });
     } else if (filter.type === 'COMBO') {
@@ -54,36 +48,46 @@ export class TicketsService {
     return queryBuilder.getMany();
   }
 
-  // Thống kê tổng quan cho trang doanh thu vé
+  // Thống kê tổng quan (dùng cho trang danh sách vé)
   async getStats() {
-    const result = await this.ticketRepository
-      .createQueryBuilder('ticket')
-      .leftJoin('ticket.orderItemId', 'orderItem')
-      .leftJoin('orderItem.orderId', 'order')
-      .select('COUNT(*)', 'total')
-      .addSelect(
-        'SUM(CASE WHEN ticket.status = :active THEN 1 ELSE 0 END)',
-        'unused',
-      )
-      .addSelect(
-        'SUM(CASE WHEN ticket.status IN (:expired, :cancelled) THEN 1 ELSE 0 END)',
-        'used',
-      )
-      .addSelect('COALESCE(SUM(orderItem.price), 0)', 'revenue')
-      .where('order.status = :orderStatus', { orderStatus: 'PAID' })
-      .setParameters({
-        active: TicketStatus.ACTIVE,
-        expired: TicketStatus.EXPIRED,
-        cancelled: TicketStatus.CANCELLED,
-      })
-      .getRawOne();
+    const result = await this.ticketRepository.manager.query(
+      `
+      SELECT
+        COUNT(*) AS total,
+        SUM(CASE WHEN t.status = 'ACTIVE' THEN 1 ELSE 0 END) AS unused,
+        SUM(CASE WHEN t.status IN ('EXPIRED','CANCELLED') THEN 1 ELSE 0 END) AS used,
+        COALESCE(SUM(oi.price), 0) AS revenue
+      FROM tickets t
+      JOIN order_items oi ON oi.id = t.order_item_id
+      JOIN orders o ON o.id = oi.order_id
+      WHERE o.status = 'PAID'
+      `,
+    );
 
+    const row = result[0];
     return {
-      total: parseInt(result.total || '0'),
-      unused: parseInt(result.unused || '0'),
-      used: parseInt(result.used || '0'),
-      revenue: parseFloat(result.revenue || '0'),
+      total: parseInt(row.total || '0'),
+      unused: parseInt(row.unused || '0'),
+      used: parseInt(row.used || '0'),
+      revenue: parseFloat(row.revenue || '0'),
     };
+  }
+
+  // Lấy vé theo order_id
+  async getTicketsByOrder(orderId: number) {
+    const itemIds = await this.ticketRepository.manager.query(
+      `SELECT id FROM order_items WHERE order_id = ?`,
+      [orderId],
+    );
+    const ids = itemIds.map((r: any) => r.id);
+    if (ids.length === 0) return [];
+
+    return this.ticketRepository
+      .createQueryBuilder('ticket')
+      .leftJoinAndSelect('ticket.gateTicket', 'gateTicket')
+      .where('ticket.orderItemId IN (:...ids)', { ids })
+      .orderBy('ticket.id', 'ASC')
+      .getMany();
   }
 
   // Quét vé tại cổng
@@ -93,7 +97,6 @@ export class TicketsService {
     await queryRunner.startTransaction();
 
     try {
-      // Khóa dòng vé lại để tránh 2 request quét trùng nhau cùng lúc
       const ticket = await queryRunner.manager.findOne(Ticket, {
         where: { ticketCode: dto.ticketCode },
         lock: { mode: 'pessimistic_write' },
@@ -111,20 +114,17 @@ export class TicketsService {
 
       const today = new Date().toISOString().split('T')[0];
       const validDate = ticket.validDate.toISOString().split('T')[0];
-      
+
       if (validDate !== today) {
         await queryRunner.rollbackTransaction();
         return { ok: false, message: 'TICKET_NOT_VALID_TODAY', scanType: null };
       }
 
-      // Lấy lần quét gần nhất để biết vé đang Ở TRONG hay Ở NGOÀI
       const lastScan = await queryRunner.manager.findOne(TicketScan, {
         where: { ticketId: ticket.id },
         order: { scannedAt: 'DESC', id: 'DESC' },
       });
 
-      // Chưa quet lần nào hoặc lần trước là OUT -> lần này là IN
-      // Lần trước là IN -> lần này là OUT
       const scanType = !lastScan || lastScan.scanType === ScanType.OUT ? ScanType.IN : ScanType.OUT;
 
       const ticketScan = queryRunner.manager.create(TicketScan, {
@@ -135,7 +135,6 @@ export class TicketsService {
       });
 
       await queryRunner.manager.save(TicketScan, ticketScan);
-
       await queryRunner.commitTransaction();
 
       return { ok: true, message: 'SCANNED', scanType };
@@ -154,7 +153,6 @@ export class TicketsService {
     await queryRunner.startTransaction();
 
     try {
-      // Lấy các order_items của order
       const orderItems = await queryRunner.manager.query(
         `
         SELECT oi.id, oi.gate_ticket_id, oi.quantity, oi.price,
@@ -171,18 +169,15 @@ export class TicketsService {
       const prefix = `QR-${datePrefix}-`;
 
       for (const item of orderItems) {
-        // Sinh quantity tickets cho mỗi order_item
         for (let i = 0; i < item.quantity; i++) {
-          // Tạo ticket code unique
           const randomNum = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
           const ticketCode = `${prefix}${randomNum}`;
 
-          // Kiểm tra trùng lặp
           const existing = await queryRunner.manager.findOne(Ticket, {
             where: { ticketCode },
           });
           if (existing) {
-            i--; // thử lại
+            i--;
             continue;
           }
 
@@ -210,14 +205,191 @@ export class TicketsService {
     }
   }
 
-  // Lấy vé theo order_id
-  async getTicketsByOrder(orderId: number) {
-    return this.ticketRepository
-      .createQueryBuilder('ticket')
-      .leftJoinAndSelect('ticket.gateTicket', 'gateTicket')
-      .leftJoin('ticket.orderItemId', 'orderItem')
-      .where('orderItem.orderId = :orderId', { orderId })
-      .orderBy('ticket.id', 'ASC')
-      .getMany();
+  // ===== Các method phục vụ revenue-service gọi sang =====
+
+  async getAvailableYears() {
+    const result = await this.ticketRepository.manager.query(`
+      SELECT DISTINCT DATE_FORMAT(o.paid_at, '%Y') AS year
+      FROM orders o
+      WHERE o.status = 'PAID'
+      ORDER BY year DESC
+    `);
+    return result.map((row: any) => parseInt(row.year));
   }
+
+  async getMonthlyRevenue(filter: FilterRevenueDto) {
+    const currentYear = new Date().getFullYear();
+    const selectedYear = filter.year || currentYear;
+    const selectedType = filter.type || 'total';
+
+    let query = '';
+    if (selectedType === 'total') {
+      query = `
+        SELECT DATE_FORMAT(o.paid_at, '%m') AS month_num,
+               DATE_FORMAT(o.paid_at, '%m/%Y') AS month_display,
+               COALESCE(SUM(o.total_price), 0) AS total
+        FROM orders o
+        WHERE o.status = 'PAID' AND DATE_FORMAT(o.paid_at, '%Y') = ?
+        GROUP BY month_num, month_display
+        ORDER BY month_num ASC
+      `;
+    } else {
+      query = `
+        SELECT DATE_FORMAT(o.paid_at, '%m') AS month_num,
+               DATE_FORMAT(o.paid_at, '%m/%Y') AS month_display,
+               COALESCE(SUM(oi.price), 0) AS total
+        FROM tickets t
+        JOIN order_items oi ON t.order_item_id = oi.id
+        JOIN orders o ON oi.order_id = o.id
+        WHERE o.status = 'PAID' AND t.status != 'CANCELLED'
+          AND DATE_FORMAT(o.paid_at, '%Y') = ?
+        GROUP BY month_num, month_display
+        ORDER BY month_num ASC
+      `;
+    }
+
+    const result = await this.ticketRepository.manager.query(query, [selectedYear]);
+
+    const monthlyData: Record<string, number> = {};
+    for (let m = 1; m <= 12; m++) {
+      monthlyData[`${m.toString().padStart(2, '0')}/${selectedYear}`] = 0;
+    }
+    result.forEach((row: any) => {
+      if (monthlyData.hasOwnProperty(row.month_display)) {
+        monthlyData[row.month_display] = parseFloat(row.total);
+      }
+    });
+
+    return { year: selectedYear, type: selectedType, data: monthlyData };
+  }
+
+  async getGateTicketDetails() {
+    const result = await this.ticketRepository.manager.query(`
+      SELECT gt.id, gt.name, gt.price,
+             COUNT(CASE WHEN o.status = 'PAID' AND t.status != 'CANCELLED' THEN t.id END) AS total_tickets,
+             COALESCE(SUM(CASE WHEN o.status = 'PAID' AND t.status != 'CANCELLED' THEN oi.price END), 0) AS revenue
+      FROM gate_tickets gt
+      LEFT JOIN tickets t ON t.gate_ticket_id = gt.id
+      LEFT JOIN order_items oi ON t.order_item_id = oi.id
+      LEFT JOIN orders o ON oi.order_id = o.id
+      GROUP BY gt.id, gt.name, gt.price
+      ORDER BY gt.id ASC
+    `);
+
+    return result.map((row: any) => ({
+      id: row.id,
+      name: row.name,
+      price: parseFloat(row.price),
+      totalTickets: parseInt(row.total_tickets || '0'),
+      revenue: parseFloat(row.revenue || '0'),
+    }));
+  }
+
+  async getOverview() {
+    const result = await this.ticketRepository.manager.query(`
+      SELECT
+        COUNT(DISTINCT o.id) AS total_orders,
+        COALESCE(SUM(CASE WHEN o.status = 'PAID' THEN o.total_price ELSE 0 END), 0) AS total_revenue,
+        COUNT(DISTINCT CASE WHEN o.status = 'PAID' THEN o.id END) AS paid_orders,
+        COUNT(DISTINCT CASE WHEN o.status = 'PENDING' THEN o.id END) AS pending_orders
+      FROM orders o
+    `);
+
+    return {
+      totalOrders: parseInt(result[0]?.total_orders || '0'),
+      totalRevenue: parseFloat(result[0]?.total_revenue || '0'),
+      paidOrders: parseInt(result[0]?.paid_orders || '0'),
+      pendingOrders: parseInt(result[0]?.pending_orders || '0'),
+    };
+  }
+  
+
+// Lấy danh sách gate tickets đang active
+async getActiveGateTickets() {
+  return this.ticketRepository.manager.query(
+    `SELECT id, name, is_combo FROM gate_tickets WHERE status = 'ACTIVE' ORDER BY id ASC`,
+  );
+}
+
+// Tính base total theo phạm vi áp dụng của 1 promotion
+async calculateBaseTotal(dto: CalculateBaseTotalDto) {
+  const result = await this.ticketRepository.manager.query(
+    `
+    SELECT SUM(oi.quantity * oi.price) AS total
+    FROM order_items oi
+    WHERE oi.order_id = ?
+      AND (
+            NOT EXISTS (
+                SELECT 1 FROM promotion_gate_tickets
+                WHERE promotion_id = ?
+            )
+            OR oi.gate_ticket_id IN (
+                SELECT gate_ticket_id FROM promotion_gate_tickets
+                WHERE promotion_id = ?
+            )
+          )
+    `,
+    [dto.orderId, dto.promotionId, dto.promotionId],
+  );
+  return { total: parseFloat(result[0]?.total || '0') };
+}
+// Thống kê: tổng số lần 1 promotion được sử dụng
+async getPromotionTotalUsed(promotionId: number) {
+  const result = await this.ticketRepository.manager.query(
+    `SELECT COUNT(*) AS total FROM promotion_order WHERE promotion_id = ?`,
+    [promotionId],
+  );
+  return { total: parseInt(result[0]?.total || '0') };
+}
+
+// Thống kê: tổng tiền đã giảm của 1 promotion
+async getPromotionTotalDiscount(promotionId: number) {
+  const result = await this.ticketRepository.manager.query(
+    `SELECT COALESCE(SUM(discount_amount), 0) AS total FROM promotion_order WHERE promotion_id = ?`,
+    [promotionId],
+  );
+  return { total: parseFloat(result[0]?.total || '0') };
+}
+
+// Ghi/update promotion_order + tự cập nhật lại total_price của order (2 việc luôn đi cùng nhau nên gộp 1 transaction)
+async applyPromotionToOrder(dto: ApplyPromotionOrderDto) {
+  const queryRunner = this.ticketRepository.manager.connection.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
+
+  try {
+    await queryRunner.manager.query(
+      `
+      INSERT INTO promotion_order (promotion_id, order_id, discount_amount)
+      VALUES (?, ?, ?)
+      ON DUPLICATE KEY UPDATE discount_amount = ?
+      `,
+      [dto.promotionId, dto.orderId, dto.discountAmount, dto.discountAmount],
+    );
+
+    await queryRunner.manager.query(
+      `
+      UPDATE orders o
+      SET total_price = (
+        SELECT SUM(oi.quantity * oi.price)
+        FROM order_items oi
+        WHERE oi.order_id = o.id
+      ) - COALESCE(
+        (SELECT discount_amount FROM promotion_order WHERE order_id = o.id LIMIT 1),
+        0
+      )
+      WHERE o.id = ?
+      `,
+      [dto.orderId],
+    );
+
+    await queryRunner.commitTransaction();
+    return { success: true };
+  } catch (error) {
+    await queryRunner.rollbackTransaction();
+    throw error;
+  } finally {
+    await queryRunner.release();
+  }
+}
 }

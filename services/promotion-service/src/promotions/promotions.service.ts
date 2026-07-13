@@ -1,6 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
+import { firstValueFrom } from 'rxjs';
 import { Promotion, PromotionStatus } from './entities/promotion.entity';
 import { PromotionGateTicket } from './entities/promotion-gate-ticket.entity';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
@@ -9,12 +12,18 @@ import { ApplyPromotionDto } from './dto/apply-promotion.dto';
 
 @Injectable()
 export class PromotionsService {
+  private readonly ticketServiceUrl: string;
+
   constructor(
     @InjectRepository(Promotion)
     private readonly promotionRepository: Repository<Promotion>,
     @InjectRepository(PromotionGateTicket)
     private readonly promotionGateTicketRepository: Repository<PromotionGateTicket>,
-  ) {}
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.ticketServiceUrl = this.configService.get<string>('TICKET_SERVICE_URL') as string;
+  }
 
   // Lấy tất cả promotions
   async findAll() {
@@ -25,7 +34,6 @@ export class PromotionsService {
       .getMany();
   }
 
-  // Lấy promotion theo id
   async findById(id: number) {
     const promotion = await this.promotionRepository.findOne({
       where: { id },
@@ -37,9 +45,7 @@ export class PromotionsService {
     return promotion;
   }
 
-  // Tìm promotion theo code hợp lệ
   async findByCode(code: string) {
-    const today = new Date().toISOString().split('T')[0];
     return this.promotionRepository.findOne({
       where: {
         code: code.toUpperCase(),
@@ -49,7 +55,6 @@ export class PromotionsService {
     });
   }
 
-  // Tạo promotion mới
   async create(dto: CreatePromotionDto) {
     const queryRunner = this.promotionRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
@@ -66,7 +71,6 @@ export class PromotionsService {
 
       const savedPromotion = await queryRunner.manager.save(Promotion, promotion);
 
-      // Set scope nếu có gateTicketIds
       if (dto.gateTicketIds && dto.gateTicketIds.length > 0) {
         for (const gateTicketId of dto.gateTicketIds) {
           const pgt = queryRunner.manager.create(PromotionGateTicket, {
@@ -87,16 +91,13 @@ export class PromotionsService {
     }
   }
 
-  // Cập nhật promotion
   async update(id: number, dto: UpdatePromotionDto) {
     const queryRunner = this.promotionRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const promotion = await queryRunner.manager.findOne(Promotion, {
-        where: { id },
-      });
+      const promotion = await queryRunner.manager.findOne(Promotion, { where: { id } });
       if (!promotion) {
         await queryRunner.rollbackTransaction();
         throw new NotFoundException('Promotion not found');
@@ -109,8 +110,6 @@ export class PromotionsService {
       promotion.status = dto.status;
 
       await queryRunner.manager.save(Promotion, promotion);
-
-      // Xóa scope cũ và set mới
       await queryRunner.manager.delete(PromotionGateTicket, { promotionId: id });
 
       if (dto.gateTicketIds && dto.gateTicketIds.length > 0) {
@@ -133,7 +132,6 @@ export class PromotionsService {
     }
   }
 
-  // Vô hiệu hóa promotion
   async disable(id: number) {
     const promotion = await this.promotionRepository.findOne({ where: { id } });
     if (!promotion) {
@@ -143,7 +141,7 @@ export class PromotionsService {
     return this.promotionRepository.save(promotion);
   }
 
-  // Áp dụng promotion cho order
+  // Áp dụng promotion cho order — giờ gọi HTTP sang ticket-service thay vì SQL trực tiếp
   async apply(dto: ApplyPromotionDto) {
     const promotion = await this.findByCode(dto.code);
     if (!promotion) {
@@ -151,107 +149,75 @@ export class PromotionsService {
     }
 
     const today = new Date().toISOString().split('T')[0];
-    const startDate = promotion.startDate.toISOString().split('T')[0];
-    const endDate = promotion.endDate.toISOString().split('T')[0];
+
+const toDateString = (value: Date | string): string => {
+  return value instanceof Date ? value.toISOString().split('T')[0] : String(value);
+};
+
+const startDate = toDateString(promotion.startDate);
+const endDate = toDateString(promotion.endDate);
 
     if (today < startDate || today > endDate) {
       return { success: false, message: 'Mã giảm giá đã hết hạn hoặc chưa có hiệu lực' };
     }
 
-    // Tính base total từ order items trong phạm vi áp dụng
-    const baseTotal = await this.calculateBaseTotal(dto.orderId, promotion.id);
+    // Gọi sang ticket-service để tính base total (thay vì tự query order_items)
+    const { total: baseTotal } = await this.callTicketService(
+      'post',
+      '/tickets/internal/calculate-base-total',
+      { orderId: dto.orderId, promotionId: promotion.id },
+    );
+
     if (baseTotal <= 0) {
       return { success: false, message: 'Không có sản phẩm phù hợp để áp mã' };
     }
 
     const discount = (baseTotal * promotion.discount) / 100;
 
-    // Lưu vào promotion_order
-    await this.promotionRepository.manager.query(
-      `
-      INSERT INTO promotion_order (promotion_id, order_id, discount_amount)
-      VALUES (?, ?, ?)
-      ON DUPLICATE KEY UPDATE discount_amount = ?
-      `,
-      [promotion.id, dto.orderId, discount, discount],
-    );
-
-    // Cập nhật total price của order
-    await this.updateOrderTotal(dto.orderId);
+    // Gọi sang ticket-service để ghi promotion_order + cập nhật total_price (thay vì tự UPDATE)
+    await this.callTicketService('post', '/tickets/internal/apply-promotion-order', {
+      promotionId: promotion.id,
+      orderId: dto.orderId,
+      discountAmount: discount,
+    });
 
     return { success: true, discount };
   }
 
-  // Tính base total theo phạm vi áp dụng
-  private async calculateBaseTotal(orderId: number, promotionId: number) {
-    const result = await this.promotionRepository.manager.query(
-      `
-      SELECT SUM(oi.quantity * oi.price) AS total
-      FROM order_items oi
-      WHERE oi.order_id = ?
-        AND (
-              NOT EXISTS (
-                  SELECT 1 FROM promotion_gate_tickets
-                  WHERE promotion_id = ?
-              )
-              OR oi.gate_ticket_id IN (
-                  SELECT gate_ticket_id FROM promotion_gate_tickets
-                  WHERE promotion_id = ?
-              )
-            )
-      `,
-      [orderId, promotionId, promotionId],
-    );
-    return parseFloat(result[0]?.total || '0');
-  }
-
-  // Cập nhật total price của order
-  private async updateOrderTotal(orderId: number) {
-    await this.promotionRepository.manager.query(
-      `
-      UPDATE orders o
-      SET total_price = (
-        SELECT SUM(oi.quantity * oi.price)
-        FROM order_items oi
-        WHERE oi.order_id = o.id
-      ) - COALESCE(
-        (SELECT discount_amount FROM promotion_order WHERE order_id = o.id LIMIT 1),
-        0
-      )
-      WHERE o.id = ?
-      `,
-      [orderId],
-    );
-  }
-
-  // Lấy danh sách gate tickets
+  // Lấy danh sách gate tickets — gọi HTTP sang ticket-service
   async getAllGateTickets() {
-    return this.promotionRepository.manager.query(
-      `
-      SELECT id, name, is_combo FROM gate_tickets WHERE status = 'ACTIVE' ORDER BY id ASC
-      `,
-    );
+    return this.callTicketService('get', '/tickets/internal/gate-tickets');
   }
 
-  // Thống kê: tổng số lần sử dụng
   async getTotalUsed(promotionId: number) {
-    const result = await this.promotionRepository.manager.query(
-      `
-      SELECT COUNT(*) AS total FROM promotion_order WHERE promotion_id = ?
-      `,
-      [promotionId],
-    );
-    return parseInt(result[0]?.total || '0');
-  }
+  const { total } = await this.callTicketService(
+    'get',
+    `/tickets/internal/promotion/${promotionId}/total-used`,
+  );
+  return total;
+}
 
-  // Thống kê: tổng tiền đã giảm
-  async getTotalDiscount(promotionId: number) {
-    const result = await this.promotionRepository.manager.query(
-      `
-      SELECT COALESCE(SUM(discount_amount), 0) AS total FROM promotion_order WHERE promotion_id = ?
-      `,
-      [promotionId],
-    );
-    return parseFloat(result[0]?.total || '0');
+async getTotalDiscount(promotionId: number) {
+  const { total } = await this.callTicketService(
+    'get',
+    `/tickets/internal/promotion/${promotionId}/total-discount`,
+  );
+  return total;
+}
+
+  // Hàm dùng chung để gọi HTTP sang ticket-service
+  private async callTicketService(method: 'get' | 'post', path: string, body?: any) {
+    try {
+      const url = `${this.ticketServiceUrl}${path}`;
+      const response =
+        method === 'get'
+          ? await firstValueFrom(this.httpService.get(url))
+          : await firstValueFrom(this.httpService.post(url, body));
+      return response.data;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Không gọi được ticket-service: ${error.message}`,
+      );
+    }
   }
 }

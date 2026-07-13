@@ -2,8 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
 import { PromotionGateTicket } from './promotion-gate-ticket.entity';
@@ -24,6 +22,9 @@ export class Promotion {
   @Column({ type: 'int' })
   discount: number;
 
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  description: string;
+
   @Column({ name: 'start_date', type: 'date' })
   startDate: Date;
 
@@ -36,12 +37,6 @@ export class Promotion {
     default: PromotionStatus.ACTIVE,
   })
   status: PromotionStatus;
-
-  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
-  updatedAt: Date;
 
   // Relations
   @OneToMany('PromotionGateTicket', 'promotion')

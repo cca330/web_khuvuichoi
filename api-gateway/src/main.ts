@@ -8,6 +8,9 @@ async function bootstrap() {
   app.enableCors(); // cho phép frontend gọi vào
 
   const userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:3001';
+  const ticketServiceUrl = process.env.TICKET_SERVICE_URL || 'http://localhost:3002';
+  const revenueServiceUrl = process.env.REVENUE_SERVICE_URL || 'http://localhost:3003';
+  const promotionServiceUrl = process.env.PROMOTION_SERVICE_URL || 'http://localhost:3004';
 
   // Mọi request có path bắt đầu bằng /api/auth hoặc /api/users
   // sẽ được chuyển tiếp nguyên xi sang user-service
@@ -16,7 +19,7 @@ async function bootstrap() {
   createProxyMiddleware({
     target: userServiceUrl,
     changeOrigin: true,
-    pathRewrite: { '^/': '/auth/' }, // thêm lại "/auth/" vào trước phần path còn sót lại
+    pathRewrite: { '^/api/auth': '/auth' },
   }),
 );
 
@@ -25,7 +28,37 @@ app.use(
   createProxyMiddleware({
     target: userServiceUrl,
     changeOrigin: true,
-    pathRewrite: { '^/': '/users/' },
+    pathRewrite: { '^/api/users': '/users' },
+  }),
+);
+
+// Ticket service proxy
+app.use(
+  '/api/tickets',
+  createProxyMiddleware({
+    target: ticketServiceUrl,
+    changeOrigin: true,
+    pathRewrite: { '^/': '/tickets/' },
+  }),
+);
+
+
+app.use(
+  '/api/revenue',
+  createProxyMiddleware({
+    target: revenueServiceUrl,
+    changeOrigin: true,
+    pathRewrite: { '^/': '/revenue/' },
+  }),
+);
+
+
+app.use(
+  '/api/promotions',
+  createProxyMiddleware({
+    target: promotionServiceUrl,
+    changeOrigin: true,
+    pathRewrite: { '^/': '/promotions/' },
   }),
 );
 
