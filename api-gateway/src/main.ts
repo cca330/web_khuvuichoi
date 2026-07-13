@@ -11,23 +11,23 @@ async function bootstrap() {
 
   // Mọi request có path bắt đầu bằng /api/auth hoặc /api/users
   // sẽ được chuyển tiếp nguyên xi sang user-service
-  app.use(
-    '/api/auth',
-    createProxyMiddleware({
-      target: userServiceUrl,
-      changeOrigin: true,
-      pathRewrite: { '^/api/auth': '/auth' }, // bỏ tiền tố /api khi gửi sang service thật
-    }),
-  );
+ app.use(
+  '/api/auth',
+  createProxyMiddleware({
+    target: userServiceUrl,
+    changeOrigin: true,
+    pathRewrite: { '^/': '/auth/' }, // thêm lại "/auth/" vào trước phần path còn sót lại
+  }),
+);
 
-  app.use(
-    '/api/users',
-    createProxyMiddleware({
-      target: userServiceUrl,
-      changeOrigin: true,
-      pathRewrite: { '^/api/users': '/users' },
-    }),
-  );
+app.use(
+  '/api/users',
+  createProxyMiddleware({
+    target: userServiceUrl,
+    changeOrigin: true,
+    pathRewrite: { '^/': '/users/' },
+  }),
+);
 
   const port = process.env.PORT || 8000;
   await app.listen(port);
