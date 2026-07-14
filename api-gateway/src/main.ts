@@ -11,6 +11,8 @@ async function bootstrap() {
   const ticketServiceUrl = process.env.TICKET_SERVICE_URL || 'http://localhost:3002';
   const revenueServiceUrl = process.env.REVENUE_SERVICE_URL || 'http://localhost:3003';
   const promotionServiceUrl = process.env.PROMOTION_SERVICE_URL || 'http://localhost:3004';
+  const gameServiceUrl = process.env.GAME_SERVICE_URL || 'http://localhost:3005';
+  const eventServiceUrl = process.env.EVENT_SERVICE_URL || 'http://localhost:3006';
 
   // Mọi request có path bắt đầu bằng /api/auth hoặc /api/users
   // sẽ được chuyển tiếp nguyên xi sang user-service
@@ -59,6 +61,27 @@ app.use(
     target: promotionServiceUrl,
     changeOrigin: true,
     pathRewrite: { '^/': '/promotions/' },
+  }),
+);
+
+
+app.use(
+  '/api/games',
+  createProxyMiddleware({
+    target: gameServiceUrl,
+    changeOrigin: true,
+    pathRewrite: { '^/': '/games/' },
+  }),
+);
+
+
+
+app.use(
+  '/api/events',
+  createProxyMiddleware({
+    target: eventServiceUrl,
+    changeOrigin: true,
+    pathRewrite: { '^/': '/events/' },
   }),
 );
 

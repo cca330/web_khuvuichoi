@@ -2,8 +2,6 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
 import { GameImage } from './game-image.entity';
@@ -16,7 +14,6 @@ export enum GameStatus {
 export enum AllowedTicket {
   ALL = 'ALL',
   ADULT = 'ADULT',
-  CHILD = 'CHILD',
 }
 
 @Entity('games')
@@ -33,6 +30,9 @@ export class Game {
   @Column({ name: 'recommended_age', type: 'int', nullable: true })
   recommendedAge: number;
 
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  category: string;
+
   @Column({
     name: 'allowed_ticket',
     type: 'enum',
@@ -47,12 +47,6 @@ export class Game {
     default: GameStatus.OPEN,
   })
   status: GameStatus;
-
-  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
-  updatedAt: Date;
 
   // Relations
   @OneToMany('GameImage', 'game')

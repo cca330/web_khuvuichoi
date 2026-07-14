@@ -5,8 +5,8 @@ export class CreateEventDto {
   @IsNotEmpty({ message: 'Title không được để trống' })
   title: string;
 
-  @IsOptional()
-  thumbnail?: string;
+  @IsNotEmpty({ message: 'Thumbnail không được để trống' })
+  thumbnail: string;
 
   @IsOptional()
   description?: string;
@@ -20,7 +20,7 @@ export class CreateEventDto {
   @IsDateString({}, { message: 'End datetime phải là ngày hợp lệ' })
   endDatetime: string;
 
-  @IsEnum(EventStatus, { message: 'Status phải là COMING_SOON, ONGOING, COMPLETED hoặc CANCELLED' })
+  @IsEnum(EventStatus, { message: 'Status phải là COMING_SOON, ONGOING, FINISHED hoặc CANCELLED' })
   status: EventStatus;
 
   @IsOptional()

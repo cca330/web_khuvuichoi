@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { User, UserRole, UserStatus } from './entities/user.entity';
 
 @Injectable()
@@ -118,4 +118,11 @@ export class UsersService {
     );
     return { message: 'Đổi mật khẩu thành công' };
   }
+  async findByIds(ids: number[]) {
+  if (ids.length === 0) return [];
+  return this.userRepository.find({
+    where: { id: In(ids) },
+    select: { id: true, username: true },
+  });
+}
 }

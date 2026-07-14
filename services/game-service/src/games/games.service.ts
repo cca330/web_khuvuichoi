@@ -1,19 +1,29 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
 import { Game, GameStatus, AllowedTicket } from './entities/game.entity';
 import { GameImage } from './entities/game-image.entity';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
+import { In } from 'typeorm'; 
 
 @Injectable()
 export class GamesService {
+  private readonly userServiceUrl: string;
+
   constructor(
     @InjectRepository(Game)
     private readonly gameRepository: Repository<Game>,
     @InjectRepository(GameImage)
     private readonly gameImageRepository: Repository<GameImage>,
-  ) {}
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.userServiceUrl = this.configService.get<string>('USER_SERVICE_URL') as string;
+  }
 
   // Lấy tất cả games
   async findAll() {
@@ -44,17 +54,18 @@ export class GamesService {
     return game;
   }
 
-  // Lấy games theo loại vé cổng
-  async getByGate(gateType: AllowedTicket) {
-    return this.gameRepository.find({
-      where: {
-        status: GameStatus.OPEN,
-        allowedTicket: [AllowedTicket.ALL, gateType] as any,
-      },
-      relations: ['images'],
-      order: { id: 'ASC' },
-    });
-  }
+  
+
+async getByGate(gateType: AllowedTicket) {
+  return this.gameRepository.find({
+    where: {
+      status: GameStatus.OPEN,
+      allowedTicket: In([AllowedTicket.ALL, gateType]), // ✅ ĐÚNG — dùng In() cho danh sách nhiều giá trị
+    },
+    relations: ['images'],
+    order: { id: 'ASC' },
+  });
+}
 
   // Tìm kiếm game theo tên
   async search(keyword: string) {
@@ -215,24 +226,43 @@ export class GamesService {
     };
   }
 
-  // Lấy danh sách feedback của game
+  // Lấy danh sách feedback của game — gọi sang user-service lấy username, không JOIN SQL nữa
   async getFeedbacks(gameId: number) {
-    const result = await this.gameRepository.manager.query(
+    const feedbacks = await this.gameRepository.manager.query(
       `
-      SELECT f.id, f.content, f.rating, f.created_at, u.username
+      SELECT f.id, f.user_id, f.content, f.rating, f.created_at
       FROM feedbacks f
-      JOIN users u ON f.user_id = u.id
       WHERE f.game_id = ?
       ORDER BY f.created_at DESC
       `,
       [gameId],
     );
-    return result.map((row: any) => ({
-      id: row.id,
-      content: row.content,
-      rating: row.rating,
-      createdAt: row.created_at,
-      username: row.username,
+
+    if (feedbacks.length === 0) return [];
+
+    const userIds = [...new Set(feedbacks.map((f: any) => f.user_id))];
+
+    let users: any[] = [];
+    try {
+      const { data } = await firstValueFrom(
+        this.httpService.get(`${this.userServiceUrl}/users/internal/by-ids`, {
+          params: { ids: userIds.join(',') },
+        }),
+      );
+      users = data;
+    } catch (error) {
+      users = []; // nếu user-service lỗi, vẫn trả feedback nhưng thiếu username
+    }
+
+    const userMap = new Map(users.map((u) => [u.id, u.username]));
+
+    return feedbacks.map((f: any) => ({
+      id: f.id,
+      content: f.content,
+      rating: f.rating,
+      createdAt: f.created_at,
+      username: userMap.get(f.user_id) || 'Unknown',
     }));
   }
+
 }

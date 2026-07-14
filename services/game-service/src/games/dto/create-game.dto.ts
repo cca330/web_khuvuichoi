@@ -12,7 +12,7 @@ export class CreateGameDto {
   @IsNumber({}, { message: 'Recommended age phải là số' })
   recommendedAge?: number;
 
-  @IsEnum(AllowedTicket, { message: 'Allowed ticket phải là ALL, ADULT hoặc CHILD' })
+  @IsEnum(AllowedTicket, { message: 'Allowed ticket phải là ALL hoặc ADULT' })
   allowedTicket: AllowedTicket;
 
   @IsEnum(GameStatus, { message: 'Status phải là OPEN hoặc CLOSE' })
@@ -21,4 +21,7 @@ export class CreateGameDto {
   @IsOptional()
   @IsArray({ message: 'Images phải là mảng' })
   images?: string[];
+
+  @IsOptional()
+  category?: string;
 }

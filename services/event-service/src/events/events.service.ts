@@ -162,7 +162,7 @@ export class EventsService {
   async createSchedule(dto: CreateEventScheduleDto) {
     const schedule = this.eventScheduleRepository.create({
       eventId: dto.eventId,
-      scheduleTime: new Date(dto.scheduleTime),
+      scheduleTime: dto.scheduleTime,
       title: dto.title,
       description: dto.description,
       sortOrder: dto.sortOrder || 1,
@@ -179,7 +179,7 @@ export class EventsService {
       throw new NotFoundException('Event schedule not found');
     }
 
-    schedule.scheduleTime = new Date(dto.scheduleTime);
+    schedule.scheduleTime = dto.scheduleTime;
     schedule.title = dto.title;
     if (dto.description !== undefined) schedule.description = dto.description;
     if (dto.sortOrder !== undefined) schedule.sortOrder = dto.sortOrder;

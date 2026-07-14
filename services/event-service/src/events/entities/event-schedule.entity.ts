@@ -15,8 +15,8 @@ export class EventSchedule {
   @Column({ name: 'event_id' })
   eventId: number;
 
-  @Column({ name: 'schedule_time', type: 'datetime' })
-  scheduleTime: Date;
+  @Column({ name: 'schedule_time', type: 'time' })
+  scheduleTime: string;
 
   @Column()
   title: string;

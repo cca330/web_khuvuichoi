@@ -12,7 +12,7 @@ import { EventSchedule } from './event-schedule.entity';
 export enum EventStatus {
   COMING_SOON = 'COMING_SOON',
   ONGOING = 'ONGOING',
-  COMPLETED = 'COMPLETED',
+  FINISHED = 'FINISHED',
   CANCELLED = 'CANCELLED',
 }
 
@@ -24,8 +24,8 @@ export class Event {
   @Column()
   title: string;
 
-  @Column({ nullable: true })
-  thumbnail: string;
+ @Column()
+thumbnail: string; 
 
   @Column({ type: 'text', nullable: true })
   description: string;
