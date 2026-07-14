@@ -24,8 +24,8 @@ export class Event {
   @Column()
   title: string;
 
- @Column()
-thumbnail: string; 
+  @Column()
+  thumbnail: string;
 
   @Column({ type: 'text', nullable: true })
   description: string;

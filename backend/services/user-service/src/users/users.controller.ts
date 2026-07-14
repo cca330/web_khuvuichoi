@@ -20,10 +20,10 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('internal/by-ids')
-findByIds(@Query('ids') ids: string) {
-  const idArray = ids.split(',').map((id) => parseInt(id.trim()));
-  return this.usersService.findByIds(idArray);
-}
+  findByIds(@Query('ids') ids: string) {
+    const idArray = ids.split(',').map((id) => parseInt(id.trim()));
+    return this.usersService.findByIds(idArray);
+  }
   @Get()
   findAll(@Query('status') status?: UserStatus) {
     return this.usersService.findAll(status);
