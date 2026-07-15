@@ -21,7 +21,7 @@ async function bootstrap() {
   createProxyMiddleware({
     target: userServiceUrl,
     changeOrigin: true,
-    pathRewrite: { '^/api/auth': '/auth' },
+    pathRewrite: { '^/': '/auth' },
   }),
 );
 
@@ -30,7 +30,7 @@ app.use(
   createProxyMiddleware({
     target: userServiceUrl,
     changeOrigin: true,
-    pathRewrite: { '^/api/users': '/users' },
+    pathRewrite: { '^/': '/users' },
   }),
 );
 
