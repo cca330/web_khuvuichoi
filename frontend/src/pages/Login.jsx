@@ -27,7 +27,7 @@ export default function Login() {
       const res = await authApi.login(username, password);
       const { accessToken, user } = res.data;
       login(accessToken, user);
-      navigate(user.role === 'ADMIN' ? '/tickets' : '/');
+      navigate(user.role === 'ADMIN' ? '/admin/tickets' : '/');
     } catch (err) {
       setError(err.response?.data?.message || 'Không kết nối được server!');
     }
@@ -35,39 +35,41 @@ export default function Login() {
 
   return (
     <div className="panel">
-      <h1><b>Login</b></h1>
+      <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
+        <h1><b>Login</b></h1>
 
-      <div className="txtbox">
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <i className="bx bx-user-circle"></i>
-      </div>
+        <div className="txtbox">
+          <input
+            type="text"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <i className="bx bx-user-circle"></i>
+        </div>
 
-      <div className="txtbox">
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <i className="bx bxs-lock-alt"></i>
-      </div>
+        <div className="txtbox">
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <i className="bx bxs-lock-alt"></i>
+        </div>
 
-      <div className="error">{error}</div>
+        <div className="error">{error}</div>
 
-      <div className="quenmk">
-        <Link to="/forgot-password">Quên mật khẩu</Link>
-      </div>
+        <div className="quenmk">
+          <Link to="/forgot-password">Quên mật khẩu</Link>
+        </div>
 
-      <button className="btnlogin" onClick={handleLogin}>Login</button>
+        <button className="btnlogin" type="submit">Login</button>
 
-      <div className="taotaikhoan">
-        <p>Bạn chưa có tài khoản? <Link to="/register">Tạo tài khoản</Link></p>
-      </div>
+        <div className="taotaikhoan">
+          <p>Bạn chưa có tài khoản? <Link to="/register">Tạo tài khoản</Link></p>
+        </div>
+      </form>
     </div>
   );
 }

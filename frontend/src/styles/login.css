@@ -44,6 +44,7 @@ body {
 .panel h1 {
   font-size: 45px;
   text-align: center;
+  margin-bottom: 25px;
 }
 
 @media (max-width: 767px) {
@@ -146,12 +147,13 @@ body {
   cursor: pointer;
   color: #333;
   font-weight: 600;
+  margin-top: 10px;
 }
 
 .panel .taotaikhoan {
-  font-size: 14.5px;
+  font-size: 5px;
   text-align: center;
-  margin: 20px 0 15px;
+  margin: 10px 0 10px;
 }
 
 .taotaikhoan a {
