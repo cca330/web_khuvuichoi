@@ -1,0 +1,97 @@
+version: "3.9"
+
+services:
+  # ---------- BACKEND SERVICES ----------
+  user-service:
+    build: ./backend/services/user-service
+    container_name: user-service
+    restart: unless-stopped
+    env_file: ./backend/services/user-service/.env
+    ports:
+      - "3001:3001"
+    networks:
+      - theme-park-net
+
+  ticket-service:
+    build: ./backend/services/ticket-service
+    container_name: ticket-service
+    restart: unless-stopped
+    env_file: ./backend/services/ticket-service/.env
+    ports:
+      - "3002:3002"
+    networks:
+      - theme-park-net
+
+  revenue-service:
+    build: ./backend/services/revenue-service
+    container_name: revenue-service
+    restart: unless-stopped
+    env_file: ./backend/services/revenue-service/.env
+    ports:
+      - "3003:3003"
+    networks:
+      - theme-park-net
+
+  promotion-service:
+    build: ./backend/services/promotion-service
+    container_name: promotion-service
+    restart: unless-stopped
+    env_file: ./backend/services/promotion-service/.env
+    ports:
+      - "3004:3004"
+    networks:
+      - theme-park-net
+
+  game-service:
+    build: ./backend/services/game-service
+    container_name: game-service
+    restart: unless-stopped
+    env_file: ./backend/services/game-service/.env
+    ports:
+      - "3005:3005"
+    networks:
+      - theme-park-net
+
+  event-service:
+    build: ./backend/services/event-service
+    container_name: event-service
+    restart: unless-stopped
+    env_file: ./backend/services/event-service/.env
+    ports:
+      - "3006:3006"
+    networks:
+      - theme-park-net
+
+  # ---------- API GATEWAY ----------
+  api-gateway:
+    build: ./backend/api-gateway
+    container_name: api-gateway
+    restart: unless-stopped
+    env_file: ./backend/api-gateway/.env
+    depends_on:
+      - user-service
+      - ticket-service
+      - game-service
+      - event-service
+      - promotion-service
+      - revenue-service
+    ports:
+      - "8000:8000"
+    networks:
+      - theme-park-net
+
+  # ---------- FRONTEND ----------
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: unless-stopped
+    depends_on:
+      - api-gateway
+    ports:
+      - "80:80"
+    networks:
+      - theme-park-net
+
+networks:
+  theme-park-net:
+    driver: bridge
