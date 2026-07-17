@@ -1,0 +1,255 @@
+/* ==========================================================================
+   CSS CHO TRANG DANH SÁCH SỰ KIỆN (EVENTS LIST PAGE)
+   ========================================================================== */
+
+.events-page-modern {
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Banner đỉnh trang sự kiện tràn rộng tương tự Trang Chủ & Games */
+.events-hero-section {
+  position: relative;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.events-hero-bg {
+  width: calc(100vw - 40px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  height: 50vh;
+  min-height: 350px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: 24px;
+}
+
+.events-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(12, 16, 26, 0.85) 0%,
+    rgba(12, 16, 26, 0.45) 100%
+  );
+  z-index: 1;
+  border-radius: 24px;
+}
+
+.events-hero-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  padding: 0 40px;
+}
+
+.events-hero-tagline {
+  display: inline-block;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--primary-color);
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.events-hero-title {
+  font-size: 48px;
+  font-weight: 900;
+  margin-bottom: 16px;
+  color: #ffffff !important;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.events-hero-desc {
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* Khu vực Danh sách sự kiện */
+.events-list-section {
+  padding: 80px 0;
+}
+
+.events-section-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--dark-color);
+  margin-bottom: 40px;
+  position: relative;
+  display: inline-block;
+}
+
+.events-section-title::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -10px;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+/* Card sự kiện phong cách hiện đại */
+.modern-event-card {
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--site-shadow);
+  border: 1px solid var(--border-color);
+  transition:
+    transform 0.3s,
+    box-shadow 0.3s;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.modern-event-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(12, 16, 26, 0.1);
+}
+
+.event-card-img-wrap {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.event-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.modern-event-card:hover .event-card-img {
+  transform: scale(1.08);
+}
+
+.event-card-status {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: 50px;
+  text-transform: uppercase;
+}
+
+/* Colors status */
+.status-coming {
+  background: #3b82f6;
+}
+.status-ongoing {
+  background: #10b981;
+}
+.status-completed {
+  background: #64748b;
+}
+.status-cancelled {
+  background: #ef4444;
+}
+
+.event-card-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.event-card-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--dark-color);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.event-card-desc {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.event-card-meta {
+  margin-top: auto;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.meta-row:last-child {
+  margin-bottom: 0;
+}
+
+.meta-row svg {
+  color: var(--primary-color);
+}
+
+.btn-modern-event-detail {
+  display: block;
+  text-align: center;
+  background: #f1f5f9;
+  color: #475569 !important;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 12px 0;
+  border-radius: 12px;
+  margin-top: 20px;
+  text-decoration: none !important;
+  transition: all 0.2s;
+}
+
+.btn-modern-event-detail:hover {
+  background: var(--primary-color);
+  color: #ffffff !important;
+}
+
+/* Không có kết quả */
+.modern-no-events {
+  text-align: center;
+  padding: 80px 20px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: var(--site-shadow);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.no-events-icon {
+  font-size: 54px;
+  margin-bottom: 20px;
+}
+
+.modern-no-events h4 {
+  font-weight: 800;
+  color: var(--dark-color);
+  margin-bottom: 12px;
+}
+
+.modern-no-events p {
+  color: #64748b;
+  font-size: 14px;
+}

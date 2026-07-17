@@ -1,6 +1,0 @@
-{
-    "name": "ndat0/doannhom9",
-    "require": {
-        "phpoffice/phpspreadsheet": "^5.4"
-    }
-}

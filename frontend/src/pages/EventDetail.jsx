@@ -1,7 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import eventsApi from '../api/eventsApi';
-import '../styles/admin.css';
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import {
+  FaMapMarkerAlt,
+  FaCalendarAlt,
+  FaClock,
+  FaArrowLeft,
+} from "react-icons/fa";
+import eventsApi from "../api/eventsApi";
+import "../styles/style1.css"; // Chuyển sang dùng chung file style với trang chủ & games
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -9,6 +15,30 @@ const EventDetail = () => {
   const [images, setImages] = useState([]);
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Hiệu ứng cuộn trang lặp lại chuyên nghiệp
+  useEffect(() => {
+    if (!loading && event) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("reveal-visible");
+            } else {
+              if (entry.boundingClientRect.top > 0) {
+                entry.target.classList.remove("reveal-visible");
+              }
+            }
+          });
+        },
+        { threshold: 0.1 },
+      );
+
+      const elements = document.querySelectorAll(".scroll-reveal");
+      elements.forEach((el) => observer.observe(el));
+      return () => elements.forEach((el) => observer.unobserve(el));
+    }
+  }, [loading, event, images, schedules]);
 
   useEffect(() => {
     fetchEventDetail();
@@ -19,13 +49,13 @@ const EventDetail = () => {
       setLoading(true);
       const response = await eventsApi.getById(id);
       setEvent(response.data);
-      
+
       // Fetch images
       try {
         const imagesRes = await eventsApi.getImages(id);
         setImages(imagesRes.data);
       } catch (error) {
-        console.error('Error fetching images:', error);
+        console.error("Error fetching images:", error);
       }
 
       // Fetch schedules
@@ -33,133 +63,181 @@ const EventDetail = () => {
         const schedulesRes = await eventsApi.getSchedules(id);
         setSchedules(schedulesRes.data);
       } catch (error) {
-        console.error('Error fetching schedules:', error);
+        console.error("Error fetching schedules:", error);
       }
     } catch (error) {
-      console.error('Error fetching event detail:', error);
+      console.error("Error fetching event detail:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const getStatusBadge = (status) => {
-    const colors = {
-      'COMING_SOON': 'green',
-      'ONGOING': 'blue',
-      'COMPLETED': 'gray',
-      'CANCELLED': 'red'
+  const getStatusLabel = (status) => {
+    const labels = {
+      COMING_SOON: "Sắp diễn ra",
+      ONGOING: "Đang diễn ra",
+      COMPLETED: "Đã kết thúc",
+      CANCELLED: "Đã hủy",
     };
-    return colors[status] || 'gray';
+    return labels[status] || status;
+  };
+
+  const getStatusBadgeClass = (status) => {
+    const colors = {
+      COMING_SOON: "status-coming",
+      ONGOING: "status-ongoing",
+      COMPLETED: "status-completed",
+      CANCELLED: "status-cancelled",
+    };
+    return colors[status] || "status-completed";
   };
 
   if (loading) {
-    return <div className="loading">Đang tải...</div>;
+    return <div className="loading">Đang tải chi tiết sự kiện...</div>;
   }
 
   if (!event) {
-    return <div className="error">Không tìm thấy sự kiện</div>;
+    return (
+      <div className="event-detail-error">
+        <div className="error-content">
+          <h4>Không tìm thấy sự kiện!</h4>
+          <Link to="/events" className="btn-modern-back">
+            Quay lại trang sự kiện
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="layout">
-      <div className="content">
-        <div className="container">
-          <div className="header">
-            <div>
-              <h1>Chi tiết sự kiện</h1>
-              <p className="muted">{event.title}</p>
-            </div>
-          </div>
-
-          {/* Event Info Card */}
-          <div className="event-card">
-            <div className="event-header">
-              <h2>{event.title}</h2>
-              <span className={`badge ${getStatusBadge(event.status)}`}>
-                {event.status}
+    <div className="event-detail-page">
+      {/* ─── BANNER SỰ KIỆN HOÀNH TRÁNG (Đồng bộ trang chủ) ─── */}
+      <section className="event-detail-hero">
+        <div
+          className="event-hero-bg"
+          style={{
+            backgroundImage: `url(${event.thumbnail || "/img/banner.png"})`,
+          }}
+        >
+          <div className="event-hero-overlay"></div>
+          <div className="container event-hero-content">
+            <span
+              className={`event-status-badge ${getStatusBadgeClass(event.status)}`}
+            >
+              {getStatusLabel(event.status)}
+            </span>
+            <h1 className="event-hero-title">{event.title}</h1>
+            <div className="event-hero-meta">
+              <span className="meta-item">
+                <FaMapMarkerAlt /> {event.location}
+              </span>
+              <span className="meta-item">
+                <FaCalendarAlt />{" "}
+                {new Date(event.startDatetime).toLocaleDateString("vi-VN")}
               </span>
             </div>
-            
-            <div className="event-info-grid">
-              <div className="info-item">
-                <span>Địa điểm</span>
-                <strong>{event.location}</strong>
-              </div>
-              <div className="info-item">
-                <span>Thời gian bắt đầu</span>
-                <strong>{new Date(event.startDatetime).toLocaleString('vi-VN')}</strong>
-              </div>
-              <div className="info-item">
-                <span>Thời gian kết thúc</span>
-                <strong>{new Date(event.endDatetime).toLocaleString('vi-VN')}</strong>
-              </div>
-            </div>
-
-            <p className="event-description">{event.description}</p>
-
-            {event.thumbnail && (
-              <div className="event-thumbnail">
-                <img src={event.thumbnail} alt={event.title} />
-              </div>
-            )}
-          </div>
-
-          {/* Event Images */}
-          <div className="section">
-            <div className="section-header">
-              <h3>Ảnh sự kiện</h3>
-            </div>
-            {images.length === 0 ? (
-              <p className="muted">Chưa có ảnh sự kiện</p>
-            ) : (
-              <div className="images-grid">
-                {images.map((img, index) => (
-                  <div key={index} className="image-item">
-                    <img src={`/uploads/${img.image}`} alt={`Event image ${index + 1}`} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Event Schedules */}
-          <div className="section">
-            <div className="section-header">
-              <h3>Lịch trình</h3>
-            </div>
-            {schedules.length === 0 ? (
-              <p className="muted">Chưa có lịch trình</p>
-            ) : (
-              <div className="schedules-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Thời gian</th>
-                      <th>Tiêu đề</th>
-                      <th>Mô tả</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {schedules.map((schedule) => (
-                      <tr key={schedule.id}>
-                        <td>{new Date(schedule.scheduleTime).toLocaleString('vi-VN')}</td>
-                        <td>{schedule.title}</td>
-                        <td>{schedule.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          <div className="actions">
-            <Link to="/events" className="btn secondary">
-              ← Quay lại
-            </Link>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* ─── NỘI DUNG CHI TIẾT SỰ KIỆN ─── */}
+      <section className="event-content-section spad">
+        <div className="container">
+          <div className="row">
+            {/* Cột trái: Thông tin chính và mô tả */}
+            <div className="col-lg-8 scroll-reveal mb-5 mb-lg-0">
+              <div className="event-main-card">
+                <h3 className="section-subtitle">Chi tiết chương trình</h3>
+                <p className="event-description-text">{event.description}</p>
+
+                {/* Grid thời gian chi tiết */}
+                <div className="event-time-grid">
+                  <div className="time-box">
+                    <FaClock className="icon-start" />
+                    <div>
+                      <span>Thời gian bắt đầu</span>
+                      <strong>
+                        {new Date(event.startDatetime).toLocaleString("vi-VN")}
+                      </strong>
+                    </div>
+                  </div>
+                  <div className="time-box">
+                    <FaClock className="icon-end" />
+                    <div>
+                      <span>Thời gian kết thúc</span>
+                      <strong>
+                        {new Date(event.endDatetime).toLocaleString("vi-VN")}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Bộ sưu tập ảnh sự kiện */}
+              <div className="event-gallery-section mt-5 scroll-reveal">
+                <h3 className="section-subtitle">Hình ảnh sự kiện</h3>
+                {images.length === 0 ? (
+                  <div className="empty-box">
+                    <p>
+                      Hình ảnh thực tế về sự kiện sẽ được cập nhật liên tục.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="event-images-grid">
+                    {images.map((img, index) => (
+                      <div key={index} className="event-image-card">
+                        <img
+                          src={`/uploads/${img.image}`}
+                          alt={`Event Gallery ${index + 1}`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Cột phải: Lịch trình chương trình */}
+            <div className="col-lg-4 scroll-reveal">
+              <div className="event-schedule-card">
+                <h3 className="schedule-title">Lịch trình chi tiết</h3>
+                {schedules.length === 0 ? (
+                  <div className="empty-box-small">
+                    <p>Lịch trình chi tiết đang được cập nhật...</p>
+                  </div>
+                ) : (
+                  <div className="timeline-flow">
+                    {schedules.map((schedule, idx) => (
+                      <div key={schedule.id} className="timeline-item">
+                        <div className="timeline-dot"></div>
+                        <div className="timeline-content">
+                          <span className="timeline-time">
+                            {new Date(schedule.scheduleTime).toLocaleTimeString(
+                              "vi-VN",
+                              { hour: "2-digit", minute: "2-digit" },
+                            )}
+                          </span>
+                          <h4 className="timeline-heading">{schedule.title}</h4>
+                          <p className="timeline-desc">
+                            {schedule.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Nút điều hướng */}
+              <div className="event-actions mt-4">
+                <Link to="/events" className="btn-event-back-modern">
+                  <FaArrowLeft /> Quay lại danh sách
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
