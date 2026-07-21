@@ -1,0 +1,75 @@
+/* ─── 1. MÀN HÌNH MÁY TÍNH BẢNG (TABLET: < 992px) ─── */
+@media (max-width: 991.98px) {
+  /* Tiêu đề trò chơi */
+  #games-section .section-title h2 {
+    font-size: 1.8rem !important;
+  }
+
+  /* Danh mục tab lọc */
+  #games-section .featured__controls ul li {
+    padding: 6px 16px !important;
+    font-size: 0.85rem !important;
+    margin: 3px !important;
+  }
+
+  /* Chỉnh lại chiều cao thẻ Card 3D */
+  .game-3d-card {
+    min-height: 360px !important;
+  }
+}
+
+/* ─── 2. MÀN HÌNH ĐIỆN THOẠI MOBILE (MOBILE: < 576px) ─── */
+@media (max-width: 575.98px) {
+  /* Tiêu đề trò chơi nhỏ lại */
+  #games-section .section-title h2 {
+    font-size: 1.4rem !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Thanh tab lọc cuộn ngang mượt mà trên điện thoại */
+  #games-section .featured__controls ul {
+    display: flex !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    padding-bottom: 8px !important;
+    justify-content: flex-start !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #games-section .featured__controls ul li {
+    flex: 0 0 auto !important;
+    font-size: 0.8rem !important;
+    padding: 6px 14px !important;
+  }
+
+  /* Tắt bớt khoảng trắng Spad trên Mobile */
+  .spad {
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
+  }
+
+  /* Nút Xem tất cả sự kiện */
+  .event-section .text-center.mt-5 {
+    margin-top: 1rem !important;
+  }
+
+  .btn-explore-pink {
+    width: 90% !important;
+    padding: 10px 16px !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* Thẻ Game 3D trên mobile: Tắt hiệu ứng nghiêng quá sâu để không bị lag */
+  .game-3d-wrapper {
+    perspective: none !important;
+  }
+
+  .game-3d-card {
+    min-height: 340px !important;
+    transform: none !important;
+  }
+
+  .game-3d-img-container {
+    height: 170px !important;
+  }
+}

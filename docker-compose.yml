@@ -68,6 +68,8 @@ services:
     container_name: api-gateway
     restart: unless-stopped
     env_file: ./backend/api-gateway/.env
+    volumes:
+      - gateway_uploads:/app/uploads
     depends_on:
       - user-service
       - ticket-service
@@ -95,3 +97,7 @@ services:
 networks:
   theme-park-net:
     driver: bridge
+
+volumes:
+  mysql_data:
+  gateway_uploads:

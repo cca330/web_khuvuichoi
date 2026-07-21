@@ -10,5 +10,6 @@ WORKDIR /app
 COPY --from=build /app/package*.json ./
 RUN npm install --omit=dev
 COPY --from=build /app/dist ./dist
+RUN mkdir -p uploads
 EXPOSE 8000
 CMD ["node", "dist/main"]

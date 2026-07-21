@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import gamesApi from "../api/gamesApi";
+import { getImageUrl } from "../utils/imageUtils";
 import "../styles/game.css";
 
 const Games = () => {
@@ -203,7 +204,7 @@ const Games = () => {
                           <img
                             src={
                               game.images?.[0]
-                                ? `/uploads/${game.images[0]}`
+                                ? getImageUrl(game.images[0].image)
                                 : "/img/default-game.jpg"
                             }
                             alt={game.name}

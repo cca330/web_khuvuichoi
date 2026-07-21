@@ -7,7 +7,8 @@ import {
   FaArrowLeft,
 } from "react-icons/fa";
 import eventsApi from "../api/eventsApi";
-import "../styles/style1.css"; // Chuyển sang dùng chung file style với trang chủ & games
+import { getImageUrl } from "../utils/imageUtils";
+import "../styles/home.css"; // Chuyển sang dùng chung file style với trang chủ & games
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -116,7 +117,7 @@ const EventDetail = () => {
         <div
           className="event-hero-bg"
           style={{
-            backgroundImage: `url(${event.thumbnail || "/img/banner.png"})`,
+            backgroundImage: `url(${getImageUrl(event.thumbnail) || "/img/banner.png"})`,
           }}
         >
           <div className="event-hero-overlay"></div>
@@ -187,7 +188,7 @@ const EventDetail = () => {
                     {images.map((img, index) => (
                       <div key={index} className="event-image-card">
                         <img
-                          src={`/uploads/${img.image}`}
+                          src={getImageUrl(img.image)}
                           alt={`Event Gallery ${index + 1}`}
                         />
                       </div>

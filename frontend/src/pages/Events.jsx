@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaMapMarkerAlt, FaCalendarAlt, FaClock } from "react-icons/fa";
 import eventsApi from "../api/eventsApi";
+import { getImageUrl } from "../utils/imageUtils";
 import "../styles/events.css"; // Import file CSS riêng biệt vừa tạo
 
 const Events = () => {
@@ -116,7 +117,7 @@ const Events = () => {
                   <div className="modern-event-card">
                     <div className="event-card-img-wrap">
                       <img
-                        src={event.thumbnail || "/img/default-event.jpg"}
+                        src={getImageUrl(event.thumbnail) || "/img/default-event.jpg"}
                         alt={event.title}
                         className="event-card-img"
                       />

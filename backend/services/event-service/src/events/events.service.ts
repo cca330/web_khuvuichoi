@@ -8,6 +8,7 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { CreateEventScheduleDto } from './dto/create-event-schedule.dto';
 import { UpdateEventScheduleDto } from './dto/update-event-schedule.dto';
+import { isBase64Image, saveBase64Image, saveBase64Images, getImageUrl } from './image-helper';
 
 @Injectable()
 export class EventsService {
@@ -42,14 +43,33 @@ export class EventsService {
 
   // Tạo event mới
   async create(dto: CreateEventDto) {
+    console.log('=== CREATE EVENT DEBUG ===');
+    console.log('thumbnail type:', typeof dto.thumbnail);
+    console.log('thumbnail is base64:', isBase64Image(dto.thumbnail));
+    console.log('images type:', typeof dto.images);
+    console.log('images length:', dto.images?.length);
+
     const queryRunner = this.eventRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
+      // Process thumbnail - save if base64
+      let thumbnail = dto.thumbnail;
+      if (dto.thumbnail && isBase64Image(dto.thumbnail)) {
+        console.log('Processing thumbnail...');
+        try {
+          thumbnail = saveBase64Image(dto.thumbnail, 'thumb');
+          console.log('Thumbnail saved as:', thumbnail);
+        } catch (thumbError) {
+          console.error('Error saving thumbnail:', thumbError);
+          thumbnail = dto.thumbnail; // Fallback to original
+        }
+      }
+
       const event = queryRunner.manager.create(Event, {
         title: dto.title,
-        thumbnail: dto.thumbnail,
+        thumbnail,
         description: dto.description,
         location: dto.location,
         startDatetime: new Date(dto.startDatetime),
@@ -58,10 +78,15 @@ export class EventsService {
       });
 
       const savedEvent = await queryRunner.manager.save(Event, event);
+      console.log('Event created with ID:', savedEvent.id);
 
-      // Add images if provided
+      // Add images if provided - save base64 to files
       if (dto.images && dto.images.length > 0) {
-        for (const image of dto.images) {
+        // Process images - save base64 to files
+        const savedImages = saveBase64Images(dto.images, 'event');
+        console.log('Images saved as:', savedImages);
+
+        for (const image of savedImages) {
           const eventImage = queryRunner.manager.create(EventImage, {
             eventId: savedEvent.id,
             image,
@@ -71,8 +96,10 @@ export class EventsService {
       }
 
       await queryRunner.commitTransaction();
+      console.log('=== EVENT CREATED SUCCESS ===');
       return this.findById(savedEvent.id);
     } catch (error) {
+      console.error('Error creating event:', error);
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
@@ -96,7 +123,14 @@ export class EventsService {
       }
 
       event.title = dto.title;
-      if (dto.thumbnail !== undefined) event.thumbnail = dto.thumbnail;
+      if (dto.thumbnail !== undefined) {
+        // Process thumbnail - save if base64
+        if (isBase64Image(dto.thumbnail)) {
+          event.thumbnail = saveBase64Image(dto.thumbnail, 'thumb');
+        } else {
+          event.thumbnail = dto.thumbnail;
+        }
+      }
       if (dto.description !== undefined) event.description = dto.description;
       if (dto.location !== undefined) event.location = dto.location;
       event.startDatetime = new Date(dto.startDatetime);
@@ -110,8 +144,11 @@ export class EventsService {
         // Delete old images
         await queryRunner.manager.delete(EventImage, { eventId: id });
 
+        // Process images - save base64 to files
+        const savedImages = saveBase64Images(dto.images, 'event');
+
         // Add new images
-        for (const image of dto.images) {
+        for (const image of savedImages) {
           const eventImage = queryRunner.manager.create(EventImage, {
             eventId: id,
             image,

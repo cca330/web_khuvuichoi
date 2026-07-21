@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import Game3DCard from "../components/Game3DCard";
 import {
   FaTicketAlt,
   FaRegClock,
@@ -10,7 +11,9 @@ import {
 } from "react-icons/fa";
 import gamesApi from "../api/gamesApi";
 import eventsApi from "../api/eventsApi";
-import "../styles/style1.css";
+import { getImageUrl } from "../utils/imageUtils";
+import "../styles/home.css";
+import RevealOverlay from "../components/RevealOverlay";
 
 const Home = () => {
   const [games, setGames] = useState([]);
@@ -62,14 +65,15 @@ const Home = () => {
     fetchData();
   }, []);
 
+  // TỰ ĐỘNG CHUYỂN SLIDE SAU 4 GIÂY & RESET BỘ ĐẾM KHI NGƯỜI DÙNG TƯƠNG TÁC
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (events.length > 0) {
-        setCurrentSlide((prev) => (prev + 1) % events.length);
-      }
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [events.length]);
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % 11);
+    }, 4000); // 4000ms = 4 giây
+
+    // Dọn dẹp Timer cũ mỗi khi currentSlide thay đổi (để đếm lại từ đầu 4 giây)
+    return () => clearInterval(timer);
+  }, [currentSlide]);
 
   const fetchData = async () => {
     try {
@@ -258,46 +262,194 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ─── 4. SỰ KIỆN NỔI BẬT ─── */}
+      {/* ─── 4. SỰ KIỆN NỔI BẬT (FULL-WIDTH CONTAINER) ─── */}
       <section className="from-blog spad event-section scroll-reveal fade-up">
-        <div className="container">
-          <div className="section-title text-center">
-            <h2>Sự kiện nổi bật</h2>
-            <p className="mt-3 w-75 mx-auto">
-              HG – Playground mang đến nhiều sự kiện bùng nổ đỉnh cao.
-            </p>
-          </div>
-          {events.length > 0 && (
-            <div className="event-slider-container">
-              <div className="event-slider-wrapper">
-                {events.map((event, index) => (
-                  <div
-                    key={event.id}
-                    className={`event-slide ${index === currentSlide ? "active" : ""}`}
-                  >
-                    <img
-                      src={event.thumbnail || "/img/default-event.jpg"}
-                      alt={event.title}
-                    />
-                    <div className="event-caption">
-                      <h3>{event.title}</h3>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ─── 5. TÌM VÉ / GAMES ─── */}
-      <section id="games-section" className="featured spad">
+        {/* Tiêu đề in đậm đặc biệt */}
         <div className="container">
           <div className="row">
             <div className="col-lg-12">
-              <div className="section-title">
-                <h2>Tìm một tấm vé hoàn hảo dành cho bạn</h2>
+              <div className="section-title text-center mb-4">
+                <span className="subtitle-tag-pink">Hoạt Động Bùng Nổ</span>
+                <h2 className="section-main-heading">SỰ KIỆN NỔI BẬT</h2>
+                <p className="mt-3 w-75 mx-auto section-sub-desc">
+                  HG – Playground không chỉ là khu vui chơi giải trí mà còn là
+                  nơi diễn ra nhiều sự kiện đỉnh cao, mang đến những khoảnh khắc
+                  bùng nổ cảm xúc cho mọi lứa tuổi.
+                </p>
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Khung Slider tràn rộng gần hết màn hình (Container-Fluid) */}
+        <div className="container-fluid px-2 px-md-5">
+          <div className="event-slider-container full-width-slider">
+            <div className="event-slider-wrapper">
+              <div
+                className={`event-slide ${currentSlide === 0 ? "active" : ""}`}
+              >
+                <img src="/img/event-slider-33.jpg" alt="Countdown pháo hoa" />
+                <div className="event-caption">
+                  <h3>Đêm Countdown Chào Năm Mới 2026</h3>
+                  <p>Pháo hoa rực rỡ, đại nhạc hội với ca sĩ nổi tiếng</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 1 ? "active" : ""}`}
+              >
+                <img src="/img/event-slider-2.png" alt="Sân khấu countdown" />
+                <div className="event-caption">
+                  <h3>Đêm Countdown Chào Năm Mới 2026</h3>
+                  <p>DJ bùng nổ, countdown hoành tráng đón giao thừa</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 2 ? "active" : ""}`}
+              >
+                <img src="/img/event-slider-34.webp" alt="Đám đông countdown" />
+                <div className="event-caption">
+                  <h3>Đêm Countdown Chào Năm Mới 2026</h3>
+                  <p>Khoảnh khắc giao thừa đáng nhớ</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 3 ? "active" : ""}`}
+              >
+                <img src="/img/event-slider1.png" alt="Đèn LED lung linh" />
+                <div className="event-caption">
+                  <h3>Lễ Hội Ánh Sáng Magic Light</h3>
+                  <p>Hàng triệu đèn LED lung linh</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 4 ? "active" : ""}`}
+              >
+                <img src="/img/event-slider2.png" alt="Drone light show" />
+                <div className="event-caption">
+                  <h3>Lễ Hội Ánh Sáng Magic Light</h3>
+                  <p>Biểu diễn drone light show</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 5 ? "active" : ""}`}
+              >
+                <img src="/img/event-slider3.png" alt="Đường hầm ánh sáng" />
+                <div className="event-caption">
+                  <h3>Lễ Hội Ánh Sáng Magic Light</h3>
+                  <p>Không gian cổ tích sống động</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 6 ? "active" : ""}`}
+              >
+                <img src="/img/event-slide1.png.png" alt="Té nước vui nhộn" />
+                <div className="event-caption">
+                  <h3>Water Splash Festival 2026</h3>
+                  <p>Lễ hội té nước lớn nhất năm</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 7 ? "active" : ""}`}
+              >
+                <img src="/img/event-slide2.png.png" alt="Pool party" />
+                <div className="event-caption">
+                  <h3>Water Splash Festival 2026</h3>
+                  <p>DJ pool party bùng nổ</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 8 ? "active" : ""}`}
+              >
+                <img src="/img/event-slid1.png" alt="Nhà ma kinh dị" />
+                <div className="event-caption">
+                  <h3>Halloween Horror Night</h3>
+                  <p>Nhà ma kinh dị</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 9 ? "active" : ""}`}
+              >
+                <img src="/img/event-slid2.png" alt="Hóa trang Halloween" />
+                <div className="event-caption">
+                  <h3>Halloween Horror Night</h3>
+                  <p>Hóa trang zombie, ma quái</p>
+                </div>
+              </div>
+
+              <div
+                className={`event-slide ${currentSlide === 10 ? "active" : ""}`}
+              >
+                <img src="/img/event-slid3.png" alt="Diễu hành ma quái" />
+                <div className="event-caption">
+                  <h3>Halloween Horror Night</h3>
+                  <p>Diễu hành ma quái</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Nút Prev / Next */}
+            <button
+              className="slider-btn prev-btn"
+              onClick={() => setCurrentSlide((prev) => (prev - 1 + 11) % 11)}
+            >
+              <FaChevronLeft />
+            </button>
+            <button
+              className="slider-btn next-btn"
+              onClick={() => setCurrentSlide((prev) => (prev + 1) % 11)}
+            >
+              <FaChevronRight />
+            </button>
+
+            {/* Chấm điều hướng */}
+            <div className="slider-nav">
+              {Array.from({ length: 11 }).map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`dot-item ${currentSlide === idx ? "active" : ""}`}
+                  onClick={() => setCurrentSlide(idx)}
+                ></span>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center mt-5">
+          <Link to="/events" className="btn-explore-pink">
+            <FaTicketAlt className="me-2" /> Xem tất cả sự kiện
+          </Link>
+        </div>
+      </section>
+
+      {/* ─── 6. TÌM VÉ / GAMES (ĐÃ THÊM SCROLL REVEAL & FILTER ANIMATION) ─── */}
+      <section
+        id="games-section"
+        className="featured spad scroll-reveal fade-up"
+      >
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-12">
+              <div className="section-title text-center mb-4">
+                <h2
+                  style={{
+                    color: "#fff",
+                    textShadow: "0 0 20px rgba(73,229,255,0.3)",
+                  }}
+                >
+                  Tìm một tấm vé hoàn hảo dành cho bạn
+                </h2>
+              </div>
+
+              {/* Các nút lọc danh mục */}
               <div className="featured__controls">
                 <ul>
                   <li
@@ -334,85 +486,69 @@ const Home = () => {
               </div>
             </div>
           </div>
-          <div className="row featured__filter">
-            {filteredGames.map((game) => (
-              <div
-                key={game.id}
-                className="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex"
-              >
-                <div className="card mb-4 w-100">
-                  <img
-                    className="card-img-top"
-                    src={
-                      game.images?.[0]
-                        ? `/uploads/${game.images[0]}`
-                        : "/img/default-game.jpg"
-                    }
-                    alt={game.name}
-                    style={{ height: "200px", objectFit: "cover" }}
-                  />
-                  <div className="card-body d-flex flex-column">
-                    <h5 className="card-title">{game.name}</h5>
-                    <div className="content pb-2 border-bottom mb-3">
-                      <div className="d-flex align-items-center">
-                        <img src="/img/ic1.png" alt="" />
-                        <span className="pl-2" style={{ fontSize: "13px" }}>
-                          Từ {game.recommendedAge}+ tuổi
-                        </span>
-                      </div>
-                    </div>
-                    <div className="row pt-2 mt-auto align-items-center">
-                      <div className="col-lg-7 col-md-12">
-                        <span
-                          style={{ fontSize: "13px", fontWeight: "600" }}
-                          className="text-muted"
-                        >
-                          {game.category}
-                        </span>
-                      </div>
-                      <div className="col-lg-5 col-md-12 text-right mt-2 mt-lg-0">
-                        <Link className="booknow" to="/games">
-                          Chi tiết
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
+          {/* Danh sách các card game có animation khi đổi tab */}
+          <div className="row featured__filter mt-3" key={activeFilter}>
+            {loading ? (
+              <div className="col-12 text-center py-4 text-white">
+                Đang tải danh sách trò chơi...
               </div>
-            ))}
+            ) : filteredGames.length === 0 ? (
+              <div className="col-12 text-center py-4 text-white-50">
+                Không tìm thấy trò chơi phù hợp!
+              </div>
+            ) : (
+              filteredGames.map((game, index) => (
+                <div
+                  key={game.id}
+                  className="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex filter-animate-item"
+                  style={{
+                    animationDelay: `${index * 0.08}s`,
+                  }} /* Tạo hiệu ứng xuất hiện lần lượt */
+                >
+                  <Game3DCard game={game} />
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>
 
-      {/* ─── 6. TRẢI NGHIỆM ─── */}
-      <section className="trai-nghiem spad">
+      {/* ─── 6. TRẢI NGHIỆM TUYỆT VỜI ─── */}
+      <section className="trai-nghiem-section spad scroll-reveal fade-up">
         <div className="container">
           <div className="row align-items-center">
+            {/* Ảnh bên trái */}
             <div className="col-lg-6 mb-5 mb-lg-0">
-              <img
-                src="/img/bn-trainghiem.png"
-                className="img-fluid w-100 rounded-3 shadow"
-                alt="Trải nghiệm tại HG Playground"
-              />
+              <div className="trainghiem-img-box">
+                <img
+                  src="/img/bn-trainghiem.png"
+                  className="img-fluid rounded-4 shadow-lg"
+                  alt="Trải nghiệm tại HG Playground"
+                />
+              </div>
             </div>
+
+            {/* Nội dung danh sách 5 mục bên phải */}
             <div className="col-lg-6">
-              <div className="content__about">
-                <h3 className="mb-4">
+              <div className="content__trainghiem-modern">
+                <h3 className="trainghiem-title mb-4">
                   Trải nghiệm tuyệt vời tại HG Playground
                 </h3>
-                <p className="lead mb-4">
+                <p className="trainghiem-desc mb-4">
                   Hãy tạm gác lại cuộc sống thường nhật để bước vào thế giới vui
                   chơi đầy màu sắc tại HG Playground! Một ngày trọn vẹn niềm
                   vui, tiếng cười và kỷ niệm bên gia đình & bạn bè đang chờ bạn
                   khám phá.
                 </p>
-                <div className="content-trainghiem">
-                  <div className="d-flex align-items-start mb-4">
+
+                <div className="trainghiem-list">
+                  {/* Mục 1 */}
+                  <div className="trainghiem-item d-flex align-items-start mb-3">
                     <img
                       src="/img/check.png"
                       alt="Check"
-                      className="me-3"
-                      style={{ width: "50px" }}
+                      className="check-icon me-3"
                     />
                     <div>
                       <h4>Tàu Lượn Siêu Tốc & Trò Chơi Mạo Hiểm</h4>
@@ -422,12 +558,13 @@ const Home = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="d-flex align-items-start mb-4">
+
+                  {/* Mục 2 */}
+                  <div className="trainghiem-item d-flex align-items-start mb-3">
                     <img
                       src="/img/check.png"
                       alt="Check"
-                      className="me-3"
-                      style={{ width: "50px" }}
+                      className="check-icon me-3"
                     />
                     <div>
                       <h4>Máng Trượt & Khu Vui Chơi Nước Ocean Park</h4>
@@ -437,12 +574,13 @@ const Home = () => {
                       </p>
                     </div>
                   </div>
-                  <div className="d-flex align-items-start mb-4">
+
+                  {/* Mục 3 */}
+                  <div className="trainghiem-item d-flex align-items-start mb-3">
                     <img
                       src="/img/check.png"
                       alt="Check"
-                      className="me-3"
-                      style={{ width: "50px" }}
+                      className="check-icon me-3"
                     />
                     <div>
                       <h4>Vòng Quay Khổng Lồ & Trò Chơi Gia Đình</h4>
@@ -452,11 +590,41 @@ const Home = () => {
                       </p>
                     </div>
                   </div>
+
+                  {/* Mục 4 */}
+                  <div className="trainghiem-item d-flex align-items-start mb-3">
+                    <img
+                      src="/img/check.png"
+                      alt="Check"
+                      className="check-icon me-3"
+                    />
+                    <div>
+                      <h4>Khu Vui Chơi Trẻ Em & Vòng Quay Ngựa Gỗ</h4>
+                      <p>
+                        Thế giới cổ tích với trò chơi nhẹ nhàng, phù hợp cho bé
+                        và gia đình.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Mục 5 */}
+                  <div className="trainghiem-item d-flex align-items-start mb-3">
+                    <img
+                      src="/img/check.png"
+                      alt="Check"
+                      className="check-icon me-3"
+                    />
+                    <div>
+                      <h4>Show Biểu Diễn & Sự Kiện Đặc Biệt</h4>
+                      <p>
+                        Pháo hoa, nhạc sống, biểu diễn xiếc - những khoảnh khắc
+                        đáng nhớ mỗi ngày!
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <Link
-                  to="/games"
-                  className="btn btn-danger btn-lg mt-4 px-5 py-3 rounded-pill shadow"
-                >
+
+                <Link to="/booking" className="btn-explore-pink mt-4">
                   Khám Phá Ngay Các Trò Chơi!
                 </Link>
               </div>
@@ -465,64 +633,74 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ─── 7. FEEDBACK / TESTIMONIAL ─── */}
-      <section className="testimonial">
+      {/* ─── 7. KHÁCH HÀNG NÓI GÌ VỀ CHÚNG TÔI (TESTIMONIAL DESIGN MỚI) ─── */}
+      <section className="testimonial-section-modern spad scroll-reveal fade-up">
         <div className="container">
-          <div className="row">
-            <div className="col-lg-6 d-none d-lg-block">
-              <ol className="carousel-indicators tabs">
-                {feedbacks.map((fb, index) => (
-                  <li
-                    key={fb.id}
-                    data-target="#carouselExampleIndicators"
-                    data-slide-to={index}
-                    className={index === 0 ? "active" : ""}
-                  >
-                    <figure>
-                      <img
-                        src={`/img/fb${index + 1}.jpg`}
-                        className="img-fluid"
-                        alt={`Khách hàng ${fb.name}`}
-                      />
-                    </figure>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="col-lg-6 d-flex justify-content-center align-items-center">
-              <div
-                id="carouselExampleIndicators"
-                className="carousel slide"
-                data-ride="carousel"
-              >
-                <h1>Khách hàng nói gì về chúng tôi?</h1>
-                <div className="carousel-inner">
-                  {feedbacks.map((fb, index) => (
-                    <div
-                      key={fb.id}
-                      className={`carousel-item ${index === 0 ? "active" : ""}`}
-                    >
-                      <div className="rating">{renderStars(fb.rating)}</div>
-                      <div className="quote-wrapper">
-                        <p>{fb.content}</p>
-                        <h3>{fb.name}</h3>
-                        <small>
-                          {new Date(fb.created_at).toLocaleDateString("vi-VN")}
-                        </small>
-                      </div>
-                    </div>
-                  ))}
+          <div className="row align-items-center justify-content-center">
+            {/* Cột trái: 3 Ảnh đại diện Avatar tròn xếp tầng nghệ thuật */}
+            <div className="col-lg-5 col-md-6 mb-5 mb-md-0 position-relative">
+              <div className="avatar-cluster-wrapper">
+                <div className="avatar-circle avt-main">
+                  <img src="/img/fb1.jpg" alt="Khách hàng 1" />
                 </div>
-                <ol className="carousel-indicators indicators">
-                  {feedbacks.map((fb, index) => (
-                    <div
-                      key={fb.id}
-                      data-target="#carouselExampleIndicators"
-                      data-slide-to={index}
-                      className={index === 0 ? "active" : ""}
-                    ></div>
-                  ))}
-                </ol>
+                <div className="avatar-circle avt-top">
+                  <img src="/img/fb2.jpg" alt="Khách hàng 2" />
+                </div>
+                <div className="avatar-circle avt-bottom">
+                  <img src="/img/fb3.jpg" alt="Khách hàng 3" />
+                </div>
+
+                {/* Bong bóng trang trí màu xanh nhạt */}
+                <span className="bubble-decoration bubble-1"></span>
+                <span className="bubble-decoration bubble-2"></span>
+              </div>
+            </div>
+
+            {/* Cột phải: Thẻ nội dung nhận xét */}
+            <div className="col-lg-6 col-md-6 offset-lg-1">
+              <div className="testimonial-card-box">
+                <h2 className="testimonial-card-title">
+                  Khách hàng nói gì về chúng tôi?
+                </h2>
+
+                {feedbacks.length > 0 && (
+                  <div className="testimonial-content-slider">
+                    <div className="stars-rating mb-3">
+                      {renderStars(feedbacks[currentSlide]?.rating || 5)}
+                    </div>
+
+                    <p className="testimonial-quote-text">
+                      "
+                      {feedbacks[currentSlide]?.content ||
+                        "Khu vui chơi rất tuyệt vời, gia đình tôi đã có khoảng thời gian rất vui vẻ!"}
+                      "
+                    </p>
+
+                    <div className="testimonial-user-info">
+                      <h4 className="user-name">
+                        {feedbacks[currentSlide]?.name || "KHÁCH HÀNG"}
+                      </h4>
+                      <span className="user-date">
+                        {feedbacks[currentSlide]?.created_at
+                          ? new Date(
+                              feedbacks[currentSlide].created_at,
+                            ).toLocaleDateString("vi-VN")
+                          : "16/01/2026"}
+                      </span>
+                    </div>
+
+                    {/* Thanh gạch ngang nhỏ định vị Slide */}
+                    <div className="slider-indicators-dash mt-4">
+                      {feedbacks.map((_, idx) => (
+                        <span
+                          key={idx}
+                          className={`dash-item ${idx === currentSlide ? "active" : ""}`}
+                          onClick={() => setCurrentSlide(idx)}
+                        ></span>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

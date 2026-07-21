@@ -1,0 +1,119 @@
+.reveal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99999;
+  cursor: pointer;
+  overflow: hidden;
+
+  background-color: rgba(255, 255, 255, 0.04);
+
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+
+  transition:
+    backdrop-filter 1.2s cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.pointer-disabled {
+  pointer-events: none;
+  backdrop-filter: blur(0px);
+  -webkit-backdrop-filter: blur(0px);
+  background-color: transparent;
+}
+
+.reveal-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* NÚT CHỈ DẪN CHẠM BAN ĐẦU */
+.click-prompt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  pointer-events: none;
+  z-index: 100000;
+}
+
+.click-prompt span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 3px;
+  opacity: 0.8;
+  animation: pulseText 2s infinite ease-in-out;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.prompt-ripple {
+  width: 60px;
+  height: 60px;
+  border-radius: 43% 57% 41% 59% / 57% 45% 55% 43%;
+  border: 2.5px solid #ffffff;
+  position: relative;
+  animation: pulseRipple 1.8s infinite ease-out;
+}
+
+@keyframes pulseRipple {
+  0% {
+    transform: scale(0.6) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.6) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+@keyframes pulseText {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* CÁNH TAY ẢO KHỔNG LỒ PHÓNG TO NGUYÊN BẢN */
+.virtual-hand {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  margin-left: -150px;
+  width: 600px;
+  height: 80vh;
+  z-index: 100001;
+  pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.arm-image-element {
+  width: 150%;
+  height: 150%;
+  object-fit: contain;
+  border: none !important;
+  outline: none !important;
+  background-color: transparent !important;
+  -webkit-user-drag: none;
+}

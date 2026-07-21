@@ -8,7 +8,8 @@ import { Game, GameStatus, AllowedTicket } from './entities/game.entity';
 import { GameImage } from './entities/game-image.entity';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
-import { In } from 'typeorm'; 
+import { In } from 'typeorm';
+import { isBase64Image, saveBase64Images } from './image-helper'; 
 
 @Injectable()
 export class GamesService {
@@ -94,12 +95,15 @@ async getByGate(gateType: AllowedTicket) {
 
       const savedGame = await queryRunner.manager.save(Game, game);
 
-      // Add images if provided
+      // Add images if provided - process base64 to files
       if (dto.images && dto.images.length > 0) {
-        for (let i = 0; i < dto.images.length; i++) {
+        // Filter and save base64 images
+        const savedImages = saveBase64Images(dto.images, 'game');
+
+        for (let i = 0; i < savedImages.length; i++) {
           const gameImage = queryRunner.manager.create(GameImage, {
             gameId: savedGame.id,
-            image: dto.images[i],
+            image: savedImages[i],
             sortOrder: i + 1,
           });
           await queryRunner.manager.save(GameImage, gameImage);
@@ -149,11 +153,14 @@ async getByGate(gateType: AllowedTicket) {
         // Delete old images
         await queryRunner.manager.delete(GameImage, { gameId: id });
 
+        // Process and save new images
+        const savedImages = saveBase64Images(dto.images, 'game');
+
         // Add new images
-        for (let i = 0; i < dto.images.length; i++) {
+        for (let i = 0; i < savedImages.length; i++) {
           const gameImage = queryRunner.manager.create(GameImage, {
             gameId: id,
-            image: dto.images[i],
+            image: savedImages[i],
             sortOrder: i + 1,
           });
           await queryRunner.manager.save(GameImage, gameImage);

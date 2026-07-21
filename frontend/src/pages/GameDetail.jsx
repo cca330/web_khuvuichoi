@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import gamesApi from '../api/gamesApi';
+import { getImageUrl } from '../utils/imageUtils';
 import '../styles/admin.css';
 
 const GameDetail = () => {
   const { id } = useParams();
   const [game, setGame] = useState(null);
-  const [images, setImages] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
   const [stats, setStats] = useState({ total: 0, avgRating: 0 });
   const [loading, setLoading] = useState(true);
@@ -20,14 +20,6 @@ const GameDetail = () => {
       setLoading(true);
       const response = await gamesApi.getById(id);
       setGame(response.data);
-      
-      // Fetch images
-      try {
-        const imagesRes = await gamesApi.getImages(id);
-        setImages(imagesRes.data);
-      } catch (error) {
-        console.error('Error fetching images:', error);
-      }
 
       // Fetch feedbacks
       try {
@@ -83,12 +75,12 @@ const GameDetail = () => {
 
           {/* Game Info Card */}
           <div className="game-card">
-            {images.length > 0 ? (
+            {game.images && game.images.length > 0 ? (
               <div className="game-carousel">
-                {images.map((img, index) => (
+                {game.images.map((img, index) => (
                   <img
                     key={index}
-                    src={`/uploads/${img}`}
+                    src={getImageUrl(img.image)}
                     alt={game.name}
                     className={`carousel-slide ${index === 0 ? 'active' : ''}`}
                   />
