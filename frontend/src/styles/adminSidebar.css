@@ -1,0 +1,185 @@
+/* ==========================================================================
+   ADMIN SIDEBAR - MODERN SOFT GLOW & GLASSMORPHISM STYLE
+   ========================================================================== */
+
+.adm-sidebar-container {
+  width: 270px;
+  min-width: 270px;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 16px;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  box-shadow: 4px 0 24px rgba(149, 157, 165, 0.04);
+}
+
+/* ─── 1. BRAND / LOGO ─── */
+.adm-sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px 24px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  margin-bottom: 20px;
+}
+
+.adm-brand-icon {
+  width: 42px;
+  height: 42px;
+  background: #f1f5f9;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  border: 1px solid #e2e8f0;
+}
+
+.adm-brand-text h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.3px;
+}
+
+.adm-brand-text span {
+  font-size: 11px;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ─── 2. NAVIGATION MENU ─── */
+.adm-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.adm-nav-group-title {
+  font-size: 11px;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  padding: 0 12px 10px 12px;
+}
+
+.adm-menu-list {
+  list-style: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adm-menu-item {
+  list-style: none !important;
+}
+
+/* Chữ ở trạng thái bình thường: Đậm nét hơn & rõ ràng hơn (Font-weight: 700) */
+.adm-menu-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: #475569; /* Tăng độ đậm màu chữ xám */
+  text-decoration: none !important;
+  font-size: 14.5px;
+  font-weight: 700; /* ĐÃ TĂNG ĐỘ ĐẬM CỦA CHỮ SIDEBAR */
+  position: relative;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid transparent;
+}
+
+.adm-menu-icon {
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.25s ease;
+}
+
+.adm-menu-label {
+  flex: 1;
+  letter-spacing: -0.2px;
+}
+
+/* Hover State */
+.adm-menu-link:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  transform: translateX(3px);
+}
+
+.adm-menu-link:hover .adm-menu-icon {
+  transform: scale(1.15);
+}
+
+/* ─── 3. ACTIVE STATE MỜ ẢO SANG TRỌNG (THAY Ô ĐEN XÌ) ─── */
+.adm-menu-link.active {
+  /* Nền Gradient mờ mượt mà hòa hợp với card bên phải */
+  background: linear-gradient(
+    135deg,
+    rgba(79, 70, 229, 0.1) 0%,
+    rgba(147, 51, 234, 0.12) 100%
+  );
+  color: #4f46e5 !important; /* Chữ chuyển sang tím Indigo sang trọng */
+  font-weight: 800; /* Tăng độ đậm tối đa khi active */
+  border: 1px solid rgba(99, 102, 241, 0.25); /* Viền mờ dịu mắt */
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.12); /* Hiệu ứng tỏa sáng nhẹ */
+}
+
+.adm-menu-link.active .adm-menu-icon {
+  transform: scale(1.1);
+}
+
+/* Chấm điểm nhấn mờ lung linh */
+.adm-active-pill {
+  width: 7px;
+  height: 7px;
+  background: #6366f1;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #6366f1;
+}
+
+/* ─── 4. FOOTER LOGOUT ─── */
+.adm-sidebar-footer {
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+  margin-top: auto;
+}
+
+.adm-logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  color: #ef4444;
+  background: #fef2f2;
+  text-decoration: none !important;
+  font-size: 14.5px;
+  font-weight: 800; /* Chữ Đăng xuất cũng được in đậm hơn */
+  transition: all 0.25s ease;
+  border: 1px solid #fee2e2;
+}
+
+.adm-logout-btn:hover {
+  background: #ef4444;
+  color: #ffffff !important;
+  border-color: #ef4444;
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+}
+
+.adm-logout-icon {
+  font-size: 18px;
+}

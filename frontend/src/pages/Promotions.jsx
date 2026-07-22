@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { FaCopy, FaCheckCircle, FaPercentage } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { FaCopy, FaCheckCircle, FaArrowLeft } from "react-icons/fa";
 import promotionsApi from "../api/promotionsApi";
 import "../styles/promotions.css";
 
 const Promotions = () => {
+  const navigate = useNavigate();
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState("");
@@ -12,30 +14,6 @@ const Promotions = () => {
   useEffect(() => {
     fetchPromotions();
   }, []);
-
-  // Hiệu ứng cuộn trang mượt mà
-  useEffect(() => {
-    if (!loading && promotions.length > 0) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("reveal-visible");
-            } else {
-              if (entry.boundingClientRect.top > 0) {
-                entry.target.classList.remove("reveal-visible");
-              }
-            }
-          });
-        },
-        { threshold: 0.1 },
-      );
-
-      const elements = document.querySelectorAll(".scroll-reveal");
-      elements.forEach((el) => observer.observe(el));
-      return () => elements.forEach((el) => observer.unobserve(el));
-    }
-  }, [loading, promotions]);
 
   const fetchPromotions = async () => {
     try {
@@ -57,19 +35,26 @@ const Promotions = () => {
     setToastMessage(`Đã sao chép mã ưu đãi: ${code}`);
     setShowToast(true);
 
-    // Tự động ẩn Toast sau 2.5 giây
     setTimeout(() => {
       setShowToast(false);
     }, 2500);
   };
 
   if (loading) {
-    return <div className="loading">Đang tải danh sách khuyến mãi...</div>;
+    return (
+      <div className="promotions-page-modern">
+        <div className="promotions-list-section text-center py-5">
+          <p style={{ color: "#64748b", fontWeight: 600 }}>
+            Đang tải danh sách khuyến mãi...
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="promotions-page-modern">
-      {/* ─── BANNER KHUYẾN MÃI HOÀNH TRÁNG (Đồng bộ, chống đè Header) ─── */}
+      {/* BANNER NẰM CỐ ĐỊNH NẰM DƯỚI HEADER */}
       <section className="promotions-hero-section">
         <div
           className="promotions-hero-bg"
@@ -87,15 +72,26 @@ const Promotions = () => {
         </div>
       </section>
 
-      {/* ─── DANH SÁCH VOUCHER ─── */}
+      {/* DANH SÁCH VOUCHER (CÓ HIỆU ỨNG TRƯỢT TỪ DƯỚI LÊN) */}
       <section className="promotions-list-section">
-        <div className="container text-center">
-          <h3 className="promotions-section-title">
-            Các Ưu Đãi Đang Hoạt Động
-          </h3>
+        <div className="container">
+          {/* HEADER BAR CHỨA TIÊU ĐỀ VÀ NÚT QUAY LẠI TRANG THANH TOÁN */}
+          <div className="promotions-header-bar">
+            <div>
+              <h3 className="promotions-section-title">
+                Các Ưu Đãi Đang Hoạt Động
+              </h3>
+            </div>
+            <button
+              className="btn-back-booking"
+              onClick={() => navigate("/booking")}
+            >
+              <FaArrowLeft /> Quay lại trang đặt vé
+            </button>
+          </div>
 
           {promotions.length === 0 ? (
-            <div className="modern-no-promos scroll-reveal">
+            <div className="modern-no-promos">
               <div className="no-promos-icon">🎟️</div>
               <h4>Hiện chưa có khuyến mãi nào hoạt động</h4>
               <p>
@@ -104,12 +100,9 @@ const Promotions = () => {
               </p>
             </div>
           ) : (
-            <div className="promotions-grid text-left">
+            <div className="promotions-grid">
               {promotions.map((promotion) => (
-                <div
-                  key={promotion.id}
-                  className="modern-promo-card scroll-reveal"
-                >
+                <div key={promotion.id} className="modern-promo-card">
                   <div className="promo-card-header">
                     <span className="promo-code-title">{promotion.code}</span>
                     <span className="promo-status-badge">Đang áp dụng</span>
@@ -125,13 +118,13 @@ const Promotions = () => {
 
                     <div className="promo-info-details">
                       <div className="promo-info-item">
-                        Áp dụng cho:{" "}
+                        Áp dụng:{" "}
                         <strong>
                           {promotion.scopeNames || "Tất cả loại vé"}
                         </strong>
                       </div>
                       <div className="promo-info-item">
-                        Hạn sử dụng:{" "}
+                        Hạn dùng:{" "}
                         <strong>
                           {new Date(promotion.endDate).toLocaleDateString(
                             "vi-VN",
@@ -156,7 +149,7 @@ const Promotions = () => {
         </div>
       </section>
 
-      {/* ─── THÔNG BÁO TOAST POPUP (Đẹp hơn hàm alert mặc định) ─── */}
+      {/* POPUP TOAST THÔNG BÁO COPY */}
       <div className={`copy-toast ${showToast ? "show" : ""}`}>
         <FaCheckCircle /> {toastMessage}
       </div>

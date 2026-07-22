@@ -27,8 +27,12 @@ import PromotionDetail from "./pages/admin/PromotionDetail";
 import EventCreate from "./pages/admin/EventCreate";
 import EventEdit from "./pages/admin/EventEdit";
 import EventDetailAdmin from "./pages/admin/EventDetail";
-import ScrollToTop from "./components/ScrollToTop"; // Import sẵn có của bạn
+import Booking from "./pages/Booking";
+import OrderHistory from "./pages/OrderHistory";
+import OrderDetail from "./pages/OrderDetail";
+import ScrollToTop from "./components/ScrollToTop";
 import "./styles/responsive.css";
+
 // Component bảo vệ route cho admin
 function AdminRoute({ children }) {
   const { user } = useAuth();
@@ -48,7 +52,6 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        {/* 🟢 ĐẶT SCROLLTOTOP Ở ĐÂY (NGAY DƯỚI BROWSERROUTER) */}
         <ScrollToTop />
 
         <Routes>
@@ -61,6 +64,9 @@ function App() {
             <Route path="/events/:id" element={<EventDetail />} />
             <Route path="/promotions" element={<PromotionsPage />} />
             <Route path="/users" element={<UserList />} />
+            <Route path="/booking" element={<Booking />} />
+            <Route path="/orders" element={<OrderHistory />} />
+            <Route path="/order/:id" element={<OrderDetail />} />
           </Route>
 
           {/* Trang auth — KHÔNG có Header/Footer */}

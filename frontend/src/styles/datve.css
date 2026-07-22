@@ -1,0 +1,386 @@
+/* ==========================================================================
+   CSS TRANG ĐẶT VÉ ĐỒNG BỘ STYLE TRANG GAMES (HG PLAYGROUND)
+   ========================================================================== */
+
+.cart-page-modern {
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* ─── 1. BANNER TRÀN LỀ CHUẨN TRANG GAMES ─── */
+.cart-hero-section {
+  position: relative;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.cart-hero-bg {
+  width: calc(100vw - 40px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  height: 50vh;
+  min-height: 360px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: 24px;
+}
+
+.cart-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(12, 16, 26, 0.82) 0%,
+    rgba(12, 16, 26, 0.5) 100%
+  );
+  z-index: 1;
+  border-radius: 24px;
+}
+
+.cart-hero-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  padding: 0 40px;
+}
+
+.cart-hero-tagline {
+  display: inline-block;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--primary-color, #ff4081);
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.cart-hero-title {
+  font-size: 42px;
+  font-weight: 900;
+  margin-bottom: 12px;
+  color: #ffffff !important;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.cart-hero-desc {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 600px;
+  line-height: 1.6;
+}
+
+/* ─── 2. KHU VỰC NỘI DUNG ĐẶT VÉ ─── */
+.cart-list-section {
+  padding: 50px 0 80px 0;
+}
+
+.cart-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.cart-header-bar h3 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Khung trắng bo góc chuẩn Modern Card */
+.modern-cart-box {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(12, 16, 26, 0.05);
+  border: 1px solid #e2e8f0;
+  margin-bottom: 24px;
+}
+
+.modern-cart-box h4 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+
+/* ─── 3. BẢNG DỮ LIỆU ĐẶT VÉ CHUẨN TINH TẾ ─── */
+.modern-cart-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.modern-cart-table th {
+  background-color: #f8fafc;
+  color: #475569;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modern-cart-table th:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.modern-cart-table th:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.modern-cart-table td {
+  padding: 16px;
+  vertical-align: middle;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 14px;
+  color: #334155;
+}
+
+/* Badges */
+.badge-gate {
+  background: #e0f2fe;
+  color: #0284c7;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.badge-combo {
+  background: #f3e8ff;
+  color: #9333ea;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.combo-info {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+  font-weight: normal;
+  margin-top: 4px;
+}
+
+/* Buttons */
+.btn-modern-primary {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff !important;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-modern-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-qty-minus,
+.btn-qty-plus {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-qty-minus:hover,
+.btn-qty-plus:hover {
+  background: #e2e8f0;
+}
+
+.btn-qty-delete {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-left: 6px;
+}
+
+.btn-checkout-action {
+  width: 100%;
+  padding: 14px;
+  background: var(--primary-color, #ff4081);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 10px 20px rgba(255, 64, 129, 0.25);
+  transition: all 0.3s;
+}
+
+.btn-checkout-action:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(255, 64, 129, 0.35);
+}
+
+.btn-checkout-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── SUMMARY CHEKOUT ─── */
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: #475569;
+}
+
+.summary-row.total {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+  padding-top: 16px;
+  border-top: 2px dashed #e2e8f0;
+  margin-top: 16px;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .cart-hero-title {
+    font-size: 32px;
+  }
+}
+/* ─── BỔ SUNG KHU VỰC MÃ GIẢM GIÁ (COUPON) ─── */
+.coupon-box {
+  margin: 18px 0;
+  padding: 14px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+}
+
+.coupon-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.coupon-form {
+  display: flex;
+  gap: 8px;
+}
+
+.coupon-input {
+  flex: 1;
+  height: 40px !important;
+  font-size: 13px !important;
+  text-transform: uppercase;
+}
+
+.btn-coupon-apply {
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-coupon-apply:hover:not(:disabled) {
+  background: var(--primary-color, #ff4081);
+}
+
+.btn-coupon-apply:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.coupon-msg {
+  font-size: 12px;
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-weight: 600;
+}
+
+.msg-success {
+  color: #10b981;
+}
+
+.msg-error {
+  color: #ef4444;
+}
+
+.user-info-box {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 12px;
+  margin: 20px 0;
+  font-size: 13px;
+  color: #475569;
+}
+.cart-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+/* ==========================================================================
+   HIỆU ỨNG XUẤT HIỆN SMOOTH CHO TRANG BOOKING
+   ========================================================================== */
+
+/* ==========================================================================
+   HIỆU ỨNG XUẤT HIỆN DÀNH RIÊNG CHO NỘI DUNG DƯỚI BANNER
+   ========================================================================== */
+
+/* Giữ nguyên trang để Header & Banner đứng yên */
+.cart-page-modern {
+  opacity: 1;
+}
+
+/* Chỉ áp dụng hiệu ứng trượt hiện cho khu vực danh sách vé & thanh toán */
+.cart-list-section {
+  opacity: 0;
+  animation: contentSectionAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.15s; /* Xuất hiện mượt mà ngay sau khi Banner cố định */
+}
+
+@keyframes contentSectionAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(25px); /* Trượt nhẹ từ dưới lên */
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -2,17 +2,21 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Ticket, TicketStatus } from './entities/ticket.entity';
 import { TicketScan, ScanType } from './entities/ticket-scan.entity';
-import { GateTicket } from './entities/gate-ticket.entity';
+
+import { Order, OrderStatus } from './entities/order.entity';
+import { OrderItem } from './entities/order-item.entity';
 import { FilterTicketsDto } from './dto/filter-tickets.dto';
 import { ScanTicketDto } from './dto/scan-ticket.dto';
 import { FilterRevenueDto } from './dto/filter-revenue.dto';
 import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
+import { GateTicket, GateTicketStatus } from './entities/gate-ticket.entity';
 @Injectable()
 export class TicketsService {
   constructor(
@@ -22,6 +26,10 @@ export class TicketsService {
     private readonly ticketScanRepository: Repository<TicketScan>,
     @InjectRepository(GateTicket)
     private readonly gateTicketRepository: Repository<GateTicket>,
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+    @InjectRepository(OrderItem)
+    private readonly orderItemRepository: Repository<OrderItem>,
   ) {}
 
   // Lấy danh sách vé đã bán (chỉ lấy vé thuộc đơn đã PAID)
@@ -420,5 +428,305 @@ export class TicketsService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  // ==================== CART / ORDER METHODS ====================
+
+  // Lấy hoặc tạo order PENDING cho user
+  async getOrCreatePendingOrder(userId: number): Promise<Order> {
+    let order = await this.orderRepository.findOne({
+      where: { userId, status: OrderStatus.PENDING },
+    });
+
+    if (!order) {
+      const newOrder = this.orderRepository.create({
+        userId,
+        status: OrderStatus.PENDING,
+        totalPrice: 0,
+      });
+      order = await this.orderRepository.save(newOrder);
+    }
+
+    return order;
+  }
+
+  // Lấy danh sách gate tickets đang hoạt động
+  async getGateTickets(): Promise<GateTicket[]> {
+    return this.gateTicketRepository.find({
+      where: { status: GateTicketStatus.ACTIVE }, // ✅ dùng enum thay vì chuỗi 'ACTIVE'
+      order: { id: 'ASC' },
+    });
+  }
+
+  // Thêm vé cổng vào giỏ hàng
+  async addGateToCart(userId: number, gateTicketId: number): Promise<Order> {
+    const order = await this.getOrCreatePendingOrder(userId);
+    const gateTicket = await this.gateTicketRepository.findOne({
+      where: { id: gateTicketId },
+    });
+
+    if (!gateTicket) {
+      throw new NotFoundException('Vé cổng không tồn tại');
+    }
+
+    let orderItem = await this.orderItemRepository.findOne({
+      where: { orderId: order.id, gateTicketId },
+    });
+
+    if (orderItem) {
+      orderItem.quantity += 1;
+      await this.orderItemRepository.save(orderItem);
+    } else {
+      orderItem = this.orderItemRepository.create({
+        orderId: order.id,
+        gateTicketId,
+        quantity: 1,
+        price: gateTicket.price,
+      });
+      await this.orderItemRepository.save(orderItem);
+    }
+
+    await this.updateOrderTotal(order.id);
+
+    const updatedOrder = await this.orderRepository.findOne({
+      where: { id: order.id },
+    });
+    if (!updatedOrder) {
+      throw new NotFoundException('Order not found sau khi cập nhật');
+    }
+    return updatedOrder;
+  }
+
+  // Cập nhật số lượng vé trong giỏ
+  async updateCartItemQuantity(
+    itemId: number,
+    action: 'plus' | 'minus',
+  ): Promise<void> {
+    const item = await this.orderItemRepository.findOne({
+      where: { id: itemId },
+    });
+
+    if (!item) {
+      throw new NotFoundException('Item không tồn tại');
+    }
+
+    if (action === 'plus') {
+      item.quantity += 1;
+      await this.orderItemRepository.save(item);
+    } else if (action === 'minus') {
+      if (item.quantity <= 1) {
+        await this.orderItemRepository.delete(itemId);
+      } else {
+        item.quantity -= 1;
+        await this.orderItemRepository.save(item);
+      }
+    }
+
+    // Cập nhật tổng tiền
+    await this.updateOrderTotal(item.orderId);
+  }
+
+  // Xóa item khỏi giỏ hàng
+  async deleteCartItem(itemId: number): Promise<void> {
+    const item = await this.orderItemRepository.findOne({
+      where: { id: itemId },
+    });
+
+    if (!item) {
+      throw new NotFoundException('Item không tồn tại');
+    }
+
+    const orderId = item.orderId;
+    await this.orderItemRepository.delete(itemId);
+    await this.updateOrderTotal(orderId);
+  }
+
+  // Lấy thông tin giỏ hàng
+  async getCart(userId: number) {
+    const order = await this.getOrCreatePendingOrder(userId);
+
+    const items = await this.orderItemRepository
+      .createQueryBuilder('item')
+      .leftJoinAndSelect('item.gateTicket', 'gateTicket')
+      .where('item.orderId = :orderId', { orderId: order.id })
+      .getMany();
+
+    const baseTotal = await this.calculateBaseTotalOnly(order.id);
+    const discount = await this.getDiscountByOrder(order.id);
+    const finalTotal = Math.max(0, baseTotal - discount);
+
+    return {
+      order,
+      items: items.map((item) => ({
+        id: item.id,
+        gateTicketId: item.gateTicketId,
+        name: item.gateTicket?.name || 'Unknown',
+        isCombo: item.gateTicket?.isCombo || false,
+        admitsAdult: item.gateTicket?.admitsAdult || 0,
+        admitsChild: item.gateTicket?.admitsChild || 0,
+        quantity: item.quantity,
+        price: item.price,
+        total: item.price * item.quantity,
+      })),
+      baseTotal,
+      discount,
+      finalTotal,
+    };
+  }
+
+  // Lấy lịch sử đơn hàng đã thanh toán
+  async getOrderHistory(userId: number) {
+    const orders = await this.orderRepository.find({
+      where: { userId, status: OrderStatus.PAID },
+      order: { paidAt: 'DESC' },
+    });
+
+    return Promise.all(
+      orders.map(async (order) => {
+        const items = await this.orderItemRepository
+          .createQueryBuilder('item')
+          .leftJoinAndSelect('item.gateTicket', 'gateTicket')
+          .where('item.orderId = :orderId', { orderId: order.id })
+          .getMany();
+
+        const discount = await this.getDiscountByOrder(order.id);
+
+        return {
+          id: order.id,
+          totalPrice: order.totalPrice,
+          discount,
+          finalTotal: order.totalPrice,
+
+          status: order.status,
+          createdAt: order.createdAt,
+          paidAt: order.paidAt,
+          items: items.map((item) => ({
+            name: item.gateTicket?.name || 'Unknown',
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        };
+      }),
+    );
+  }
+
+  // Lấy chi tiết đơn hàng
+  async getOrderDetail(orderId: number, userId: number) {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, userId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Đơn hàng không tồn tại');
+    }
+
+    const items = await this.orderItemRepository
+      .createQueryBuilder('item')
+      .leftJoinAndSelect('item.gateTicket', 'gateTicket')
+      .where('item.orderId = :orderId', { orderId: order.id })
+      .getMany();
+
+    const discount = await this.getDiscountByOrder(order.id);
+
+    return {
+      id: order.id,
+      totalPrice: order.totalPrice,
+      discount,
+      finalTotal: order.totalPrice,
+      status: order.status,
+      createdAt: order.createdAt,
+      paidAt: order.paidAt,
+      items: items.map((item) => ({
+        id: item.id,
+        gateTicketId: item.gateTicketId,
+        name: item.gateTicket?.name || 'Unknown',
+        isCombo: item.gateTicket?.isCombo || false,
+        admitsAdult: item.gateTicket?.admitsAdult || 0,
+        admitsChild: item.gateTicket?.admitsChild || 0,
+        quantity: item.quantity,
+        price: item.price,
+        total: item.price * item.quantity,
+      })),
+    };
+  }
+
+  // Thanh toán đơn hàng
+  async checkout(orderId: number, userId: number) {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, userId, status: OrderStatus.PENDING },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Đơn hàng không tồn tại hoặc đã thanh toán');
+    }
+
+    // Kiểm tra giỏ hàng không trống
+    const itemCount = await this.orderItemRepository.count({
+      where: { orderId: order.id },
+    });
+
+    if (itemCount === 0) {
+      throw new BadRequestException('Giỏ hàng trống');
+    }
+
+    // Simulate payment success - trong thực tế sẽ gọi API thanh toán
+    const paymentSuccess = true;
+
+    if (paymentSuccess) {
+      // Cập nhật trạng thái đơn hàng
+      order.status = OrderStatus.PAID;
+      order.paidAt = new Date();
+
+      // Tính lại total sau khi áp dụng khuyến mãi
+      const baseTotal = await this.calculateBaseTotalOnly(order.id);
+      const discount = await this.getDiscountByOrder(order.id);
+      order.totalPrice = Math.max(0, baseTotal - discount);
+
+      await this.orderRepository.save(order);
+
+      // Generate tickets
+      await this.generateByOrder(order.id);
+
+      return { success: true, orderId: order.id };
+    } else {
+      order.status = OrderStatus.FAILED;
+      await this.orderRepository.save(order);
+      throw new BadRequestException('Thanh toán thất bại');
+    }
+  }
+
+  // Helper: Cập nhật tổng tiền đơn hàng
+  private async updateOrderTotal(orderId: number): Promise<void> {
+    const result = await this.orderItemRepository
+      .createQueryBuilder('item')
+      .select('SUM(item.quantity * item.price)', 'total')
+      .where('item.orderId = :orderId', { orderId })
+      .getRawOne();
+
+    const total = parseFloat(result?.total || '0');
+
+    await this.orderRepository.update(orderId, { totalPrice: total });
+  }
+
+  // Helper: Tính tổng tiền gốc (chưa giảm)
+  private async calculateBaseTotalOnly(orderId: number): Promise<number> {
+    const result = await this.orderItemRepository
+      .createQueryBuilder('item')
+      .select('SUM(item.quantity * item.price)', 'total')
+      .where('item.orderId = :orderId', { orderId })
+      .getRawOne();
+
+    return parseFloat(result?.total || '0');
+  }
+
+  // Helper: Lấy discount của đơn hàng
+  private async getDiscountByOrder(orderId: number): Promise<number> {
+    const result = await this.orderRepository.manager.query(
+      `SELECT COALESCE(discount_amount, 0) as discount
+       FROM promotion_order WHERE order_id = ? LIMIT 1`,
+      [orderId],
+    );
+
+    return parseFloat(result[0]?.discount || '0');
   }
 }

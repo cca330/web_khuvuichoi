@@ -87,7 +87,7 @@
   display: block;
   font-size: 15px;
   font-weight: 700; /* Tăng độ đậm */
-  color: rgba(1, 255, 94, 0.8) !important;
+  color: rgba(255, 255, 255, 0.8) !important;
   text-decoration: none !important;
   letter-spacing: 0.05em;
   padding: 8px 0;

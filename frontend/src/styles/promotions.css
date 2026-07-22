@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CSS CHO TRANG KHUYẾN MÃI (PROMOTIONS PAGE)
+   CSS TRANG KHUYẾN MÃI (PROMOTIONS PAGE) - HOÀN THIỆN LẠI GIAO DIỆN
    ========================================================================== */
 
 .promotions-page-modern {
@@ -7,7 +7,7 @@
   min-height: 100vh;
 }
 
-/* Banner đỉnh trang giải quyết triệt để lỗi đè chữ vào Menu */
+/* ─── 1. BANNER TRÀN LỀ CỐ ĐỊNH ─── */
 .promotions-hero-section {
   position: relative;
   overflow: hidden;
@@ -18,8 +18,8 @@
   width: calc(100vw - 40px) !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  height: 50vh;
-  min-height: 350px;
+  height: 48vh;
+  min-height: 340px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -52,37 +52,61 @@
   display: inline-block;
   font-size: 13px;
   text-transform: uppercase;
-  color: var(--primary-color);
+  color: #ff4081;
   letter-spacing: 2px;
   font-weight: 700;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 
 .promotions-hero-title {
-  font-size: 48px;
+  font-size: 42px;
   font-weight: 900;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   color: #ffffff !important;
   text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .promotions-hero-desc {
-  font-size: 18px;
+  font-size: 16px;
   color: rgba(255, 255, 255, 0.85);
-  max-width: 600px;
+  max-width: 580px;
   line-height: 1.6;
 }
 
-/* Khu vực danh sách thẻ khuyến mãi */
+/* ─── 2. NỘI DUNG VOUCHER (CÓ ANIMATION TỰ ĐỘNG CỰC MƯỢT) ─── */
 .promotions-list-section {
-  padding: 80px 0;
+  padding: 50px 0 80px 0;
+  opacity: 0;
+  animation: promoSectionAppear 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: 0.15s;
+}
+
+@keyframes promoSectionAppear {
+  0% {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header bar ngang chứa Tiêu đề và Nút quay lại */
+.promotions-header-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .promotions-section-title {
-  font-size: 28px;
-  font-weight: 800;
-  color: var(--dark-color);
-  margin-bottom: 40px;
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
   position: relative;
   display: inline-block;
 }
@@ -90,82 +114,101 @@
 .promotions-section-title::after {
   content: "";
   position: absolute;
-  left: 50%;
-  bottom: -10px;
-  transform: translateX(-50%);
-  width: 50px;
+  left: 0;
+  bottom: -6px;
+  width: 40px;
   height: 3px;
-  background: var(--primary-color);
+  background: #ff4081;
   border-radius: 10px;
 }
 
-/* Thiết kế Grid hệ thống */
+.btn-back-booking {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #0f172a;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.btn-back-booking:hover {
+  background: #ff4081;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 64, 129, 0.3);
+}
+
+/* ─── 3. LƯỚI THẺ PROMOTIONS ─── */
 .promotions-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 24px;
-  margin-top: 20px;
 }
 
-/* Voucher Card dạng răng cưa vé xem phim siêu nghệ thuật */
 .modern-promo-card {
   background: #ffffff;
   border-radius: 20px;
-  box-shadow: var(--site-shadow);
-  border: 1px solid var(--border-color);
+  box-shadow: 0 8px 25px rgba(15, 23, 42, 0.05);
+  border: 1px solid #e2e8f0;
   overflow: hidden;
   position: relative;
   display: flex;
   flex-direction: column;
   transition:
-    transform 0.3s,
-    box-shadow 0.3s;
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .modern-promo-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(12, 16, 26, 0.1);
+  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.1);
 }
 
-/* Vết cắt tròn hai bên giống tấm vé thực tế */
+/* Vết cắt vé răng cưa */
 .modern-promo-card::before,
 .modern-promo-card::after {
   content: "";
   position: absolute;
-  bottom: 65px; /* Ngay vị trí phân cách với footer */
-  width: 16px;
-  height: 16px;
-  background: #f8fafc; /* Trùng màu nền trang */
+  bottom: 60px;
+  width: 18px;
+  height: 18px;
+  background: #f8fafc;
   border-radius: 50%;
   z-index: 3;
-  border: 1px solid var(--border-color);
+  border: 1px solid #e2e8f0;
 }
 
 .modern-promo-card::before {
-  left: -9px;
+  left: -10px;
 }
 
 .modern-promo-card::after {
-  right: -9px;
+  right: -10px;
 }
 
 .promo-card-header {
-  padding: 24px 24px 12px 24px;
+  padding: 20px 20px 12px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px dashed #e2e8f0;
+  border-bottom: 1px dashed #cbd5e1;
 }
 
 .promo-code-title {
-  font-family: "Courier New", Courier, monospace;
-  font-size: 20px;
-  font-weight: 900;
-  color: var(--dark-color);
+  font-family: monospace;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
   background: #f1f5f9;
-  padding: 4px 12px;
+  padding: 4px 10px;
   border-radius: 8px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed #94a3b8;
   letter-spacing: 1px;
 }
 
@@ -175,14 +218,15 @@
   text-transform: uppercase;
   padding: 4px 10px;
   border-radius: 50px;
-  background: rgba(16, 185, 129, 0.1);
-  color: #10b981;
+  background: #dcfce7;
+  color: #15803d;
 }
 
 .promo-card-body {
-  padding: 24px;
+  padding: 20px;
   display: flex;
-  gap: 20px;
+  align-items: center;
+  gap: 16px;
   flex-grow: 1;
 }
 
@@ -191,17 +235,17 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--primary-color) 0%, #ff7e9d 100%);
+  background: linear-gradient(135deg, #ff4081 0%, #ff7e9d 100%);
   color: #ffffff;
   border-radius: 16px;
-  width: 80px;
-  height: 80px;
+  width: 76px;
+  height: 76px;
   flex-shrink: 0;
-  box-shadow: 0 8px 16px rgba(255, 91, 132, 0.2);
+  box-shadow: 0 6px 16px rgba(255, 64, 129, 0.25);
 }
 
 .promo-discount-value {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 900;
   line-height: 1;
 }
@@ -209,15 +253,13 @@
 .promo-discount-label {
   font-size: 9px;
   font-weight: 800;
-  letter-spacing: 0.5px;
   margin-top: 2px;
 }
 
 .promo-info-details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  justify-content: center;
+  gap: 6px;
 }
 
 .promo-info-item {
@@ -227,13 +269,13 @@
 }
 
 .promo-info-item strong {
-  color: var(--dark-color);
+  color: #0f172a;
   font-weight: 700;
 }
 
 .promo-card-footer {
-  padding: 16px 24px;
-  background: #fafafa;
+  padding: 14px 20px;
+  background: #f8fafc;
   border-top: 1px solid #f1f5f9;
   z-index: 2;
 }
@@ -243,7 +285,7 @@
   height: 40px;
   border: none;
   border-radius: 10px;
-  background: var(--dark-color);
+  background: #0f172a;
   color: #ffffff;
   font-weight: 700;
   font-size: 13px;
@@ -252,34 +294,33 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-promo-copy:hover {
-  background: var(--primary-color);
-  transform: translateY(-2px);
+  background: #ff4081;
 }
 
-/* Hộp trống không có khuyến mãi */
+/* Khung thông báo rỗng */
 .modern-no-promos {
   text-align: center;
-  padding: 80px 20px;
+  padding: 60px 20px;
   background: #ffffff;
-  border-radius: 24px;
-  box-shadow: var(--site-shadow);
-  max-width: 600px;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(80, 248, 68, 0.04);
+  max-width: 500px;
   margin: 0 auto;
 }
 
 .no-promos-icon {
-  font-size: 54px;
-  margin-bottom: 20px;
+  font-size: 48px;
+  margin-bottom: 16px;
 }
 
 .modern-no-promos h4 {
   font-weight: 800;
-  color: var(--dark-color);
-  margin-bottom: 12px;
+  color: #0f172a;
+  margin-bottom: 8px;
 }
 
 .modern-no-promos p {
@@ -287,7 +328,7 @@
   font-size: 14px;
 }
 
-/* Popup Toast thông báo Copy thành công */
+/* Toast Popup */
 .copy-toast {
   position: fixed;
   bottom: 30px;
@@ -299,7 +340,7 @@
   font-size: 14px;
   font-weight: 700;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  z-index: 1000;
+  z-index: 100000;
   transform: translateY(100px);
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -313,12 +354,6 @@
   opacity: 1;
 }
 
-.copy-toast i {
+.copy-toast svg {
   color: #10b981;
-}
-
-@media (max-width: 767px) {
-  .promotions-hero-title {
-    font-size: 36px;
-  }
 }

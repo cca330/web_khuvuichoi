@@ -38,17 +38,14 @@ const Header = () => {
             </li>
             <li
               className={
-                isActive("/tickets") || location.pathname.startsWith("/tickets")
+                isActive("/booking") ||
+                isActive("/orders") ||
+                isActive("/order")
                   ? "active"
                   : ""
               }
             >
-              <Link to={user?.role === "ADMIN" ? "/admin/tickets" : "/tickets"}>
-                Đặt vé
-              </Link>
-            </li>
-            <li className={isActive("/promotions") ? "active" : ""}>
-              <Link to="/promotions">Khuyến Mãi</Link>
+              <Link to={user ? "/booking" : "/login"}>Vé & Combo</Link>
             </li>
           </ul>
         </nav>
