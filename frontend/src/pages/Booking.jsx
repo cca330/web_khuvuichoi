@@ -102,27 +102,35 @@ const Booking = () => {
     e.preventDefault();
     if (!couponCode.trim()) return;
 
+    // Kiểm tra xem có order chưa
+    if (!cartData || !cartData.order || !cartData.order.id) {
+      setCouponMessage({
+        type: "error",
+        text: "Vui lòng chọn vé trước khi áp dụng mã giảm giá!",
+      });
+      return;
+    }
+
     try {
       setApplyingCoupon(true);
       setCouponMessage(null);
 
-      // Gọi API áp dụng mã giảm giá (Nếu api cartApi có sẵn hàm applyCoupon)
-      if (cartApi.applyCoupon) {
-        const res = await cartApi.applyCoupon(user.id, couponCode.trim());
-        if (res?.data?.cart) {
-          setCartData(res.data.cart);
-        } else {
-          await refreshCartOnly();
-        }
+      // Gọi API áp dụng mã giảm giá (Promotion Service)
+      const res = await cartApi.applyCoupon(couponCode.trim(), cartData.order.id);
+
+      if (res?.data?.success) {
+        // Áp dụng thành công - refresh giỏ hàng để lấy discount mới
+        await refreshCartOnly();
+
         setCouponMessage({
           type: "success",
-          text: "Áp dụng mã giảm giá thành công!",
+          text: `Áp dụng mã giảm giá thành công! Giảm ${res.data.discount?.toLocaleString() || 0}đ`,
         });
       } else {
-        // Mock giả lập thông báo nếu backend chưa cập nhật endpoint
+        // API trả về lỗi
         setCouponMessage({
-          type: "success",
-          text: `Đã áp dụng mã: ${couponCode.toUpperCase()}`,
+          type: "error",
+          text: res?.data?.message || "Mã giảm giá không hợp lệ!",
         });
       }
     } catch (error) {
@@ -131,6 +139,7 @@ const Booking = () => {
         type: "error",
         text:
           error?.response?.data?.message ||
+          error?.data?.message ||
           "Mã giảm giá không hợp lệ hoặc đã hết hạn!",
       });
     } finally {

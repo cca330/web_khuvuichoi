@@ -40,6 +40,11 @@ const cartApi = {
   checkout: (userId, orderId) => {
     return axiosClient.post(`/tickets/checkout?userId=${userId}`, { orderId });
   },
+
+  // Áp dụng mã giảm giá
+  applyCoupon: (code, orderId) => {
+    return axiosClient.post('/promotions/apply', { code, orderId });
+  },
 };
 
 export default cartApi;
