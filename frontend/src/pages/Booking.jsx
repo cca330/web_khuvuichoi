@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import cartApi from "../api/cartApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/datve.css";
+import promotionsApi from "../api/promotionsApi";
 
 const Booking = () => {
   const { user } = useAuth();
