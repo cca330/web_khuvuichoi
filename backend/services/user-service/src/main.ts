@@ -6,10 +6,12 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  // Enable CORS cho microservices
+  // Enable CORS - only allow API Gateway
   app.enableCors({
-    origin: true,
+    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:8000'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
   
   // Global validation pipe

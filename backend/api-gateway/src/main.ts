@@ -3,11 +3,22 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 import { AppModule } from './app.module';
 import { createProxyMiddleware } from 'http-proxy-middleware';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
-  app.enableCors();
+  // Rate Limiting - Protect against brute force & DoS
+  app.useGlobalGuards(app.get(ThrottlerGuard));
+
+  // CORS - Only allow specific origins
+  app.enableCors({
+    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
 
   // Serve ảnh đã upload — truy cập qua http://localhost:8000/uploads/<tên file>
   app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads' });

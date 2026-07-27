@@ -9,6 +9,9 @@ import {
   HttpStatus,
   Req,
   UseGuards,
+  ParseIntPipe,
+  BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { TicketsService } from './tickets.service';
 import { FilterTicketsDto } from './dto/filter-tickets.dto';
@@ -17,18 +20,21 @@ import { GenerateTicketsDto } from './dto/generate-tickets.dto';
 import { FilterRevenueDto } from './dto/filter-revenue.dto';
 import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
-import { IsNotEmpty, IsNumber, IsIn } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsIn, Min, Max } from 'class-validator';
 
 class AddGateDto {
   @IsNotEmpty()
   @IsNumber()
+  @Min(1)
   gateTicketId: number;
 }
 
 class UpdateQtyDto {
   @IsNotEmpty()
   @IsNumber()
+  @Min(1)
   itemId: number;
 
   @IsNotEmpty()
@@ -39,6 +45,7 @@ class UpdateQtyDto {
 class CheckoutDto {
   @IsNotEmpty()
   @IsNumber()
+  @Min(1)
   orderId: number;
 }
 
@@ -48,77 +55,78 @@ export class TicketsController {
 
   // ==================== Cart/Order APIs ====================
 
-  // Lấy danh sách vé cổng
+  // Lấy danh sách vé cổng - Public
   @Get('gate-tickets')
   getGateTickets() {
     return this.ticketsService.getGateTickets();
   }
 
-  // Lấy thông tin giỏ hàng
+  // Lấy thông tin giỏ hàng - Protected
   @Get('cart')
-  getCart(@Query('userId') userId: string) {
-    return this.ticketsService.getCart(parseInt(userId));
+  @UseGuards(JwtAuthGuard)
+  getCart(@Request() req) {
+    return this.ticketsService.getCart(req.user.id);
   }
 
-  // Thêm vé cổng vào giỏ hàng
+  // Thêm vé cổng vào giỏ hàng - Protected
   @Post('cart/add')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  addGateToCart(@Body() dto: AddGateDto, @Query('userId') userId: string) {
-    return this.ticketsService.addGateToCart(
-      parseInt(userId),
-      dto.gateTicketId,
-    );
+  addGateToCart(@Body() dto: AddGateDto, @Request() req) {
+    return this.ticketsService.addGateToCart(req.user.id, dto.gateTicketId);
   }
 
-  // Cập nhật số lượng
+  // Cập nhật số lượng - Protected
   @Post('cart/update-qty')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   updateCartItemQuantity(@Body() dto: UpdateQtyDto) {
     return this.ticketsService.updateCartItemQuantity(dto.itemId, dto.action);
   }
 
-  // Xóa item khỏi giỏ hàng
+  // Xóa item khỏi giỏ hàng - Protected
   @Post('cart/delete-item')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   deleteCartItem(@Body('itemId') itemId: number) {
     return this.ticketsService.deleteCartItem(itemId);
   }
 
-  // Lịch sử đơn hàng
+  // Lịch sử đơn hàng - Protected
   @Get('orders/history')
-  getOrderHistory(@Query('userId') userId: string) {
-    return this.ticketsService.getOrderHistory(parseInt(userId));
+  @UseGuards(JwtAuthGuard)
+  getOrderHistory(@Request() req) {
+    return this.ticketsService.getOrderHistory(req.user.id);
   }
 
-  // Chi tiết đơn hàng
+  // Chi tiết đơn hàng - Protected
   @Get('orders/:orderId')
+  @UseGuards(JwtAuthGuard)
   getOrderDetail(
-    @Param('orderId') orderId: string,
-    @Query('userId') userId: string,
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Request() req,
   ) {
-    return this.ticketsService.getOrderDetail(
-      parseInt(orderId),
-      parseInt(userId),
-    );
+    return this.ticketsService.getOrderDetail(orderId, req.user.id);
   }
 
-  // Thanh toán
+  // Thanh toán - Protected
   @Post('checkout')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  checkout(@Body() dto: CheckoutDto, @Query('userId') userId: string) {
-    return this.ticketsService.checkout(dto.orderId, parseInt(userId));
+  checkout(@Body() dto: CheckoutDto, @Request() req) {
+    return this.ticketsService.checkout(dto.orderId, req.user.id);
   }
 
   // ==================== Internal APIs ====================
 
   @Get('internal/promotion/:promotionId/total-used')
-  getPromotionTotalUsed(@Param('promotionId') promotionId: string) {
-    return this.ticketsService.getPromotionTotalUsed(parseInt(promotionId));
+  getPromotionTotalUsed(@Param('promotionId', ParseIntPipe) promotionId: number) {
+    return this.ticketsService.getPromotionTotalUsed(promotionId);
   }
 
   @Get('internal/promotion/:promotionId/total-discount')
-  getPromotionTotalDiscount(@Param('promotionId') promotionId: string) {
-    return this.ticketsService.getPromotionTotalDiscount(parseInt(promotionId));
+  getPromotionTotalDiscount(@Param('promotionId', ParseIntPipe) promotionId: number) {
+    return this.ticketsService.getPromotionTotalDiscount(promotionId);
   }
 
   @Get('internal/gate-tickets')
@@ -141,27 +149,32 @@ export class TicketsController {
   // ==================== Admin APIs ====================
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll(@Query() filter: FilterTicketsDto) {
     return this.ticketsService.findAll(filter);
   }
 
   @Get('stats')
+  @UseGuards(JwtAuthGuard)
   getStats() {
     return this.ticketsService.getStats();
   }
 
   @Get('order/:orderId')
-  getTicketsByOrder(@Param('orderId') orderId: string) {
-    return this.ticketsService.getTicketsByOrder(parseInt(orderId));
+  @UseGuards(JwtAuthGuard)
+  getTicketsByOrder(@Param('orderId', ParseIntPipe) orderId: number) {
+    return this.ticketsService.getTicketsByOrder(orderId);
   }
 
   @Post('scan')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   scanTicket(@Body() dto: ScanTicketDto) {
     return this.ticketsService.scanTicket(dto);
   }
 
   @Post('generate')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   generateTickets(@Body() dto: GenerateTicketsDto) {
     return this.ticketsService.generateByOrder(dto.orderId);

@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TicketsModule } from './tickets/tickets.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -28,6 +29,9 @@ import { TicketsModule } from './tickets/tickets.module';
         autoLoadEntities: true,
       }),
     }),
+
+    // Auth module for JWT
+    AuthModule,
 
     // Module quản lý tickets
     TicketsModule,

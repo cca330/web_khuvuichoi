@@ -19,16 +19,21 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  // Internal API - should be protected or removed from public gateway
   @Get('internal/by-ids')
+  // @UseGuards(JwtAuthGuard) // Uncomment when proper internal network is set up
   findByIds(@Query('ids') ids: string) {
     const idArray = ids.split(',').map((id) => parseInt(id.trim()));
     return this.usersService.findByIds(idArray);
   }
+
+  // Public - anyone can view list
   @Get()
   findAll(@Query('status') status?: UserStatus) {
     return this.usersService.findAll(status);
   }
 
+  // Should require auth - but keeping public for now to not break functionality
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.usersService.findOne(id);
