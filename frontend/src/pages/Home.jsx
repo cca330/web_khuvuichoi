@@ -163,7 +163,7 @@ const Home = () => {
               </p>
               <div className="hero-buttons-wrapper anim-group-4">
                 <Link to="/booking" className="btn-hero-booking">
-                  Đặt Vé Ngay
+                  Đặt Vé Ngay 123
                 </Link>
                 <a href="#games-section" className="btn-hero-explore">
                   Khám Phá Trò Chơi
