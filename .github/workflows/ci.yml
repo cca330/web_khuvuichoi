@@ -28,9 +28,6 @@ jobs:
           echo "${{ secrets.REVENUE_SERVICE_ENV }}" > backend/services/revenue-service/.env
           echo "${{ secrets.API_GATEWAY_ENV }}" > backend/api-gateway/.env
 
-      - name: Show project
-        run: ls -la
-
       - name: Validate Docker Compose
         run: docker compose config
 
@@ -40,21 +37,25 @@ jobs:
       - name: Start Containers
         run: docker compose up -d
 
-      - name: Wait for services to be ready
-        run: sleep 20
-
       - name: Show Running Containers
         run: docker ps -a
 
-      - name: Check API Gateway Health
-        run: curl -f http://localhost:8000 || exit 1
+      - name: Wait for API Gateway to be ready
+        run: |
+          for i in {1..30}; do
+            if curl -sf http://localhost:8000 > /dev/null; then
+              echo "API Gateway is up!"
+              exit 0
+            fi
+            echo "Waiting for API Gateway... ($i/30)"
+            sleep 5
+          done
+          echo "API Gateway did not become ready in time"
+          docker compose logs
+          exit 1
 
       - name: Check Frontend Health
-        run: curl -f http://localhost:80 || exit 1
-
-      - name: Show logs on failure
-        if: failure()
-        run: docker compose logs
+        run: curl -f http://localhost:80 || (docker compose logs frontend && exit 1)
 
       - name: Stop Containers
         if: always()
