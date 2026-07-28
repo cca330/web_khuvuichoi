@@ -18,6 +18,16 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Create .env files
+        run: |
+          echo "${{ secrets.USER_SERVICE_ENV }}" > backend/services/user-service/.env
+          echo "${{ secrets.TICKET_SERVICE_ENV }}" > backend/services/ticket-service/.env
+          echo "${{ secrets.PROMOTION_SERVICE_ENV }}" > backend/services/promotion-service/.env
+          echo "${{ secrets.GAME_SERVICE_ENV }}" > backend/services/game-service/.env
+          echo "${{ secrets.EVENT_SERVICE_ENV }}" > backend/services/event-service/.env
+          echo "${{ secrets.REVENUE_SERVICE_ENV }}" > backend/services/revenue-service/.env
+          echo "${{ secrets.API_GATEWAY_ENV }}" > backend/api-gateway/.env
+
       - name: Show project
         run: ls -la
 
