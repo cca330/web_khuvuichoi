@@ -1,10 +1,10 @@
-name: PHP Docker CI
+name: Docker Build CI
+
 on:
   push:
     branches:
       - main
       - develop
-
   pull_request:
     branches:
       - main
@@ -12,11 +12,9 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-
       - name: Checkout source
         uses: actions/checkout@v4
 
@@ -26,21 +24,27 @@ jobs:
       - name: Validate Docker Compose
         run: docker compose config
 
-      - name: Build Docker Image
+      - name: Build Docker Images
         run: docker compose build
 
       - name: Start Containers
         run: docker compose up -d
 
-      - name: Wait MySQL
-        run: sleep 15
+      - name: Wait for services to be ready
+        run: sleep 20
 
       - name: Show Running Containers
         run: docker ps -a
 
-      - name: PHP Syntax Check
-        run: |
-          find . -name "*.php" -exec php -l {} \;
+      - name: Check API Gateway Health
+        run: curl -f http://localhost:8000 || exit 1
+
+      - name: Check Frontend Health
+        run: curl -f http://localhost:80 || exit 1
+
+      - name: Show logs on failure
+        if: failure()
+        run: docker compose logs
 
       - name: Stop Containers
         if: always()

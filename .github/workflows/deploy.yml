@@ -3,7 +3,7 @@ name: Deploy
 on:
   workflow_run:
     workflows:
-      - "PHP Docker CI"
+      - "Docker Build CI"
     types:
       - completed
 
@@ -29,17 +29,25 @@ jobs:
           cd /home/user1/Doan
           docker compose up -d --build
 
+      - name: Wait for services to be ready
+        run: sleep 20
+
       - name: Show running containers
         run: |
           docker ps
 
-      - name: Health Check
+      - name: Health Check - Frontend
         run: |
-          curl http://localhost:8080
+          curl -f http://localhost:80 || exit 1
+
+      - name: Health Check - API Gateway
+        run: |
+          curl -f http://localhost:8000 || exit 1
 
       - name: Check MySQL
         run: |
           docker exec mysql_container mysqladmin ping -h localhost -p123456
+
       - name: Deploy Finished
         run: |
           echo "=================================="

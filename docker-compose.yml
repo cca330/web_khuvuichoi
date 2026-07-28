@@ -18,6 +18,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - theme-park-net
 
   # ---------- BACKEND SERVICES ----------
   user-service:
@@ -25,6 +27,9 @@ services:
     container_name: user-service
     restart: unless-stopped
     env_file: ./backend/services/user-service/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "3001:3001"
     networks:
@@ -35,6 +40,9 @@ services:
     container_name: ticket-service
     restart: unless-stopped
     env_file: ./backend/services/ticket-service/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "3002:3002"
     networks:
@@ -45,6 +53,8 @@ services:
     container_name: revenue-service
     restart: unless-stopped
     env_file: ./backend/services/revenue-service/.env
+    depends_on:
+      - ticket-service
     ports:
       - "3003:3003"
     networks:
@@ -55,6 +65,11 @@ services:
     container_name: promotion-service
     restart: unless-stopped
     env_file: ./backend/services/promotion-service/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      ticket-service:
+        condition: service_started
     ports:
       - "3004:3004"
     networks:
@@ -65,6 +80,11 @@ services:
     container_name: game-service
     restart: unless-stopped
     env_file: ./backend/services/game-service/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
+      user-service:
+        condition: service_started
     ports:
       - "3005:3005"
     networks:
@@ -75,6 +95,9 @@ services:
     container_name: event-service
     restart: unless-stopped
     env_file: ./backend/services/event-service/.env
+    depends_on:
+      mysql:
+        condition: service_healthy
     ports:
       - "3006:3006"
     networks:
