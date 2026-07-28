@@ -10,70 +10,251 @@ on:
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
     runs-on: self-hosted
 
     steps:
-      - name: Go to project
-        run: |
-          cd /home/user1/Doan
-          pwd
+      # ============================
+      # Update source code
+      # ============================
 
       - name: Update source
         run: |
           cd /home/user1/Doan
+
+          echo "Updating source..."
+
+          git checkout main
           git fetch origin
           git reset --hard origin/main
+
+          echo "Current commit:"
+          git log -1
+
+      # ============================
+      # Create environment files
+      # ============================
 
       - name: Create .env files
         run: |
           cd /home/user1/Doan
 
-          echo "${{ secrets.USER_SERVICE_ENV }}" > backend/services/user-service/.env
-          echo "${{ secrets.TICKET_SERVICE_ENV }}" > backend/services/ticket-service/.env
-          echo "${{ secrets.PROMOTION_SERVICE_ENV }}" > backend/services/promotion-service/.env
-          echo "${{ secrets.GAME_SERVICE_ENV }}" > backend/services/game-service/.env
-          echo "${{ secrets.EVENT_SERVICE_ENV }}" > backend/services/event-service/.env
-          echo "${{ secrets.REVENUE_SERVICE_ENV }}" > backend/services/revenue-service/.env
-          echo "${{ secrets.API_GATEWAY_ENV }}" > backend/api-gateway/.env
+
+          printf "%s" "${{ secrets.USER_SERVICE_ENV }}" \
+          > backend/services/user-service/.env
+
+
+          printf "%s" "${{ secrets.TICKET_SERVICE_ENV }}" \
+          > backend/services/ticket-service/.env
+
+
+          printf "%s" "${{ secrets.PROMOTION_SERVICE_ENV }}" \
+          > backend/services/promotion-service/.env
+
+
+          printf "%s" "${{ secrets.GAME_SERVICE_ENV }}" \
+          > backend/services/game-service/.env
+
+
+          printf "%s" "${{ secrets.EVENT_SERVICE_ENV }}" \
+          > backend/services/event-service/.env
+
+
+          printf "%s" "${{ secrets.REVENUE_SERVICE_ENV }}" \
+          > backend/services/revenue-service/.env
+
+
+          printf "%s" "${{ secrets.API_GATEWAY_ENV }}" \
+          > backend/api-gateway/.env
+
+
+          echo ".env files created"
+
+      # ============================
+      # Verify env
+      # ============================
 
       - name: Verify .env files
         run: |
+
+          echo "Checking files..."
+
+          ls -la /home/user1/Doan/backend/services/user-service
           ls -la /home/user1/Doan/backend/services/revenue-service
           ls -la /home/user1/Doan/backend/api-gateway
 
-      - name: Build and start Docker
+      # ============================
+      # Stop old containers
+      # ============================
+
+      - name: Stop old containers
         run: |
           cd /home/user1/Doan
-          docker compose up -d --build
 
-      - name: Wait for services to be ready
-        run: sleep 20
+          docker compose down || true
 
-      - name: Show running containers
+      # ============================
+      # Build Docker images
+      # ============================
+
+      - name: Build Docker images
         run: |
+
+          cd /home/user1/Doan
+
+
+          echo "Building images..."
+
+
+          docker compose build --pull
+
+      # ============================
+      # Start containers
+      # ============================
+
+      - name: Start Docker services
+        run: |
+
+          cd /home/user1/Doan
+
+
+          docker compose up -d
+
+      # ============================
+      # Wait services
+      # ============================
+
+      - name: Wait for services
+        run: |
+
+          echo "Waiting services..."
+
+
+          for i in {1..12}
+          do
+
+            if curl -f http://localhost:8000
+            then
+
+              echo "API Gateway is ready"
+              exit 0
+
+            fi
+
+
+            echo "Waiting API Gateway..."
+
+            sleep 5
+
+          done
+
+
+          echo "API Gateway failed"
+
+          docker compose ps
+
+          docker compose logs --tail=100
+
+          exit 1
+
+      # ============================
+      # Container status
+      # ============================
+
+      - name: Show containers
+        run: |
+
           docker ps
 
-      - name: Health Check - Frontend
-        run: |
-          curl -f http://localhost:80 || (docker compose logs frontend && exit 1)
+      # ============================
+      # Frontend health check
+      # ============================
 
-      - name: Health Check - API Gateway
+      - name: Health Check Frontend
         run: |
-          curl -f http://localhost:8000 || (docker compose logs api-gateway && exit 1)
+
+          curl -f http://localhost:80 \
+          || (
+
+          cd /home/user1/Doan
+
+          docker compose logs frontend
+
+          exit 1
+
+          )
+
+      # ============================
+      # API Gateway health check
+      # ============================
+
+      - name: Health Check API Gateway
+        run: |
+
+          curl -f http://localhost:8000 \
+          || (
+
+          cd /home/user1/Doan
+
+          docker compose logs api-gateway
+
+          exit 1
+
+          )
+
+      # ============================
+      # MySQL check
+      # ============================
 
       - name: Check MySQL
         run: |
-          docker exec mysql_container mysqladmin ping -h localhost -p123456
+
+          docker exec mysql_container \
+          mysqladmin ping \
+          -h localhost \
+          -p123456
+
+      # ============================
+      # Show logs if failed
+      # ============================
 
       - name: Show logs if deploy failed
         if: failure()
+
         run: |
+
           cd /home/user1/Doan
+
+
+          echo "===== Docker Status ====="
+
           docker compose ps
-          docker compose logs --tail=100
+
+
+          echo "===== Logs ====="
+
+          docker compose logs --tail=200
+
+      # ============================
+      # Cleanup
+      # ============================
+
+      - name: Docker cleanup
+        if: success()
+
+        run: |
+
+          docker image prune -f
+
+      # ============================
+      # Finish
+      # ============================
 
       - name: Deploy Finished
         run: |
+
           echo "=================================="
+
           echo " Deploy Success "
+
           echo "=================================="
