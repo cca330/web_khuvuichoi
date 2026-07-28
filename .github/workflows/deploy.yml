@@ -24,6 +24,23 @@ jobs:
           git fetch origin
           git reset --hard origin/main
 
+      - name: Create .env files
+        run: |
+          cd /home/user1/Doan
+
+          echo "${{ secrets.USER_SERVICE_ENV }}" > backend/services/user-service/.env
+          echo "${{ secrets.TICKET_SERVICE_ENV }}" > backend/services/ticket-service/.env
+          echo "${{ secrets.PROMOTION_SERVICE_ENV }}" > backend/services/promotion-service/.env
+          echo "${{ secrets.GAME_SERVICE_ENV }}" > backend/services/game-service/.env
+          echo "${{ secrets.EVENT_SERVICE_ENV }}" > backend/services/event-service/.env
+          echo "${{ secrets.REVENUE_SERVICE_ENV }}" > backend/services/revenue-service/.env
+          echo "${{ secrets.API_GATEWAY_ENV }}" > backend/api-gateway/.env
+
+      - name: Verify .env files
+        run: |
+          ls -la /home/user1/Doan/backend/services/revenue-service
+          ls -la /home/user1/Doan/backend/api-gateway
+
       - name: Build and start Docker
         run: |
           cd /home/user1/Doan
@@ -38,15 +55,22 @@ jobs:
 
       - name: Health Check - Frontend
         run: |
-          curl -f http://localhost:80 || exit 1
+          curl -f http://localhost:80 || (docker compose logs frontend && exit 1)
 
       - name: Health Check - API Gateway
         run: |
-          curl -f http://localhost:8000 || exit 1
+          curl -f http://localhost:8000 || (docker compose logs api-gateway && exit 1)
 
       - name: Check MySQL
         run: |
           docker exec mysql_container mysqladmin ping -h localhost -p123456
+
+      - name: Show logs if deploy failed
+        if: failure()
+        run: |
+          cd /home/user1/Doan
+          docker compose ps
+          docker compose logs --tail=100
 
       - name: Deploy Finished
         run: |
