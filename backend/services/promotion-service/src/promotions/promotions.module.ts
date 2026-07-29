@@ -6,12 +6,14 @@ import { PromotionsController } from './promotions.controller';
 import { PromotionsService } from './promotions.service';
 import { Promotion } from './entities/promotion.entity';
 import { PromotionGateTicket } from './entities/promotion-gate-ticket.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Promotion, PromotionGateTicket]),
     HttpModule,
     ConfigModule,
+    AuthModule,
   ],
   controllers: [PromotionsController],
   providers: [PromotionsService],

@@ -8,12 +8,17 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { UserStatus } from '../users/entities/user.entity';
+import { SecurityLogger } from './security-logger.service';
+
+// In-memory store for refresh tokens (nên dùng Redis trong production)
+const refreshTokens = new Map<string, { userId: number; username: string; expiresAt: Date }>();
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly securityLogger: SecurityLogger,
   ) {}
 
   // Tương ứng handleLogin() trong PHP
@@ -21,26 +26,89 @@ export class AuthService {
     const user = await this.usersService.findByUsernameWithPassword(username);
 
     if (!user) {
+      this.securityLogger.logLoginFailed(username, 'User not found');
       throw new UnauthorizedException('Sai username hoặc mật khẩu');
     }
 
     if (user.status === UserStatus.BLOCK) {
+      this.securityLogger.logLoginFailed(username, 'Account blocked');
       throw new UnauthorizedException('Tài khoản đã bị khóa');
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
+      this.securityLogger.logLoginFailed(username, 'Invalid password');
       throw new UnauthorizedException('Sai username hoặc mật khẩu');
     }
 
-    // Thay cho $_SESSION cũ — cấp JWT token
+    this.securityLogger.logLoginSuccess(username, user.id);
+
+    // Access token ngắn hạn (15 phút)
     const payload = { sub: user.id, username: user.username, role: user.role };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+
+    // Refresh token dài hạn (7 ngày)
+    const refreshToken = this.jwtService.sign(
+      { sub: user.id, type: 'refresh' },
+      { expiresIn: '7d' }
+    );
+
+    // Lưu refresh token
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    refreshTokens.set(refreshToken, { userId: user.id, username: user.username, expiresAt });
 
     return {
       accessToken,
+      refreshToken,
+      expiresIn: 900, // 15 phút = 900 giây
       user: { id: user.id, username: user.username, role: user.role },
     };
+  }
+
+  // Refresh token để lấy access token mới
+  async refreshToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
+
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Invalid token type');
+      }
+
+      const stored = refreshTokens.get(refreshToken);
+      if (!stored) {
+        throw new UnauthorizedException('Refresh token không tồn tại');
+      }
+
+      if (stored.expiresAt < new Date()) {
+        refreshTokens.delete(refreshToken);
+        throw new UnauthorizedException('Refresh token đã hết hạn');
+      }
+
+      // Lấy user info
+      const user = await this.usersService.findOne(stored.userId);
+      if (!user || user.status === UserStatus.BLOCK) {
+        throw new UnauthorizedException('User không hợp lệ');
+      }
+
+      // Tạo access token mới
+      const newPayload = { sub: user.id, username: user.username, role: user.role };
+      const newAccessToken = this.jwtService.sign(newPayload, { expiresIn: '15m' });
+
+      return {
+        accessToken: newAccessToken,
+        expiresIn: 900,
+      };
+    } catch (error) {
+      if (error instanceof UnauthorizedException) throw error;
+      throw new UnauthorizedException('Refresh token không hợp lệ');
+    }
+  }
+
+  // Đăng xuất - xóa refresh token
+  async logout(refreshToken: string) {
+    refreshTokens.delete(refreshToken);
+    return { message: 'Đăng xuất thành công' };
   }
 
   // Tương ứng handleRegister() trong PHP

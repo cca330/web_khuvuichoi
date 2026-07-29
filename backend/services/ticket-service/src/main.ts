@@ -2,24 +2,40 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
-  // Enable CORS cho microservices
+
+  // Security headers với Helmet
+  app.use(helmet());
+
+  // CORS - chỉ cho phép API Gateway localhost
   app.enableCors({
-    origin: true,
+    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:8000'],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
-  
+
+  // Rate Limiting với Throttler
+  app.useGlobalGuards(app.get(ThrottlerGuard));
+
   // Global validation pipe
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
   );
-  
+
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
-  
+
   const port = process.env.PORT ?? 3002;
   await app.listen(port);
   console.log(`ticket-service đang chạy ở port ${port}`);

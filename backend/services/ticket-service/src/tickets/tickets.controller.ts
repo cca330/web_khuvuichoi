@@ -21,6 +21,8 @@ import { FilterRevenueDto } from './dto/filter-revenue.dto';
 import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 
 import { IsNotEmpty, IsNumber, IsIn, Min, Max } from 'class-validator';
 
@@ -149,32 +151,37 @@ export class TicketsController {
   // ==================== Admin APIs ====================
 
   @Get()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   findAll(@Query() filter: FilterTicketsDto) {
     return this.ticketsService.findAll(filter);
   }
 
   @Get('stats')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   getStats() {
     return this.ticketsService.getStats();
   }
 
   @Get('order/:orderId')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   getTicketsByOrder(@Param('orderId', ParseIntPipe) orderId: number) {
     return this.ticketsService.getTicketsByOrder(orderId);
   }
 
   @Post('scan')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN', 'STAFF')
   @HttpCode(HttpStatus.OK)
   scanTicket(@Body() dto: ScanTicketDto) {
     return this.ticketsService.scanTicket(dto);
   }
 
   @Post('generate')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   @HttpCode(HttpStatus.OK)
   generateTickets(@Body() dto: GenerateTicketsDto) {
     return this.ticketsService.generateByOrder(dto.orderId);

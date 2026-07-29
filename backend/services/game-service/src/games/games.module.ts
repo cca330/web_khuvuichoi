@@ -6,12 +6,14 @@ import { GamesController } from './games.controller';
 import { GamesService } from './games.service';
 import { Game } from './entities/game.entity';
 import { GameImage } from './entities/game-image.entity';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Game, GameImage]),
     HttpModule,
     ConfigModule,
+    AuthModule,
   ],
   controllers: [GamesController],
   providers: [GamesService],
