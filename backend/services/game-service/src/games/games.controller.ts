@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
@@ -28,18 +28,18 @@ export class GamesController {
   }
 
   @Get(':id')
-  findById(@Param('id') id: string) {
-    return this.gamesService.findById(parseInt(id));
+  findById(@Param('id', ParseIntPipe) id: number) {
+    return this.gamesService.findById(id);
   }
 
   @Get(':id/stats')
-  getStats(@Param('id') id: string) {
-    return this.gamesService.getStats(parseInt(id));
+  getStats(@Param('id', ParseIntPipe) id: number) {
+    return this.gamesService.getStats(id);
   }
 
   @Get(':id/feedbacks')
-  getFeedbacks(@Param('id') id: string) {
-    return this.gamesService.getFeedbacks(parseInt(id));
+  getFeedbacks(@Param('id', ParseIntPipe) id: number) {
+    return this.gamesService.getFeedbacks(id);
   }
 
   @Post()
@@ -53,29 +53,29 @@ export class GamesController {
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  update(@Param('id') id: string, @Body() dto: UpdateGameDto) {
-    return this.gamesService.update(parseInt(id), dto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateGameDto) {
+    return this.gamesService.update(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @HttpCode(HttpStatus.OK)
-  delete(@Param('id') id: string) {
-    return this.gamesService.delete(parseInt(id));
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.gamesService.delete(id);
   }
 
   @Put(':id/close')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  close(@Param('id') id: string) {
-    return this.gamesService.close(parseInt(id));
+  close(@Param('id', ParseIntPipe) id: number) {
+    return this.gamesService.close(id);
   }
 
   @Put(':id/open')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  open(@Param('id') id: string) {
-    return this.gamesService.open(parseInt(id));
+  open(@Param('id', ParseIntPipe) id: number) {
+    return this.gamesService.open(id);
   }
 }

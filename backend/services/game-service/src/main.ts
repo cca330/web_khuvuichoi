@@ -21,9 +21,6 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Rate Limiting với Throttler
-  app.useGlobalGuards(app.get(ThrottlerGuard));
-
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({
@@ -38,7 +35,7 @@ async function bootstrap() {
   expressApp.use(express.json({ limit: '50mb' }));
   expressApp.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-  const port = process.env.PORT ?? 3003;
+  const port = process.env.PORT ?? 3006;
   await app.listen(port);
   console.log(`game-service đang chạy ở port ${port}`);
 }

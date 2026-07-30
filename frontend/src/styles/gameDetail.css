@@ -1,0 +1,346 @@
+/* ==========================================================================
+   CSS CHO TRANG CHI TIẾT TRÒ CHƠI (GAME DETAIL PAGE - HERO STYLE)
+   ========================================================================== */
+
+.gdetail-page-modern {
+  background: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Banner đỉnh trang tương tự Events */
+.gdetail-hero-section {
+  position: relative;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.gdetail-hero-bg {
+  width: calc(100vw - 40px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  height: 48vh;
+  min-height: 360px;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  position: relative;
+  border-radius: 24px;
+}
+
+.gdetail-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(12, 16, 26, 0.88) 0%,
+    rgba(12, 16, 26, 0.5) 100%
+  );
+  z-index: 1;
+  border-radius: 24px;
+}
+
+.gdetail-hero-content {
+  position: relative;
+  z-index: 2;
+  color: #ffffff;
+  padding: 0 40px;
+}
+
+.gdetail-hero-tagline {
+  display: inline-block;
+  font-size: 13px;
+  text-transform: uppercase;
+  color: #3b82f6;
+  letter-spacing: 2px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.gdetail-hero-title {
+  font-size: 42px;
+  font-weight: 900;
+  margin-bottom: 14px;
+  color: #ffffff !important;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.gdetail-hero-desc {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 650px;
+  line-height: 1.6;
+}
+
+/* Khu vực Nội dung chính */
+.gdetail-content-section {
+  padding: 40px 0 80px 0;
+}
+
+.gdetail-top-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.btn-gdetail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none !important;
+  transition: color 0.2s;
+}
+
+.btn-gdetail-back:hover {
+  color: #2563eb;
+}
+
+.gdetail-status-badge {
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.status-open {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-closed {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Card Thông tin chính */
+.gdetail-main-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+  border: 1px solid #e2e8f0;
+}
+
+.gdetail-main-img-box {
+  width: 100%;
+  height: 320px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f1f5f9;
+}
+
+.gdetail-main-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gdetail-thumbs-list {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.thumb-item {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.thumb-item.active {
+  border-color: #2563eb;
+}
+
+.thumb-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gdetail-info-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.gdetail-info-desc {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.gdetail-specs-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #f8fafc;
+  padding: 20px;
+  border-radius: 14px;
+}
+
+.spec-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.spec-icon {
+  font-size: 20px;
+  color: #2563eb;
+}
+
+.spec-label {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.spec-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.spec-value.highlight {
+  color: #2563eb;
+}
+
+/* Card Thống Kê */
+.gdetail-stat-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #e2e8f0;
+}
+
+.stat-icon-wrap {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.icon-blue {
+  background: #eff6ff;
+  color: #2563eb;
+}
+.icon-yellow {
+  background: #fefce8;
+  color: #eab308;
+}
+
+.stat-title {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.stat-number {
+  font-size: 24px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Card Đánh Giá */
+.gdetail-reviews-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 30px;
+  border: 1px solid #e2e8f0;
+}
+
+.gdetail-section-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 20px;
+}
+
+.gdetail-review-item {
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.review-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-circle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.username {
+  display: block;
+  font-weight: 700;
+  color: #0f172a;
+  font-size: 14px;
+}
+
+.review-date {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.star-icon {
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+.star-icon.filled {
+  color: #f59e0b;
+}
+
+.review-content {
+  margin: 0;
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.gdetail-loading-screen,
+.gdetail-error-screen {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}

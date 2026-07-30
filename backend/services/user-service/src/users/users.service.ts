@@ -29,7 +29,16 @@ export class UsersService {
   }
 
   // Tương ứng getById() trong PHP
-  async findOne(id: number) {
+  // Thêm tham số requestUser để kiểm tra quyền - user chỉ xem được profile của mình, ADMIN xem được tất cả
+  async findOne(id: number, requestUser?: { id: number; role: string }) {
+    // Nếu có requestUser, kiểm tra quyền
+    if (requestUser) {
+      // Chỉ cho phép xem profile của chính mình hoặc ADMIN
+      if (requestUser.id !== id && requestUser.role !== 'ADMIN') {
+        throw new NotFoundException(`Không tìm thấy user id=${id}`);
+      }
+    }
+
     const user = await this.userRepository.findOne({
       where: { id },
       select: {

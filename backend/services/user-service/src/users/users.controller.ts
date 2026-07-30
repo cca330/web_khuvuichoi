@@ -7,6 +7,7 @@ import {
   Query,
   ParseIntPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UpdateStatusDto } from './dto/update-status.dto';
@@ -19,24 +20,27 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  // Internal API - should be protected or removed from public gateway
+  // Internal API - protected by JWT
   @Get('internal/by-ids')
-  // @UseGuards(JwtAuthGuard) // Uncomment when proper internal network is set up
+  @UseGuards(JwtAuthGuard)
   findByIds(@Query('ids') ids: string) {
     const idArray = ids.split(',').map((id) => parseInt(id.trim()));
     return this.usersService.findByIds(idArray);
   }
 
-  // Public - anyone can view list
+  // Admin only - view all users
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
   findAll(@Query('status') status?: UserStatus) {
     return this.usersService.findAll(status);
   }
 
-  // Should require auth - but keeping public for now to not break functionality
+  // User can only view their own profile, or ADMIN can view any
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.usersService.findOne(id);
+  @UseGuards(JwtAuthGuard)
+  findOne(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    return this.usersService.findOne(id, req.user);
   }
 
   @Patch(':id/status')

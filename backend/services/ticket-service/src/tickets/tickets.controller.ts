@@ -119,30 +119,35 @@ export class TicketsController {
     return this.ticketsService.checkout(dto.orderId, req.user.id);
   }
 
-  // ==================== Internal APIs ====================
+  // ==================== Internal APIs - Protected ====================
 
   @Get('internal/promotion/:promotionId/total-used')
+  @UseGuards(JwtAuthGuard)
   getPromotionTotalUsed(@Param('promotionId', ParseIntPipe) promotionId: number) {
     return this.ticketsService.getPromotionTotalUsed(promotionId);
   }
 
   @Get('internal/promotion/:promotionId/total-discount')
+  @UseGuards(JwtAuthGuard)
   getPromotionTotalDiscount(@Param('promotionId', ParseIntPipe) promotionId: number) {
     return this.ticketsService.getPromotionTotalDiscount(promotionId);
   }
 
   @Get('internal/gate-tickets')
+  @UseGuards(JwtAuthGuard)
   getActiveGateTickets() {
     return this.ticketsService.getActiveGateTickets();
   }
 
   @Post('internal/calculate-base-total')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   calculateBaseTotal(@Body() dto: CalculateBaseTotalDto) {
     return this.ticketsService.calculateBaseTotal(dto);
   }
 
   @Post('internal/apply-promotion-order')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   applyPromotionOrder(@Body() dto: ApplyPromotionOrderDto) {
     return this.ticketsService.applyPromotionToOrder(dto);
@@ -187,23 +192,27 @@ export class TicketsController {
     return this.ticketsService.generateByOrder(dto.orderId);
   }
 
-  // ===== API nội bộ, chỉ dành cho revenue-service gọi sang =====
+  // ===== API nội bộ, chỉ dành cho revenue-service gọi sang - Protected =====
   @Get('internal/revenue/years')
+  @UseGuards(JwtAuthGuard)
   getRevenueYears() {
     return this.ticketsService.getAvailableYears();
   }
 
   @Get('internal/revenue/monthly')
+  @UseGuards(JwtAuthGuard)
   getRevenueMonthly(@Query() filter: FilterRevenueDto) {
     return this.ticketsService.getMonthlyRevenue(filter);
   }
 
   @Get('internal/revenue/gate-details')
+  @UseGuards(JwtAuthGuard)
   getRevenueGateDetails() {
     return this.ticketsService.getGateTicketDetails();
   }
 
   @Get('internal/revenue/overview')
+  @UseGuards(JwtAuthGuard)
   getRevenueOverview() {
     return this.ticketsService.getOverview();
   }

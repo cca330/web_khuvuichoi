@@ -1,9 +1,17 @@
 # Build stage
 FROM node:20-alpine AS build
 WORKDIR /app
+
+# Copy package files
 COPY package*.json ./
-RUN npm ci --only=production
+
+# Install ALL dependencies (including devDependencies for @nestjs/cli)
+RUN npm ci
+
+# Copy source code
 COPY . .
+
+# Build the app
 RUN npm run build
 
 # Production stage - Non-root user
@@ -14,10 +22,14 @@ WORKDIR /app
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Copy files
+# Copy only production dependencies and built files
 COPY --from=build --chown=nodejs:nodejs /app/package*.json ./
 COPY --from=build --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=build --chown=nodejs:nodejs /app/node_modules ./node_modules
+
+# Install production dependencies only
+RUN npm ci --only=production && \
+    npm cache clean --force
 
 # Switch to non-root user
 USER nodejs

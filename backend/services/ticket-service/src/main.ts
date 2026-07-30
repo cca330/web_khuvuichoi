@@ -20,9 +20,6 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Rate Limiting với Throttler
-  app.useGlobalGuards(app.get(ThrottlerGuard));
-
   // Global validation pipe
   app.useGlobalPipes(
     new ValidationPipe({

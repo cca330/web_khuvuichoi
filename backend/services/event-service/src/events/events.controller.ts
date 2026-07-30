@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, UseGuards, ParseIntPipe } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -18,13 +18,13 @@ export class EventsController {
   }
 
   @Get(':id')
-  findById(@Param('id') id: string) {
-    return this.eventsService.findById(parseInt(id));
+  findById(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.findById(id);
   }
 
   @Get(':id/schedules')
-  getSchedules(@Param('id') id: string) {
-    return this.eventsService.getSchedulesByEventId(parseInt(id));
+  getSchedules(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.getSchedulesByEventId(id);
   }
 
   @Post()
@@ -46,30 +46,30 @@ export class EventsController {
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  update(@Param('id') id: string, @Body() dto: UpdateEventDto) {
-    return this.eventsService.update(parseInt(id), dto);
+  update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateEventDto) {
+    return this.eventsService.update(id, dto);
   }
 
   @Put('schedules/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  updateSchedule(@Param('id') id: string, @Body() dto: UpdateEventScheduleDto) {
-    return this.eventsService.updateSchedule(parseInt(id), dto);
+  updateSchedule(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateEventScheduleDto) {
+    return this.eventsService.updateSchedule(id, dto);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @HttpCode(HttpStatus.OK)
-  delete(@Param('id') id: string) {
-    return this.eventsService.delete(parseInt(id));
+  delete(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.delete(id);
   }
 
   @Delete('schedules/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
   @HttpCode(HttpStatus.OK)
-  deleteSchedule(@Param('id') id: string) {
-    return this.eventsService.deleteSchedule(parseInt(id));
+  deleteSchedule(@Param('id', ParseIntPipe) id: number) {
+    return this.eventsService.deleteSchedule(id);
   }
 }

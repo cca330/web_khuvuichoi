@@ -14,33 +14,45 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
 
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
-
-    let message: string | string[] = 'Internal server error';
-
+    // Xử lý riêng lỗi rate limit (429)
     if (exception instanceof HttpException) {
+      const status = exception.getStatus();
+
+      if (status === HttpStatus.TOO_MANY_REQUESTS) {
+        return response.status(status).json({
+          statusCode: status,
+          timestamp: new Date().toISOString(),
+          path: request.url,
+          error: 'Too Many Requests',
+          message: 'Bạn đã thao tác quá nhanh. Vui lòng chờ vài giây rồi thử lại.',
+        });
+      }
+
+      // Xử lý các lỗi HttpException khác
       const exceptionResponse = exception.getResponse();
+
+      let message: string | string[] = exception.message;
 
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
-      } else if (
-        typeof exceptionResponse === 'object' &&
-        exceptionResponse !== null
-      ) {
+      } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
         message = (exceptionResponse as any).message ?? exception.message;
-      } else {
-        message = exception.message;
       }
+
+      return response.status(status).json({
+        statusCode: status,
+        timestamp: new Date().toISOString(),
+        path: request.url,
+        message,
+      });
     }
 
-    response.status(status).json({
-      statusCode: status,
+    // Xử lý các lỗi không phải HttpException
+    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       timestamp: new Date().toISOString(),
       path: request.url,
-      message,
+      message: 'Internal server error',
     });
   }
 }

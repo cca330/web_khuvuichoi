@@ -20,9 +20,6 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Rate Limiting với Throttler
-  app.useGlobalGuards(app.get(ThrottlerGuard));
-
   // Global validation pipe với transform và sanitization
   app.useGlobalPipes(
     new ValidationPipe({
@@ -36,7 +33,7 @@ async function bootstrap() {
   // Global exception filter
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  const port = process.env.PORT ?? 3000;
+  const port = process.env.PORT ?? 3001;
   await app.listen(port);
   console.log(`user-service đang chạy ở port ${port}`);
 }
