@@ -85,7 +85,7 @@ const GameDetail = () => {
 
   return (
     <div className="gdetail-page-modern">
-      {/* ─── BANNER TRÒ CHƠI HOÀNH TRÁNG (Tương tự Events) ─── */}
+      {/* ─── BANNER TRÒ CHƠI HOÀNH TRÁNG (Tương tự Events) -─── */}
       <section className="gdetail-hero-section">
         <div
           className="gdetail-hero-bg"
