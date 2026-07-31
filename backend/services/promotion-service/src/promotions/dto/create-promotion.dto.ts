@@ -1,4 +1,12 @@
-import { IsNotEmpty, IsNumber, IsDateString, IsArray, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsDateString,
+  IsArray,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
+import { PromotionStatus } from '../entities/promotion.entity';
 
 export class CreatePromotionDto {
   @IsNotEmpty({ message: 'Code không được để trống' })
@@ -12,6 +20,13 @@ export class CreatePromotionDto {
 
   @IsDateString({}, { message: 'End date phải là ngày hợp lệ' })
   endDate: string;
+
+  @IsOptional()
+  description?: string;
+
+  @IsOptional()
+  @IsEnum(PromotionStatus, { message: 'Status phải là ACTIVE hoặc EXPIRED' })
+  status?: PromotionStatus;
 
   @IsOptional()
   @IsArray({ message: 'Gate ticket IDs phải là mảng' })

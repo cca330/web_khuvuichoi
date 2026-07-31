@@ -11,6 +11,11 @@ const promotionsApi = {
     return axiosClient.get(`/promotions/${id}`);
   },
 
+  // Lấy danh sách gate tickets cho phạm vi áp dụng
+  getGateTickets: () => {
+    return axiosClient.get('/promotions/gate-tickets');
+  },
+
   // Tạo promotion mới
   create: (data) => {
     return axiosClient.post('/promotions', data);

@@ -8,15 +8,23 @@ export default function PromotionForm({ initialData, promotionId }) {
   const navigate = useNavigate();
 
   const [gateTickets, setGateTickets] = useState([]);
+  const [loadingTickets, setLoadingTickets] = useState(true);
+
+  // Map đúng gateTicketId từ danh sách PromotionGateTicket mà Backend trả về
+  const initialGateTicketIds = initialData?.gateTickets
+    ? initialData.gateTickets.map((g) => g.gateTicketId)
+    : [];
+
   const [form, setForm] = useState({
     code: initialData?.code || "",
     discount: initialData?.discount || "",
     description: initialData?.description || "",
-    startDate: initialData?.startDate?.slice(0, 10) || "",
-    endDate: initialData?.endDate?.slice(0, 10) || "",
+    startDate: initialData?.startDate ? initialData.startDate.slice(0, 10) : "",
+    endDate: initialData?.endDate ? initialData.endDate.slice(0, 10) : "",
     status: initialData?.status || "ACTIVE",
-    gateTicketIds: initialData?.gateTickets?.map((g) => g.gateTicketId) || [],
+    gateTicketIds: initialGateTicketIds,
   });
+
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -24,12 +32,25 @@ export default function PromotionForm({ initialData, promotionId }) {
     fetchGateTickets();
   }, []);
 
+  // Lấy danh sách loại vé từ endpoint GET /promotions/gate-tickets
   const fetchGateTickets = async () => {
     try {
+      setLoadingTickets(true);
       const res = await promotionsApi.getGateTickets();
-      setGateTickets(res.data);
+
+      // Đảm bảo dữ liệu nhận được luôn là Array
+      const tickets = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      setGateTickets(tickets);
     } catch (err) {
-      console.error("Error fetching gate tickets:", err);
+      console.error(
+        "Lỗi khi lấy danh sách gate tickets từ ticket-service:",
+        err,
+      );
+      setError(
+        "Không thể tải danh sách loại vé. Vui lòng kiểm tra lại ticket-service.",
+      );
+    } finally {
+      setLoadingTickets(false);
     }
   };
 
@@ -55,14 +76,15 @@ export default function PromotionForm({ initialData, promotionId }) {
     setError("");
     setSaving(true);
 
+    // Ép kiểu chuẩn theo CreatePromotionDto & UpdatePromotionDto
     const payload = {
-      code: form.code,
-      discount: parseInt(form.discount),
+      code: form.code.trim(),
+      discount: Number(form.discount),
       description: form.description,
-      startDate: form.startDate,
-      endDate: form.endDate,
+      startDate: form.startDate, // Dạng YYYY-MM-DD
+      endDate: form.endDate, // Dạng YYYY-MM-DD
       status: form.status,
-      gateTicketIds: form.gateTicketIds,
+      gateTicketIds: form.gateTicketIds || [], // Luôn đảm bảo truyền mảng (dù rỗng)
     };
 
     try {
@@ -73,8 +95,12 @@ export default function PromotionForm({ initialData, promotionId }) {
       }
       navigate("/admin/promotions");
     } catch (err) {
+      console.error("Lỗi submit promotion:", err);
+      const msg = err.response?.data?.message;
       setError(
-        err.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại",
+        Array.isArray(msg)
+          ? msg.join(", ")
+          : msg || "Có lỗi xảy ra, vui lòng thử lại",
       );
     } finally {
       setSaving(false);
@@ -129,6 +155,7 @@ export default function PromotionForm({ initialData, promotionId }) {
             value={form.description}
             onChange={handleChange}
             rows={3}
+            placeholder="Mô tả ngắn về chương trình khuyến mãi..."
           />
         </div>
 
@@ -166,20 +193,41 @@ export default function PromotionForm({ initialData, promotionId }) {
           </div>
         )}
 
+        {/* ─── PHẦN CHỌN PHẠM VI ÁP DỤNG (HIỂN THỊ DANH SÁCH VÉ) ─── */}
         <div className="form-group">
           <label>Phạm vi áp dụng (bỏ trống = áp dụng cho tất cả loại vé)</label>
-          <div className="checkbox-list">
-            {gateTickets.map((gt) => (
-              <label key={gt.id} className="checkbox-item">
-                <input
-                  type="checkbox"
-                  checked={form.gateTicketIds.includes(gt.id)}
-                  onChange={() => toggleGateTicket(gt.id)}
-                />
-                {gt.name}
-              </label>
-            ))}
-          </div>
+
+          {loadingTickets ? (
+            <div className="muted" style={{ padding: "8px 0" }}>
+              ⏳ Đang tải danh sách loại vé...
+            </div>
+          ) : gateTickets.length === 0 ? (
+            <div
+              style={{ color: "#f59e0b", fontSize: "14px", padding: "8px 0" }}
+            >
+              ⚠️ Không tìm thấy danh sách loại vé nào từ hệ thống.
+            </div>
+          ) : (
+            <div className="checkbox-list">
+              {gateTickets.map((gt) => {
+                // ticket-service trả về object có id và name
+                const ticketId = gt.id || gt.gateTicketId;
+                const ticketName =
+                  gt.name || gt.ticketName || `Vé #${ticketId}`;
+
+                return (
+                  <label key={ticketId} className="checkbox-item">
+                    <input
+                      type="checkbox"
+                      checked={form.gateTicketIds.includes(ticketId)}
+                      onChange={() => toggleGateTicket(ticketId)}
+                    />
+                    <span>{ticketName}</span>
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {error && <div className="form-error">{error}</div>}

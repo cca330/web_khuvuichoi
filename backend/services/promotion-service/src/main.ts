@@ -13,7 +13,11 @@ async function bootstrap() {
 
   // CORS - chỉ cho phép API Gateway localhost
   app.enableCors({
-    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:8000'],
+    origin: [
+      'http://localhost',
+      'http://localhost:80',
+      'http://localhost:8000',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -29,7 +33,7 @@ async function bootstrap() {
     }),
   );
 
-  const port = process.env.PORT ?? 3005;
+  const port = process.env.PORT ?? 3004;
   await app.listen(port);
   console.log(`promotion-service đang chạy ở port ${port}`);
 }

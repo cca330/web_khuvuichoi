@@ -134,7 +134,6 @@ export class TicketsController {
   }
 
   @Get('internal/gate-tickets')
-  @UseGuards(JwtAuthGuard)
   getActiveGateTickets() {
     return this.ticketsService.getActiveGateTickets();
   }

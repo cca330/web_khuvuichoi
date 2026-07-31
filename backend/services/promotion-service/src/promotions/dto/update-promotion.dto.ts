@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsNumber, IsDateString, IsArray, IsEnum } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsDateString,
+  IsArray,
+  IsEnum,
+  IsOptional,
+} from 'class-validator';
 import { PromotionStatus } from '../entities/promotion.entity';
 
 export class UpdatePromotionDto {
@@ -7,6 +14,9 @@ export class UpdatePromotionDto {
 
   @IsNumber({}, { message: 'Discount phải là số' })
   discount: number;
+
+  @IsOptional()
+  description?: string;
 
   @IsDateString({}, { message: 'Start date phải là ngày hợp lệ' })
   startDate: string;

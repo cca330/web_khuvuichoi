@@ -15,7 +15,11 @@ async function bootstrap() {
 
   // CORS - chỉ cho phép API Gateway localhost
   app.enableCors({
-    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:8000'],
+    origin: [
+      'http://localhost',
+      'http://localhost:80',
+      'http://localhost:8000',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -35,7 +39,7 @@ async function bootstrap() {
   expressApp.use(express.json({ limit: '50mb' }));
   expressApp.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-  const port = process.env.PORT ?? 3006;
+  const port = process.env.PORT ?? 3005;
   await app.listen(port);
   console.log(`game-service đang chạy ở port ${port}`);
 }
