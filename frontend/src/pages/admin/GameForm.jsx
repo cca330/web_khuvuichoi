@@ -29,6 +29,7 @@ export default function GameForm({ initialData, gameId }) {
     status: initialData?.status || "OPEN",
   });
   const [error, setError] = useState("");
+  const [imageError, setImageError] = useState("");
   const [saving, setSaving] = useState(false);
 
   const handleChange = (e) => {
@@ -38,6 +39,11 @@ export default function GameForm({ initialData, gameId }) {
 
   const handleImagesChange = (newImages) => {
     setImages(newImages);
+    setImageError("");
+  };
+
+  const handleImageError = (errorMsg) => {
+    setImageError(errorMsg);
   };
 
   const handleSubmit = async (e) => {

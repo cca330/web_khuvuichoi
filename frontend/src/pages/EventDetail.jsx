@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import eventsApi from "../api/eventsApi";
 import { getImageUrl } from "../utils/imageUtils";
-import "../styles/home.css"; // Chuyển sang dùng chung file style với trang chủ & games
+import "../styles/EventDetail.css"; // Tách biệt CSS riêng
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -17,7 +17,7 @@ const EventDetail = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Hiệu ứng cuộn trang lặp lại chuyên nghiệp
+  // Hiệu ứng cuộn trang reveal
   useEffect(() => {
     if (!loading && event) {
       const observer = new IntersectionObserver(
@@ -32,7 +32,7 @@ const EventDetail = () => {
             }
           });
         },
-        { threshold: 0.1 },
+        { threshold: 0.1 }
       );
 
       const elements = document.querySelectorAll(".scroll-reveal");
@@ -51,18 +51,16 @@ const EventDetail = () => {
       const response = await eventsApi.getById(id);
       setEvent(response.data);
 
-      // Fetch images
       try {
         const imagesRes = await eventsApi.getImages(id);
-        setImages(imagesRes.data);
+        setImages(imagesRes.data || []);
       } catch (error) {
         console.error("Error fetching images:", error);
       }
 
-      // Fetch schedules
       try {
         const schedulesRes = await eventsApi.getSchedules(id);
-        setSchedules(schedulesRes.data);
+        setSchedules(schedulesRes.data || []);
       } catch (error) {
         console.error("Error fetching schedules:", error);
       }
@@ -94,7 +92,7 @@ const EventDetail = () => {
   };
 
   if (loading) {
-    return <div className="loading">Đang tải chi tiết sự kiện...</div>;
+    return <div className="event-detail-loading">Đang tải chi tiết sự kiện...</div>;
   }
 
   if (!event) {
@@ -103,7 +101,7 @@ const EventDetail = () => {
         <div className="error-content">
           <h4>Không tìm thấy sự kiện!</h4>
           <Link to="/events" className="btn-modern-back">
-            Quay lại trang sự kiện
+            <FaArrowLeft /> Quay lại trang sự kiện
           </Link>
         </div>
       </div>
@@ -112,7 +110,7 @@ const EventDetail = () => {
 
   return (
     <div className="event-detail-page">
-      {/* ─── BANNER SỰ KIỆN HOÀNH TRÁNG (Đồng bộ trang chủ) ─── */}
+      {/* ─── BANNER SỰ KIỆN HOÀNH TRÁNG ─── */}
       <section className="event-detail-hero">
         <div
           className="event-hero-bg"
@@ -129,13 +127,17 @@ const EventDetail = () => {
             </span>
             <h1 className="event-hero-title">{event.title}</h1>
             <div className="event-hero-meta">
-              <span className="meta-item">
-                <FaMapMarkerAlt /> {event.location}
-              </span>
-              <span className="meta-item">
-                <FaCalendarAlt />{" "}
-                {new Date(event.startDatetime).toLocaleDateString("vi-VN")}
-              </span>
+              {event.location && (
+                <span className="meta-item">
+                  <FaMapMarkerAlt /> {event.location}
+                </span>
+              )}
+              {event.startDatetime && (
+                <span className="meta-item">
+                  <FaCalendarAlt />{" "}
+                  {new Date(event.startDatetime).toLocaleDateString("vi-VN")}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -149,25 +151,30 @@ const EventDetail = () => {
             <div className="col-lg-8 scroll-reveal mb-5 mb-lg-0">
               <div className="event-main-card">
                 <h3 className="section-subtitle">Chi tiết chương trình</h3>
-                <p className="event-description-text">{event.description}</p>
+                <p className="event-description-text">{event.description || "Chưa có mô tả chi tiết."}</p>
 
                 {/* Grid thời gian chi tiết */}
                 <div className="event-time-grid">
                   <div className="time-box">
                     <FaClock className="icon-start" />
                     <div>
-                      <span>Thời gian bắt đầu</span>
-                      <strong>
-                        {new Date(event.startDatetime).toLocaleString("vi-VN")}
+                      <span className="time-label">Thời gian bắt đầu:</span>
+                      <strong className="time-value">
+                        {event.startDatetime
+                          ? new Date(event.startDatetime).toLocaleString("vi-VN")
+                          : "Chưa cập nhật"}
                       </strong>
                     </div>
                   </div>
+
                   <div className="time-box">
                     <FaClock className="icon-end" />
                     <div>
-                      <span>Thời gian kết thúc</span>
-                      <strong>
-                        {new Date(event.endDatetime).toLocaleString("vi-VN")}
+                      <span className="time-label">Thời gian kết thúc:</span>
+                      <strong className="time-value">
+                        {event.endDatetime
+                          ? new Date(event.endDatetime).toLocaleString("vi-VN")
+                          : "Chưa cập nhật"}
                       </strong>
                     </div>
                   </div>
@@ -179,9 +186,7 @@ const EventDetail = () => {
                 <h3 className="section-subtitle">Hình ảnh sự kiện</h3>
                 {images.length === 0 ? (
                   <div className="empty-box">
-                    <p>
-                      Hình ảnh thực tế về sự kiện sẽ được cập nhật liên tục.
-                    </p>
+                    <p>Hình ảnh thực tế về sự kiện sẽ được cập nhật liên tục.</p>
                   </div>
                 ) : (
                   <div className="event-images-grid">
@@ -208,20 +213,18 @@ const EventDetail = () => {
                   </div>
                 ) : (
                   <div className="timeline-flow">
-                    {schedules.map((schedule, idx) => (
+                    {schedules.map((schedule) => (
                       <div key={schedule.id} className="timeline-item">
                         <div className="timeline-dot"></div>
                         <div className="timeline-content">
                           <span className="timeline-time">
                             {new Date(schedule.scheduleTime).toLocaleTimeString(
                               "vi-VN",
-                              { hour: "2-digit", minute: "2-digit" },
+                              { hour: "2-digit", minute: "2-digit" }
                             )}
                           </span>
                           <h4 className="timeline-heading">{schedule.title}</h4>
-                          <p className="timeline-desc">
-                            {schedule.description}
-                          </p>
+                          <p className="timeline-desc">{schedule.description}</p>
                         </div>
                       </div>
                     ))}

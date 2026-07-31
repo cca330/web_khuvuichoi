@@ -8,8 +8,10 @@ export default function ImageUpload({
   maxImages = 10,
   label = "Chọn ảnh",
   accept = "image/*",
+  onError,
 }) {
   const [previews, setPreviews] = useState([]);
+  const [uploadError, setUploadError] = useState("");
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -22,15 +24,27 @@ export default function ImageUpload({
     const files = Array.from(e.target.files);
     if (!files.length) return;
 
+    setUploadError("");
+
     const currentCount = previews.length;
     if (currentCount + files.length > maxImages) {
-      alert(`Tối đa ${maxImages} ảnh`);
+      const errorMsg = `Tối đa ${maxImages} ảnh. Bạn đang chọn ${files.length} ảnh, đã có ${currentCount} ảnh.`;
+      setUploadError(errorMsg);
+      if (onError) onError(errorMsg);
       return;
     }
 
     const newFilenames = [];
+    let hasError = false;
+
     for (const file of files) {
-      if (!file.type.startsWith("image/")) continue;
+      if (!file.type.startsWith("image/")) {
+        const errorMsg = `${file.name} không phải là file ảnh hợp lệ`;
+        setUploadError(errorMsg);
+        if (onError) onError(errorMsg);
+        hasError = true;
+        continue;
+      }
 
       const formData = new FormData();
       formData.append("file", file);
@@ -40,16 +54,30 @@ export default function ImageUpload({
           method: "POST",
           body: formData,
         });
+
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
         const data = await res.json();
-        newFilenames.push(data.filename);
+        if (data.filename) {
+          newFilenames.push(data.filename);
+        } else {
+          throw new Error("Không nhận được filename từ server");
+        }
       } catch (err) {
-        alert(`Upload ảnh thất bại: ${file.name}`);
+        const errorMsg = `Upload ảnh thất bại: ${file.name} - ${err.message}`;
+        setUploadError(errorMsg);
+        if (onError) onError(errorMsg);
+        hasError = true;
       }
     }
 
-    const updated = [...previews, ...newFilenames];
-    setPreviews(updated);
-    onChange(updated);
+    if (!hasError && newFilenames.length > 0) {
+      const updated = [...previews, ...newFilenames];
+      setPreviews(updated);
+      onChange(updated);
+    }
 
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
@@ -100,6 +128,12 @@ export default function ImageUpload({
           {multiple && <span>(Tối đa {maxImages} ảnh)</span>}
         </div>
       </div>
+
+      {uploadError && (
+        <div className="form-error" style={{ marginTop: "10px" }}>
+          {uploadError}
+        </div>
+      )}
 
       {previews.length > 0 && (
         <div className="image-preview-grid">

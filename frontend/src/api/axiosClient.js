@@ -8,7 +8,9 @@ const axiosClient = axios.create({
 });
 
 axiosClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  // Ưu tiên đọc từ sessionStorage (admin) trước, không có thì đọc localStorage (user thường)
+  const token =
+    sessionStorage.getItem("accessToken") || localStorage.getItem("accessToken");
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
