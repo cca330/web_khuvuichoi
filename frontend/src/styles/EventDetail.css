@@ -1,4 +1,7 @@
-/* ─── CẤU TRÚC VÀ PADDING CHÍNH ─── */
+/* ==========================================================================
+   EVENT DETAIL PAGE - FORM CHUẨN ĐỒNG BỘ TRANG GAMES
+   ========================================================================== */
+
 .event-detail-page {
   width: 100%;
   min-height: 100vh;
@@ -17,64 +20,65 @@
   font-weight: 500;
 }
 
-/* ─── BANNER HERO CÓ CHỨA CẢ NAVBAR MARGIN ─── */
-.event-detail-hero {
+/* ─── BANNER TRÀN VIỀN BO GÓC 24PX (ĐỒNG BỘ 100% TRANG GAMES) ─── */
+.event-detail-hero-section {
   position: relative;
-  width: 100%;
-  min-height: 380px;
-  margin-top: 70px; /* Đẩy xuống để không bị đè bởi Sticky Header */
   overflow: hidden;
+  padding: 0 !important;
 }
 
 .event-hero-bg {
-  position: relative;
-  width: 100%;
-  min-height: 380px;
+  width: calc(100vw - 40px) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  height: 60vh;
+  min-height: 400px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   display: flex;
   align-items: flex-end;
+  position: relative;
+  border-radius: 24px;
   padding-bottom: 40px;
 }
 
 .event-hero-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background: linear-gradient(
-    180deg,
-    rgba(15, 23, 42, 0.4) 0%,
-    rgba(15, 23, 42, 0.85) 100%
+    to top,
+    rgba(12, 16, 26, 0.85) 0%,
+    rgba(12, 16, 26, 0.4) 100%
   );
   z-index: 1;
+  border-radius: 24px;
 }
 
 .event-hero-content {
   position: relative;
   z-index: 2;
   color: #ffffff;
+  padding: 0 40px;
 }
 
 .event-status-badge {
   display: inline-block;
   padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 12px;
 }
 
 .status-coming {
-  background-color: #3b82f6;
+  background-color: #10b981;
   color: #fff;
 }
 .status-ongoing {
-  background-color: #10b981;
+  background-color: #f97316;
   color: #fff;
 }
 .status-completed {
@@ -87,11 +91,12 @@
 }
 
 .event-hero-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #ffffff;
+  font-size: 42px;
+  font-weight: 900;
+  color: #ffffff !important;
   margin-bottom: 14px;
-  line-height: 1.3;
+  line-height: 1.2;
+  text-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .event-hero-meta {
@@ -100,6 +105,7 @@
   gap: 20px;
   font-size: 15px;
   color: #e2e8f0;
+  font-weight: 600;
 }
 
 .meta-item {
@@ -117,18 +123,18 @@
 .event-schedule-card,
 .event-gallery-section {
   background: #ffffff;
-  border-radius: 16px;
+  border-radius: 20px;
   padding: 28px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
   border: 1px solid #e2e8f0;
 }
 
 .section-subtitle {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0f172a;
   margin-bottom: 16px;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid #ff5e7e;
   padding-left: 12px;
 }
 
@@ -156,7 +162,7 @@
   gap: 14px;
   background: #f8fafc;
   padding: 16px;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid #f1f5f9;
 }
 
@@ -182,14 +188,14 @@
 .time-value {
   display: block;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 700;
   color: #0f172a;
 }
 
 /* ─── TIMELINE SCHEDULE ─── */
 .schedule-title {
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 800;
   color: #0f172a;
   margin-bottom: 20px;
   border-left: 4px solid #10b981;
@@ -218,17 +224,17 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: #ff5e7e;
   border: 2px solid #ffffff;
-  box-shadow: 0 0 0 2px #3b82f6;
+  box-shadow: 0 0 0 2px #ff5e7e;
 }
 
 .timeline-time {
   display: inline-block;
   font-size: 12px;
   font-weight: 700;
-  color: #3b82f6;
-  background: #eff6ff;
+  color: #ff5e7e;
+  background: #fff1f2;
   padding: 2px 8px;
   border-radius: 6px;
   margin-bottom: 6px;
@@ -236,7 +242,7 @@
 
 .timeline-heading {
   font-size: 15px;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
   margin-bottom: 4px;
 }
@@ -258,9 +264,9 @@
 .event-image-card {
   width: 100%;
   height: 140px;
-  border-radius: 12px;
+  border-radius: 14px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .event-image-card img {
@@ -293,8 +299,8 @@
   background: #ffffff;
   color: #475569;
   border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  font-weight: 600;
+  border-radius: 12px;
+  font-weight: 700;
   font-size: 14px;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -303,8 +309,9 @@
 }
 
 .btn-event-back-modern:hover {
-  background: #f1f5f9;
-  color: #0f172a;
+  background: #ff5e7e;
+  color: #ffffff;
+  border-color: #ff5e7e;
 }
 
 /* ─── ANIMATION REVEAL ─── */
@@ -317,4 +324,11 @@
 .scroll-reveal.reveal-visible {
   opacity: 1;
   transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .event-hero-title {
+    font-size: 32px;
+  }
 }

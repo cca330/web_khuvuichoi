@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { FaMapMarkerAlt, FaCalendarAlt, FaClock } from "react-icons/fa";
+import { FaMapMarkerAlt, FaClock, FaArrowRight } from "react-icons/fa";
+import { HiSparkles } from "react-icons/hi2";
 import eventsApi from "../api/eventsApi";
 import { getImageUrl } from "../utils/imageUtils";
-import "../styles/events.css"; // Import file CSS riêng biệt vừa tạo
+import "../styles/events.css";
 
 const Events = () => {
   const [events, setEvents] = useState([]);
@@ -13,35 +14,11 @@ const Events = () => {
     fetchEvents();
   }, []);
 
-  // Hiệu ứng cuộn trang lặp lại chuyên nghiệp
-  useEffect(() => {
-    if (!loading && events.length > 0) {
-      const observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("reveal-visible");
-            } else {
-              if (entry.boundingClientRect.top > 0) {
-                entry.target.classList.remove("reveal-visible");
-              }
-            }
-          });
-        },
-        { threshold: 0.1 },
-      );
-
-      const elements = document.querySelectorAll(".scroll-reveal");
-      elements.forEach((el) => observer.observe(el));
-      return () => elements.forEach((el) => observer.unobserve(el));
-    }
-  }, [loading, events]);
-
   const fetchEvents = async () => {
     try {
       setLoading(true);
       const response = await eventsApi.getAll();
-      setEvents(response.data);
+      setEvents(response.data || []);
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {
@@ -51,119 +28,158 @@ const Events = () => {
 
   const getStatusLabel = (status) => {
     const labels = {
-      COMING_SOON: "Sắp diễn ra",
-      ONGOING: "Đang diễn ra",
-      COMPLETED: "Đã kết thúc",
-      CANCELLED: "Đã hủy",
+      COMING_SOON: "SẮP DIỄN RA",
+      ONGOING: "ĐANG DIỄN RA",
+      COMPLETED: "ĐÃ KẾT THÚC",
+      CANCELLED: "ĐÃ HỦY",
     };
-    return labels[status] || status;
+    return labels[status] || "SẮP DIỄN RA";
   };
 
   const getStatusBadgeClass = (status) => {
-    const colors = {
-      COMING_SOON: "status-coming",
-      ONGOING: "status-ongoing",
-      COMPLETED: "status-completed",
-      CANCELLED: "status-cancelled",
+    const classes = {
+      COMING_SOON: "status-mint",
+      ONGOING: "status-orange",
+      COMPLETED: "status-grey",
+      CANCELLED: "status-red",
     };
-    return colors[status] || "status-completed";
+    return classes[status] || "status-mint";
+  };
+
+  const formatEventDate = (dateString) => {
+    if (!dateString) return "08:00 - T7 TUẦN NÀY";
+    try {
+      const date = new Date(dateString);
+      const timeStr = date.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const dayOfWeek = `T${date.getDay() + 1 === 1 ? "CN" : date.getDay() + 1}`;
+      return `${timeStr} - ${dayOfWeek} TUẦN NÀY`;
+    } catch {
+      return "08:00 - T7 TUẦN NÀY";
+    }
   };
 
   if (loading) {
-    return <div className="loading">Đang tải danh sách sự kiện...</div>;
+    return (
+      <div className="timeline-loading">
+        <div className="timeline-spinner"></div>
+        <p>Đang tải danh sách sự kiện...</p>
+      </div>
+    );
   }
 
   return (
-    <div className="events-page-modern">
-      {/* ─── BANNER SỰ KIỆN HOÀNH TRÁNG (Sửa lỗi đè chữ lên Menu) ─── */}
-      <section className="events-hero-section">
-        <div
-          className="events-hero-bg"
-          style={{ backgroundImage: "url('/img/banner.png')" }}
-        >
-          <div className="events-hero-overlay"></div>
-          <div className="container events-hero-content">
-            <span className="events-hero-tagline">Sự kiện đặc biệt</span>
-            <h2 className="events-hero-title">Sự Kiện Tại HG Playground</h2>
-            <p className="events-hero-desc">
-              Đừng bỏ lỡ các sự kiện lễ hội hoành tráng và các chương trình ưu
-              đãi đặc sắc sắp tới!
-            </p>
+    <div className="events-timeline-page">
+      {/* ─── BANNER TRÒ CHƠI HOÀNH TRÁNG (ĐỒNG BỘ Y HỆT TRANG GAMES) ─── */}
+<section className="events-hero-section">
+  <div
+    className="events-hero-bg"
+    style={{ backgroundImage: "url('/img/banner.png')" }}
+  >
+    <div className="events-hero-overlay"></div>
+    <div className="container events-hero-content">
+      <span className="events-hero-tagline">
+        <HiSparkles style={{ marginRight: 6, color: "#FFD700" }} /> Chuyến Phiêu Lưu Kỳ Thú
+      </span>
+      <h2 className="events-hero-title">
+        Hành Trình Sự Kiện HG Playground
+      </h2>
+      <p className="events-hero-desc">
+        Khám phá chuỗi lễ hội hoành tráng, workshop sáng tạo và các hoạt động giải trí bất tận!
+      </p>
+    </div>
+  </div>
+</section>
+
+      {/* ─── TIMELINE BODY ─── */}
+      <div className="container events-body-container">
+        <h2 className="timeline-main-title">LỄ HỘI CHUỖI SỰ KIỆN</h2>
+
+        {events.length === 0 ? (
+          <div className="empty-events-box">
+            <p>Hiện chưa có sự kiện nào được đăng tải.</p>
           </div>
-        </div>
-      </section>
+        ) : (
+          <div className="timeline-container">
+            <div className="timeline-vertical-line"></div>
 
-      {/* ─── DANH SÁCH SỰ KIỆN CHÍNH ─── */}
-      <section className="events-list-section">
-        <div className="container text-center">
-          <h3 className="events-section-title">Danh Sách Sự Kiện</h3>
+            <div className="timeline-items">
+              {events.map((event, index) => {
+                const isEven = index % 2 === 0;
 
-          {events.length === 0 ? (
-            <div className="modern-no-events scroll-reveal">
-              <div className="no-events-icon">📅</div>
-              <h4>Hiện chưa có sự kiện nào!</h4>
-              <p>
-                Hãy quay lại sau để xem các chương trình và sự kiện mới nhất từ
-                chúng tôi.
-              </p>
-            </div>
-          ) : (
-            <div className="row text-left justify-content-start">
-              {events.map((event) => (
-                <div
-                  key={event.id}
-                  className="col-md-6 col-lg-4 mb-4 d-flex scroll-reveal"
-                >
-                  <div className="modern-event-card">
-                    <div className="event-card-img-wrap">
-                      <img
-                        src={getImageUrl(event.thumbnail) || "/img/default-event.jpg"}
-                        alt={event.title}
-                        className="event-card-img"
-                      />
-                      <span
-                        className={`event-card-status ${getStatusBadgeClass(event.status)}`}
-                      >
-                        {getStatusLabel(event.status)}
-                      </span>
+                return (
+                  <div
+                    key={event.id}
+                    className={`timeline-item ${
+                      isEven ? "layout-left-img" : "layout-right-img"
+                    }`}
+                  >
+                    <div className="timeline-connector-dashed"></div>
+
+                    {/* KHỐI HÌNH ẢNH */}
+                    <div className="timeline-media-block">
+                      <div className="timeline-img-card">
+                        <img
+                          src={
+                            getImageUrl(event.thumbnail) ||
+                            "/img/default-event.jpg"
+                          }
+                          alt={event.title}
+                        />
+                        <div className="badge-time-yellow">
+                          <FaClock style={{ marginRight: 4 }} />
+                          {formatEventDate(event.startDatetime)}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="event-card-body">
-                      <h4 className="event-card-title">{event.title}</h4>
-                      <p className="event-card-desc">
+                    {/* KHỐI THÔNG TIN */}
+                    <div className="timeline-text-block">
+                      <h3 className="event-item-title">
+                        <Link to={`/events/${event.id}`}>{event.title}</Link>
+                      </h3>
+
+                      {event.location && (
+                        <div className="event-item-location">
+                          <FaMapMarkerAlt className="loc-icon" />
+                          <span>{event.location}</span>
+                        </div>
+                      )}
+
+                      <p className="event-item-desc">
                         {event.description
-                          ? `${event.description.substring(0, 90)}...`
-                          : "HG Playground liên tục tổ chức các sự kiện hoành tráng..."}
+                          ? `${event.description.substring(0, 110)}...`
+                          : "Tham gia trải nghiệm chuỗi hoạt động giải trí bùng nổ sắc màu..."}
                       </p>
 
-                      <div className="event-card-meta">
-                        <div className="meta-row">
-                          <FaMapMarkerAlt /> <span>{event.location}</span>
-                        </div>
-                        <div className="meta-row">
-                          <FaCalendarAlt />{" "}
-                          <span>
-                            {new Date(event.startDatetime).toLocaleDateString(
-                              "vi-VN",
-                            )}
-                          </span>
-                        </div>
+                      <div className="event-status-row">
+                        <span className="status-label-text">Trạng thái:</span>
+                        <span
+                          className={`status-badge ${getStatusBadgeClass(
+                            event.status
+                          )}`}
+                        >
+                          {getStatusLabel(event.status)}
+                        </span>
                       </div>
 
                       <Link
                         to={`/events/${event.id}`}
-                        className="btn-modern-event-detail"
+                        className="btn-event-detail"
                       >
-                        Xem chi tiết <i className="fa fa-arrow-right"></i>
+                        <span>Chi tiết</span>
+                        <FaArrowRight className="arrow-icon" />
                       </Link>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          )}
-        </div>
-      </section>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,13 +1,16 @@
-/* ==========================================================================
-   CSS CHO TRANG DANH SÁCH SỰ KIỆN (EVENTS LIST PAGE)
-   ========================================================================== */
-
-.events-page-modern {
-  background: #f8fafc;
+/* ─── NỀN TRẮNG THUẦN & PHÔNG CHỮ CAO CẤP ─── */
+.events-timeline-page {
+  width: 100%;
   min-height: 100vh;
+  background-color: #FFFFFF;
+  color: #0F172A;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
-/* Banner đỉnh trang sự kiện tràn rộng tương tự Trang Chủ & Games */
+/* ==========================================================================
+   HERO BANNER SỰ KIỆN (ĐỒNG BỘ 100% CẤU TRÚC VỚI TRANG GAMES)
+   ========================================================================== */
+
 .events-hero-section {
   position: relative;
   overflow: hidden;
@@ -18,8 +21,8 @@
   width: calc(100vw - 40px) !important;
   left: 50% !important;
   transform: translateX(-50%) !important;
-  height: 50vh;
-  min-height: 350px;
+  height: 60vh;
+  min-height: 400px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -34,7 +37,7 @@
   inset: 0;
   background: linear-gradient(
     to right,
-    rgba(12, 16, 26, 0.85) 0%,
+    rgba(12, 16, 26, 0.8) 0%,
     rgba(12, 16, 26, 0.45) 100%
   );
   z-index: 1;
@@ -49,10 +52,11 @@
 }
 
 .events-hero-tagline {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   font-size: 13px;
   text-transform: uppercase;
-  color: var(--primary-color);
+  color: var(--primary-color, #ff5e7e);
   letter-spacing: 2px;
   font-weight: 700;
   margin-bottom: 16px;
@@ -73,183 +77,309 @@
   line-height: 1.6;
 }
 
-/* Khu vực Danh sách sự kiện */
-.events-list-section {
-  padding: 80px 0;
+/* Responsive Banner */
+@media (max-width: 991px) {
+  .events-hero-title {
+    font-size: 36px;
+  }
+  .events-hero-desc {
+    font-size: 16px;
+  }
 }
 
-.events-section-title {
+/* ─── BODY CONTAINER ─── */
+.events-body-container {
+  padding: 60px 20px 100px;
+}
+
+.timeline-main-title {
+  text-align: center;
   font-size: 28px;
-  font-weight: 800;
-  color: var(--dark-color);
-  margin-bottom: 40px;
-  position: relative;
-  display: inline-block;
-}
-
-.events-section-title::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: -10px;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 3px;
-  background: var(--primary-color);
-  border-radius: 10px;
-}
-
-/* Card sự kiện phong cách hiện đại */
-.modern-event-card {
-  background: #ffffff;
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: var(--site-shadow);
-  border: 1px solid var(--border-color);
-  transition:
-    transform 0.3s,
-    box-shadow 0.3s;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.modern-event-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 40px rgba(12, 16, 26, 0.1);
-}
-
-.event-card-img-wrap {
-  position: relative;
-  height: 220px;
-  overflow: hidden;
-}
-
-.event-card-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s;
-}
-
-.modern-event-card:hover .event-card-img {
-  transform: scale(1.08);
-}
-
-.event-card-status {
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  font-size: 11px;
-  font-weight: 800;
-  color: #ffffff;
-  padding: 4px 12px;
-  border-radius: 50px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  margin-bottom: 60px;
+  color: #0F172A;
   text-transform: uppercase;
 }
 
-/* Colors status */
-.status-coming {
-  background: #3b82f6;
-}
-.status-ongoing {
-  background: #10b981;
-}
-.status-completed {
-  background: #64748b;
-}
-.status-cancelled {
-  background: #ef4444;
-}
-
-.event-card-body {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
-
-.event-card-title {
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--dark-color);
-  margin-bottom: 12px;
-  line-height: 1.4;
-}
-
-.event-card-desc {
-  font-size: 13px;
-  color: #64748b;
-  line-height: 1.6;
-  margin-bottom: 20px;
-}
-
-.event-card-meta {
-  margin-top: auto;
-  padding-top: 14px;
-  border-top: 1px solid #f1f5f9;
-}
-
-.meta-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  color: #475569;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.meta-row:last-child {
-  margin-bottom: 0;
-}
-
-.meta-row svg {
-  color: var(--primary-color);
-}
-
-.btn-modern-event-detail {
-  display: block;
-  text-align: center;
-  background: #f1f5f9;
-  color: #475569 !important;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 12px 0;
-  border-radius: 12px;
-  margin-top: 20px;
-  text-decoration: none !important;
-  transition: all 0.2s;
-}
-
-.btn-modern-event-detail:hover {
-  background: var(--primary-color);
-  color: #ffffff !important;
-}
-
-/* Không có kết quả */
-.modern-no-events {
-  text-align: center;
-  padding: 80px 20px;
-  background: #ffffff;
-  border-radius: 24px;
-  box-shadow: var(--site-shadow);
-  max-width: 600px;
+/* ─── TIMELINE CONTAINER & TRỤC DỌC ─── */
+.timeline-container {
+  position: relative;
+  max-width: 960px;
   margin: 0 auto;
 }
 
-.no-events-icon {
-  font-size: 54px;
-  margin-bottom: 20px;
+.timeline-vertical-line {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  background-color: #E2E8F0;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
-.modern-no-events h4 {
+.timeline-items {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+/* ─── LAYOUT 2 CỘT ─── */
+.timeline-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.timeline-item.layout-left-img {
+  flex-direction: row;
+}
+
+.timeline-item.layout-right-img {
+  flex-direction: row-reverse;
+}
+
+.timeline-media-block,
+.timeline-text-block {
+  width: 50%;
+  padding: 0 35px;
+  box-sizing: border-box;
+}
+
+.layout-left-img .timeline-media-block {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.layout-right-img .timeline-media-block {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.timeline-connector-dashed {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70px;
+  height: 1px;
+  border-top: 1.5px dashed #CBD5E1;
+  transform: translateY(-50%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.layout-left-img .timeline-connector-dashed {
+  transform: translate(-100%, -50%);
+}
+
+.layout-right-img .timeline-connector-dashed {
+  transform: translate(0, -50%);
+}
+
+/* ─── SỬA LỖI BO GÓC ẢNH TIMELINE ─── */
+.timeline-img-card {
+  position: relative;
+  width: 100%;
+  max-width: 380px;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  background-color: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  /* Ép trình duyệt không tràn bo góc khi Zoom */
+  isolation: isolate;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+.timeline-img-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.timeline-img-card:hover img {
+  transform: scale(1.08);
+}
+
+.badge-time-yellow {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: #EEFF41;
+  color: #0F172A;
+  font-size: 11px;
   font-weight: 800;
-  color: var(--dark-color);
-  margin-bottom: 12px;
+  padding: 5px 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  letter-spacing: 0.2px;
+  z-index: 2;
 }
 
-.modern-no-events p {
-  color: #64748b;
-  font-size: 14px;
+/* ─── THÔNG TIN SỰ KIỆN ─── */
+.event-item-title {
+  font-size: 22px;
+  font-weight: 800;
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+  letter-spacing: -0.3px;
+}
+
+.event-item-title a {
+  color: #0F172A;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.event-item-title a:hover {
+  color: #FF5E7E;
+}
+
+.event-item-location {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748B;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.loc-icon {
+  color: #FF5E7E;
+}
+
+.event-item-desc {
+  font-size: 13.5px;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 14px;
+  max-width: 340px;
+}
+
+.event-status-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  margin-bottom: 16px;
+}
+
+.status-label-text {
+  color: #64748B;
+  font-weight: 500;
+}
+
+.status-badge {
+  font-size: 10.5px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 6px;
+  letter-spacing: 0.4px;
+}
+
+.status-mint {
+  background-color: #A7F3D0;
+  color: #065F46;
+}
+
+.status-orange {
+  background-color: #FFEDD5;
+  color: #C2410C;
+}
+
+.status-grey {
+  background-color: #E2E8F0;
+  color: #475569;
+}
+
+.status-red {
+  background-color: #FEE2E2;
+  color: #991B1B;
+}
+
+.btn-event-detail {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #FF5E7E;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-event-detail:hover {
+  color: #E11D48;
+}
+
+.btn-event-detail:hover .arrow-icon {
+  transform: translateX(4px);
+}
+
+.arrow-icon {
+  transition: transform 0.2s ease;
+}
+
+/* ─── LOADING & RESPONSIVE ─── */
+.timeline-loading {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: #64748B;
+}
+
+.timeline-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #E2E8F0;
+  border-top-color: #FF5E7E;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .timeline-vertical-line,
+  .timeline-connector-dashed {
+    display: none;
+  }
+
+  .timeline-item.layout-left-img,
+  .timeline-item.layout-right-img {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .timeline-media-block,
+  .timeline-text-block {
+    width: 100%;
+    padding: 0;
+  }
+
+  .timeline-img-card {
+    max-width: 100%;
+  }
+
+  .events-hero-title {
+    font-size: 28px;
+  }
 }

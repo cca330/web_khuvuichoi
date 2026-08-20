@@ -8,7 +8,7 @@ import {
 } from "react-icons/fa";
 import eventsApi from "../api/eventsApi";
 import { getImageUrl } from "../utils/imageUtils";
-import "../styles/EventDetail.css"; // Tách biệt CSS riêng
+import "../styles/EventDetail.css";
 
 const EventDetail = () => {
   const { id } = useParams();
@@ -17,7 +17,6 @@ const EventDetail = () => {
   const [schedules, setSchedules] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Hiệu ứng cuộn trang reveal
   useEffect(() => {
     if (!loading && event) {
       const observer = new IntersectionObserver(
@@ -110,8 +109,8 @@ const EventDetail = () => {
 
   return (
     <div className="event-detail-page">
-      {/* ─── BANNER SỰ KIỆN HOÀNH TRÁNG ─── */}
-      <section className="event-detail-hero">
+      {/* ─── BANNER CHI TIẾT SỰ KIỆN BO GÓC CHUẨN FORM GAMES ─── */}
+      <section className="event-detail-hero-section">
         <div
           className="event-hero-bg"
           style={{
