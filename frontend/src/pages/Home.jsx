@@ -21,6 +21,7 @@ const rawEventsData = [
   { id: 10, img: "/img/event-slid2.png", title: "Zombie Walk", desc: "Hóa trang ma quái" },
 ];
 
+
 // Nhân bản mảng 3 lần để cuộn lặp vô tận (Infinite Loop)
 const eventsData = [...rawEventsData, ...rawEventsData, ...rawEventsData];
 
