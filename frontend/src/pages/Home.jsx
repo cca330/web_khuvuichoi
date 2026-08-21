@@ -21,7 +21,7 @@ const rawEventsData = [
   { id: 10, img: "/img/event-slid2.png", title: "Zombie Walk", desc: "Hóa trang ma quái" },
 ];
 
-// Nhân bản mảng dữ liệu để tạo hiệu ứng cuộn lặp vô tận (Infinite Loop)
+// Nhân bản mảng 3 lần để cuộn lặp vô tận (Infinite Loop)
 const eventsData = [...rawEventsData, ...rawEventsData, ...rawEventsData];
 
 const Home = () => {
@@ -31,7 +31,7 @@ const Home = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [activeFilter, setActiveFilter] = useState("*");
 
-  // ─── REF & STATE CHO PANORAMA CAROUSEL VÒNG CUNG ───
+  // ─── REF & LOGIC CHO VÒNG CUNG PANORAMA 3D ───
   const viewportRef = useRef(null);
   const trackRef = useRef(null);
   const offsetRef = useRef(0);
@@ -41,7 +41,7 @@ const Home = () => {
   const startOffset = useRef(0);
   const autoPlayRef = useRef(null);
 
-  // 1. Hàm tính toán độ cong 3D lòng chảo
+  // Tính toán góc xoay & độ cong 3D lòng chảo
   const updateCardTransforms = () => {
     if (!viewportRef.current || !trackRef.current) return;
     const cards = trackRef.current.querySelectorAll(".panorama-card");
@@ -66,41 +66,58 @@ const Home = () => {
     });
   };
 
-  // 2. Cập nhật vị trí cuộn & Xử lý vô tận (Infinite Reset)
+  // Cập nhật vị trí cuộn & Reset mượt mà không gây giật
   const applyOffset = (val) => {
     if (!trackRef.current) return;
     const singleSetWidth = trackRef.current.scrollWidth / 3;
+    if (!singleSetWidth) return;
 
     let newOffset = val;
-    // Nếu trượt quá dải giữa bên trái -> Nhảy về dải giữa
-    if (newOffset > -singleSetWidth * 0.2) {
-      newOffset -= singleSetWidth;
-    }
-    // Nếu trượt quá dải giữa bên phải -> Nhảy về dải giữa
-    else if (newOffset < -singleSetWidth * 1.8) {
+    let didReset = false;
+
+    // Khi di chuyển quá 1 chu kỳ cụm ảnh, nhảy về vị trí tương ứng
+    if (newOffset <= -singleSetWidth * 2) {
       newOffset += singleSetWidth;
+      didReset = true;
+    } else if (newOffset >= 0) {
+      newOffset -= singleSetWidth;
+      didReset = true;
+    }
+
+    const cards = trackRef.current.querySelectorAll(".panorama-card");
+
+    // Nếu xảy ra reset, tạm thời tắt transition để tránh hiệu ứng nhảy/nảy
+    if (didReset) {
+      cards.forEach((c) => c.classList.add("no-transition"));
     }
 
     offsetRef.current = newOffset;
     trackRef.current.style.transform = `translateX(${newOffset}px)`;
-    requestAnimationFrame(updateCardTransforms);
+    updateCardTransforms();
+
+    // Bật lại transition cho frame kế tiếp
+    if (didReset) {
+      requestAnimationFrame(() => {
+        cards.forEach((c) => c.classList.remove("no-transition"));
+      });
+    }
   };
 
-  // 3. Tự động chạy Carousel mượt mà (Auto-play)
+  // Tự động di chuyển (Auto-play liên tục)
   useEffect(() => {
     const startAutoPlay = () => {
       autoPlayRef.current = setInterval(() => {
         if (!isDragging.current) {
-          applyOffset(offsetRef.current - 1.5); // Tốc độ trượt
+          applyOffset(offsetRef.current - 0.8); // Tốc độ lướt mượt 60fps
         }
-      }, 16); // ~60fps
+      }, 16);
     };
 
     startAutoPlay();
     return () => clearInterval(autoPlayRef.current);
   }, []);
 
-  // 4. Sự kiện kéo/thả bằng chuột hoặc vuốt tay
+  // Thao tác kéo tay (Drag)
   const handleMouseDown = (e) => {
     isDragging.current = true;
     dragMoved.current = false;
@@ -127,7 +144,7 @@ const Home = () => {
     }
   };
 
-  // ─── KHỞI TẠO DỮ LIỆU TRANG CHỦ ───
+  // ─── KHỞI TẠO TRANG ───
   useEffect(() => {
     if ("scrollRestoration" in window.history) {
       window.history.scrollRestoration = "manual";
@@ -324,16 +341,15 @@ const Home = () => {
         </div>
       </section>
 
-      {/* ─── 4. SỰ KIỆN NỔI BẬT (FORM SÁNG & AUTO-PLAY VÒNG CUNG) ─── */}
-      <section className="panorama-carousel-wrapper light-theme scroll-reveal fade-up">
-        {/* Header Hero Section - Đã xóa nút Sự kiện nổi bật & Chuyển màu tối cho nền sáng */}
+      {/* ─── 4. SỰ KIỆN NỔI BẬT (PANORAMA 3D LIGHT THEME) ─── */}
+      <section className="panorama-carousel-wrapper scroll-reveal fade-up">
         <div className="panorama-hero-header">
-          <h1 className="hero-title" style={{ color: "#111" }}>
+          <h1 className="hero-title">
             Khám phá thế giới <br />
-            sự kiện <span className="highlight-italic" style={{ color: "#d63384" }}>bùng nổ.</span>
+            sự kiện <span className="highlight-italic">bùng nổ.</span>
           </h1>
           
-          <p className="hero-subtitle" style={{ color: "#555" }}>
+          <p className="hero-subtitle">
             Hòa mình vào không gian lễ hội hoành tráng, ánh sáng rực rỡ và những khoảnh khắc đáng nhớ nhất tại HG Playground!
           </p>
 
@@ -342,7 +358,6 @@ const Home = () => {
           </Link>
         </div>
 
-        {/* Slider Panorama 3D Lòng Chảo */}
         <div ref={viewportRef} className="panorama-viewport">
           <div
             ref={trackRef}
@@ -461,34 +476,69 @@ const Home = () => {
       </section>
 
       {/* ─── 7. FEEDBACK KHÁCH HÀNG ─── */}
-      <section className="testimonial-section-modern spad scroll-reveal fade-up">
+      <section className="testimonial-section-modern scroll-reveal fade-up">
         <div className="container">
-          <div className="row align-items-center justify-content-center">
-            <div className="col-lg-5 col-md-6 mb-5 mb-md-0 position-relative">
+          <div className="row align-items-center">
+            
+            {/* Cột bên trái: Cụm 3 Avatar xếp lớp */}
+            <div className="col-lg-5 mb-4 mb-lg-0">
               <div className="avatar-cluster-wrapper">
-                <div className="avatar-circle avt-main"><img src="/img/fb1.jpg" alt="Feedback 1" /></div>
-                <div className="avatar-circle avt-top"><img src="/img/fb2.jpg" alt="Feedback 2" /></div>
-                <div className="avatar-circle avt-bottom"><img src="/img/fb3.jpg" alt="Feedback 3" /></div>
+                <div className="avatar-circle avt-main">
+                  <img src="/img/khuvuichoi.png" alt="Khách hàng 1" />
+                </div>
+                <div className="avatar-circle avt-top">
+                  <img src="/img/hapdan.png" alt="Khách hàng 2" />
+                </div>
+                <div className="avatar-circle avt-bottom">
+                  <img src="/img/cotich.png" alt="Khách hàng 3" />
+                </div>
+                <div className="bubble-decoration bubble-1"></div>
+                <div className="bubble-decoration bubble-2"></div>
               </div>
             </div>
 
-            <div className="col-lg-6 col-md-6 offset-lg-1">
+            {/* Cột bên phải: Card đánh giá động theo State */}
+            <div className="col-lg-7">
               <div className="testimonial-card-box">
-                <h2 className="testimonial-card-title">Khách hàng nói gì về chúng tôi?</h2>
+                <h3 className="testimonial-card-title">Khách hàng nói gì về chúng tôi?</h3>
+                
                 {feedbacks.length > 0 && (
-                  <div className="testimonial-content-slider">
-                    <div className="stars-rating mb-3">{renderStars(feedbacks[currentSlide]?.rating || 5)}</div>
-                    <p className="testimonial-quote-text">"{feedbacks[currentSlide]?.content}"</p>
-                    <div className="testimonial-user-info">
-                      <h4 className="user-name">{feedbacks[currentSlide]?.name}</h4>
+                  <>
+                    {/* Số sao đánh giá */}
+                    <div className="stars-rating mb-3">
+                      {renderStars(feedbacks[currentSlide].rating)}
                     </div>
-                  </div>
+
+                    {/* Nội dung nhận xét */}
+                    <p className="testimonial-quote-text">
+                      "{feedbacks[currentSlide].content}"
+                    </p>
+
+                    {/* Tên khách hàng & Thanh chỉ số Slide */}
+                    <div className="d-flex align-items-center justify-content-between pt-2">
+                      <div>
+                        <div className="user-name">{feedbacks[currentSlide].name}</div>
+                      </div>
+
+                      {/* Thanh gạch chuyển slide tương tác được */}
+                      <div className="slider-indicators-dash">
+                        {feedbacks.map((_, idx) => (
+                          <span
+                            key={idx}
+                            className={`dash-item ${idx === currentSlide ? "active" : ""}`}
+                            onClick={() => setCurrentSlide(idx)}
+                          ></span>
+                        ))}
+                      </div>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
+
           </div>
         </div>
-      </section>
+      </section>s
     </div>
   );
 };

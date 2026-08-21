@@ -1487,3 +1487,150 @@ li {
   .hero-subtitle { font-size: 13px; }
   .panorama-card { width: 200px; height: 260px; }
 }
+
+/* ==========================================================================
+   FIX HOÀN TOÀN BỐ CỤC CỤM AVATAR TESTIMONIAL
+   ========================================================================== */
+.testimonial-section-modern {
+  padding: 80px 0;
+  background: #f8fafc;
+}
+
+/* ==========================================================================
+   TĂNG KÍCH THƯỚC CỤM AVATAR TESTIMONIAL (NỔI BẬT & CÂN ĐỐI)
+   ========================================================================== */
+
+/* Khung bọc cụm Avatar - Tăng chiều rộng và chiều cao */
+.avatar-cluster-wrapper {
+  position: relative;
+  width: 420px !important;
+  height: 360px !important;
+  margin: 0 auto;
+}
+
+.avatar-circle {
+  position: absolute;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 5px solid #ffffff;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+  transition: transform 0.3s ease;
+}
+
+.avatar-circle img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block;
+}
+
+.avatar-circle:hover {
+  transform: scale(1.08);
+  z-index: 10 !important;
+}
+
+/* Avatar chính bên trái (To vượt trội) */
+.avt-main {
+  width: 190px !important;
+  height: 190px !important;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+}
+
+/* Avatar góc trên bên phải */
+.avt-top {
+  width: 145px !important;
+  height: 145px !important;
+  right: 15px;
+  top: 15px;
+  z-index: 2;
+}
+
+/* Avatar góc dưới bên phải */
+.avt-bottom {
+  width: 155px !important;
+  height: 155px !important;
+  right: 5px;
+  bottom: 15px;
+  z-index: 2;
+}
+
+/* Tăng kích thước & căn chỉnh 2 chấm xanh trang trí */
+.bubble-decoration {
+  position: absolute;
+  background: #22c55e;
+  border-radius: 50%;
+  z-index: 1;
+}
+
+.bubble-1 {
+  width: 28px;
+  height: 28px;
+  left: 180px;
+  top: 65px;
+}
+
+.bubble-2 {
+  width: 18px;
+  height: 18px;
+  left: 205px;
+  top: 105px;
+}
+
+/* Thẻ Testimonial Card bên phải */
+.testimonial-card-box {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px;
+  box-shadow: 0 15px 35px rgba(16, 32, 51, 0.05);
+  border: 1px solid #f1f5f9;
+}
+
+.testimonial-card-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.stars-rating i, 
+.stars-rating .fa-star {
+  color: #ffc107;
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+.testimonial-quote-text {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.user-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+}
+
+.slider-indicators-dash {
+  display: flex;
+  gap: 6px;
+}
+
+.dash-item {
+  width: 20px;
+  height: 4px;
+  background: #cbd5e1;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dash-item.active {
+  width: 32px;
+  background: #ff5b84;
+}
