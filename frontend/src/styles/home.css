@@ -1316,3 +1316,174 @@ li {
 .game-3d-card:hover .game-3d-img.active {
   transform: scale(1.06);
 }
+/* ══════════════════════════════════════════════
+   SỰ KIỆN NỔI BẬT — LIGHT THEME PANORAMA 3D
+   ══════════════════════════════════════════════ */
+
+/* Container chính - Chuyển hoàn toàn sang Nền Sáng / Trắng */
+.panorama-carousel-wrapper {
+  position: relative;
+  padding: 60px 0 40px;
+  background-color: #f8f9fa !important; /* Nền sáng nhã nhặn */
+  color: #111111;
+  text-align: center;
+}
+
+/* === HEADER HERO SECTION (THEME SÁNG) === */
+.panorama-hero-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+/* Tiêu đề chính - Màu tối nổi bật */
+.hero-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 44px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin: 0 0 16px 0;
+  color: #1a1a1a !important; /* Chữ màu tối */
+}
+
+/* Chữ nghiêng nghệ thuật - Màu hồng / tím nổi bật */
+.hero-title .highlight-italic {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 52px;
+  color: #d63384 !important;
+}
+
+/* Mô tả ngắn - Màu xám dễ đọc */
+.hero-subtitle {
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  color: #555555 !important;
+  max-width: 520px;
+  margin: 0 0 28px 0;
+  line-height: 1.6;
+}
+
+/* Nút bấm chủ đạo Theme Sáng */
+.btn-get-started-light {
+  display: inline-block;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff !important;
+  background-color: #111111;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 32px;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+}
+
+.btn-get-started-light:hover {
+  background-color: #d63384;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(214, 51, 132, 0.3);
+}
+
+/* === SLIDER VIEWPORT & CARDS 3D === */
+.panorama-viewport {
+  overflow: hidden;
+  perspective: 600px;
+  perspective-origin: 50% 50%;
+  cursor: grab;
+  padding: 30px 0 50px;
+}
+
+.panorama-viewport:active {
+  cursor: grabbing;
+}
+
+.panorama-track {
+  display: flex;
+  align-items: center;
+  gap: 6px; 
+  width: max-content;
+  padding: 20px 15vw;
+  transform-style: preserve-3d;
+  will-change: transform;
+  user-select: none;
+}
+
+.panorama-card {
+  position: relative;
+  flex: 0 0 auto;
+  width: 280px;
+  height: 350px;
+  transform-style: preserve-3d;
+  will-change: transform;
+  /* Giảm transition xuống cực ngắn để khi cuộn mượt và không bị trễ góc xoay 3D */
+  transition: transform 0.05s linear; 
+}
+
+.panorama-card.no-transition {
+  transition: none !important;
+}
+
+.panorama-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); /* Bóng đổ cho nền sáng */
+}
+
+.panorama-card-inner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+  user-select: none;
+  transition: transform 0.5s ease;
+}
+
+.panorama-card:hover .panorama-card-inner img {
+  transform: scale(1.08);
+}
+
+.panorama-card:hover .panorama-card-inner {
+  box-shadow: 0 20px 40px rgba(214, 51, 132, 0.25);
+}
+
+/* Overlay độ dốc chữ trên ảnh card */
+.panorama-card-overlay {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 40px 16px 16px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.88) 0%, rgba(0, 0, 0, 0.3) 60%, transparent 100%);
+  color: #ffffff;
+  text-align: left;
+}
+
+.panorama-card-overlay h4 {
+  margin: 0 0 4px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.panorama-card-overlay p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive di động */
+@media (max-width: 768px) {
+  .hero-title { font-size: 30px; }
+  .hero-title .highlight-italic { font-size: 36px; }
+  .hero-subtitle { font-size: 13px; }
+  .panorama-card { width: 200px; height: 260px; }
+}
