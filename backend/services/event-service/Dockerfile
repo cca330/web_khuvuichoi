@@ -31,14 +31,16 @@ COPY --from=build --chown=nodejs:nodejs /app/node_modules ./node_modules
 RUN npm ci --omit=dev --ignore-scripts && \
     npm cache clean --force
 
+RUN mkdir -p /app/uploads && chown -R nodejs:nodejs /app/uploads
+
 # Switch to non-root user
 USER nodejs
 
 # Expose port
-EXPOSE 3003
+EXPOSE 3006
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e require('http').get('http://localhost:3003', (r)=>process.exit(r.statusCode===200?0:1))
+  CMD node -e require('http').get('http://localhost:3006', (r)=>process.exit(r.statusCode===200?0:1))
 
 CMD ["node", "dist/main"]

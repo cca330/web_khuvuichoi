@@ -22,6 +22,7 @@ import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { InternalServiceGuard } from '../auth/guards/internal-service.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 
 import { IsNotEmpty, IsNumber, IsIn, Min, Max } from 'class-validator';
@@ -111,6 +112,15 @@ export class TicketsController {
     return this.ticketsService.getOrderDetail(orderId, req.user.id);
   }
 
+  @Get('orders/:orderId/tickets')
+  @UseGuards(JwtAuthGuard)
+  getUserTicketsByOrder(
+    @Param('orderId', ParseIntPipe) orderId: number,
+    @Request() req,
+  ) {
+    return this.ticketsService.getTicketsByOrderForUser(orderId, req.user.id);
+  }
+
   // Thanh toán - Protected
   @Post('checkout')
   @UseGuards(JwtAuthGuard)
@@ -122,31 +132,36 @@ export class TicketsController {
   // ==================== Internal APIs - Protected ====================
 
   @Get('internal/promotion/:promotionId/total-used')
-  @UseGuards(JwtAuthGuard)
-  getPromotionTotalUsed(@Param('promotionId', ParseIntPipe) promotionId: number) {
+  @UseGuards(InternalServiceGuard)
+  getPromotionTotalUsed(
+    @Param('promotionId', ParseIntPipe) promotionId: number,
+  ) {
     return this.ticketsService.getPromotionTotalUsed(promotionId);
   }
 
   @Get('internal/promotion/:promotionId/total-discount')
-  @UseGuards(JwtAuthGuard)
-  getPromotionTotalDiscount(@Param('promotionId', ParseIntPipe) promotionId: number) {
+  @UseGuards(InternalServiceGuard)
+  getPromotionTotalDiscount(
+    @Param('promotionId', ParseIntPipe) promotionId: number,
+  ) {
     return this.ticketsService.getPromotionTotalDiscount(promotionId);
   }
 
   @Get('internal/gate-tickets')
+  @UseGuards(InternalServiceGuard)
   getActiveGateTickets() {
     return this.ticketsService.getActiveGateTickets();
   }
 
   @Post('internal/calculate-base-total')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(InternalServiceGuard)
   @HttpCode(HttpStatus.OK)
   calculateBaseTotal(@Body() dto: CalculateBaseTotalDto) {
     return this.ticketsService.calculateBaseTotal(dto);
   }
 
   @Post('internal/apply-promotion-order')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(InternalServiceGuard)
   @HttpCode(HttpStatus.OK)
   applyPromotionOrder(@Body() dto: ApplyPromotionOrderDto) {
     return this.ticketsService.applyPromotionToOrder(dto);
@@ -193,25 +208,25 @@ export class TicketsController {
 
   // ===== API nội bộ, chỉ dành cho revenue-service gọi sang - Protected =====
   @Get('internal/revenue/years')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(InternalServiceGuard)
   getRevenueYears() {
     return this.ticketsService.getAvailableYears();
   }
 
   @Get('internal/revenue/monthly')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(InternalServiceGuard)
   getRevenueMonthly(@Query() filter: FilterRevenueDto) {
     return this.ticketsService.getMonthlyRevenue(filter);
   }
 
   @Get('internal/revenue/gate-details')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(InternalServiceGuard)
   getRevenueGateDetails() {
     return this.ticketsService.getGateTicketDetails();
   }
 
   @Get('internal/revenue/overview')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(InternalServiceGuard)
   getRevenueOverview() {
     return this.ticketsService.getOverview();
   }

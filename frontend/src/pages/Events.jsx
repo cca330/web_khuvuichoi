@@ -26,6 +26,19 @@ const Events = () => {
     }
   };
 
+  // Tính trạng thái thật dựa theo thời gian hiện tại, không đọc thẳng event.status
+  const getRealStatus = (event) => {
+    if (event.status === "CANCELLED") return "CANCELLED";
+
+    const now = new Date();
+    const start = new Date(event.startDatetime);
+    const end = new Date(event.endDatetime);
+
+    if (now < start) return "COMING_SOON";
+    if (now >= start && now <= end) return "ONGOING";
+    return "COMPLETED";
+  };
+
   const getStatusLabel = (status) => {
     const labels = {
       COMING_SOON: "SẮP DIỄN RA",
@@ -46,18 +59,23 @@ const Events = () => {
     return classes[status] || "status-mint";
   };
 
+  // Hiển thị đúng ngày giờ thật của sự kiện, không gắn cứng "tuần này"
   const formatEventDate = (dateString) => {
-    if (!dateString) return "08:00 - T7 TUẦN NÀY";
+    if (!dateString) return "";
     try {
       const date = new Date(dateString);
       const timeStr = date.toLocaleTimeString("vi-VN", {
         hour: "2-digit",
         minute: "2-digit",
       });
-      const dayOfWeek = `T${date.getDay() + 1 === 1 ? "CN" : date.getDay() + 1}`;
-      return `${timeStr} - ${dayOfWeek} TUẦN NÀY`;
+      const dateStr = date.toLocaleDateString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+      return `${timeStr} - ${dateStr}`;
     } catch {
-      return "08:00 - T7 TUẦN NÀY";
+      return "";
     }
   };
 
@@ -73,25 +91,27 @@ const Events = () => {
   return (
     <div className="events-timeline-page">
       {/* ─── BANNER TRÒ CHƠI HOÀNH TRÁNG (ĐỒNG BỘ Y HỆT TRANG GAMES) ─── */}
-<section className="events-hero-section">
-  <div
-    className="events-hero-bg"
-    style={{ backgroundImage: "url('/img/banner.png')" }}
-  >
-    <div className="events-hero-overlay"></div>
-    <div className="container events-hero-content">
-      <span className="events-hero-tagline">
-        <HiSparkles style={{ marginRight: 6, color: "#FFD700" }} /> Chuyến Phiêu Lưu Kỳ Thú
-      </span>
-      <h2 className="events-hero-title">
-        Hành Trình Sự Kiện HG Playground
-      </h2>
-      <p className="events-hero-desc">
-        Khám phá chuỗi lễ hội hoành tráng, workshop sáng tạo và các hoạt động giải trí bất tận!
-      </p>
-    </div>
-  </div>
-</section>
+      <section className="events-hero-section">
+        <div
+          className="events-hero-bg"
+          style={{ backgroundImage: "url('/img/banner.png')" }}
+        >
+          <div className="events-hero-overlay"></div>
+          <div className="container events-hero-content">
+            <span className="events-hero-tagline">
+              <HiSparkles style={{ marginRight: 6, color: "#FFD700" }} /> Chuyến
+              Phiêu Lưu Kỳ Thú
+            </span>
+            <h2 className="events-hero-title">
+              Hành Trình Sự Kiện HG Playground
+            </h2>
+            <p className="events-hero-desc">
+              Khám phá chuỗi lễ hội hoành tráng, workshop sáng tạo và các hoạt
+              động giải trí bất tận!
+            </p>
+          </div>
+        </div>
+      </section>
 
       {/* ─── TIMELINE BODY ─── */}
       <div className="container events-body-container">
@@ -108,6 +128,7 @@ const Events = () => {
             <div className="timeline-items">
               {events.map((event, index) => {
                 const isEven = index % 2 === 0;
+                const realStatus = getRealStatus(event);
 
                 return (
                   <div
@@ -158,10 +179,10 @@ const Events = () => {
                         <span className="status-label-text">Trạng thái:</span>
                         <span
                           className={`status-badge ${getStatusBadgeClass(
-                            event.status
+                            realStatus,
                           )}`}
                         >
-                          {getStatusLabel(event.status)}
+                          {getStatusLabel(realStatus)}
                         </span>
                       </div>
 

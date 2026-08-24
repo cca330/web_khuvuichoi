@@ -8,7 +8,12 @@ import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { CreateEventScheduleDto } from './dto/create-event-schedule.dto';
 import { UpdateEventScheduleDto } from './dto/update-event-schedule.dto';
-import { isBase64Image, saveBase64Image, saveBase64Images, getImageUrl } from './image-helper';
+import {
+  isBase64Image,
+  saveBase64Image,
+  saveBase64Images,
+  getImageUrl,
+} from './image-helper';
 
 @Injectable()
 export class EventsService {
@@ -41,6 +46,16 @@ export class EventsService {
     return event;
   }
 
+  // Lấy 10 event nổi bật
+  async findFeatured() {
+    return this.eventRepository.find({
+      where: { isFeatured: true },
+      relations: ['images'],
+      order: { startDatetime: 'DESC' },
+      take: 10,
+    });
+  }
+
   // Tạo event mới
   async create(dto: CreateEventDto) {
     console.log('=== CREATE EVENT DEBUG ===');
@@ -49,7 +64,8 @@ export class EventsService {
     console.log('images type:', typeof dto.images);
     console.log('images length:', dto.images?.length);
 
-    const queryRunner = this.eventRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.eventRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -75,6 +91,7 @@ export class EventsService {
         startDatetime: new Date(dto.startDatetime),
         endDatetime: new Date(dto.endDatetime),
         status: dto.status,
+        isFeatured: dto.isFeatured || false,
       });
 
       const savedEvent = await queryRunner.manager.save(Event, event);
@@ -109,7 +126,8 @@ export class EventsService {
 
   // Cập nhật event
   async update(id: number, dto: UpdateEventDto) {
-    const queryRunner = this.eventRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.eventRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -136,6 +154,7 @@ export class EventsService {
       event.startDatetime = new Date(dto.startDatetime);
       event.endDatetime = new Date(dto.endDatetime);
       event.status = dto.status;
+      if (dto.isFeatured !== undefined) event.isFeatured = dto.isFeatured;
 
       await queryRunner.manager.save(Event, event);
 

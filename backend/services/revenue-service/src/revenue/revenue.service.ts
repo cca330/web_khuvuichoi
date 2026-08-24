@@ -2,23 +2,35 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { retry, timeout } from 'rxjs/operators';
 import { FilterRevenueDto } from './dto/filter-revenue.dto';
 
 @Injectable()
 export class RevenueService {
   private readonly ticketServiceUrl: string;
+  private readonly internalServiceToken: string;
 
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.ticketServiceUrl = this.configService.get<string>('TICKET_SERVICE_URL') as string;
+    this.ticketServiceUrl = this.configService.get<string>(
+      'TICKET_SERVICE_URL',
+    ) as string;
+    this.internalServiceToken = this.configService.get<string>(
+      'INTERNAL_SERVICE_TOKEN',
+    ) as string;
   }
 
   private async callTicketService(path: string, params?: any) {
     try {
       const { data } = await firstValueFrom(
-        this.httpService.get(`${this.ticketServiceUrl}${path}`, { params }),
+        this.httpService
+          .get(`${this.ticketServiceUrl}${path}`, {
+            params,
+            headers: { 'x-internal-service-token': this.internalServiceToken },
+          })
+          .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
       );
       return data;
     } catch (error) {

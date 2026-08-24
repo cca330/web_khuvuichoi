@@ -38,12 +38,16 @@ const OrderDetail = () => {
   const fetchOrderDetail = async () => {
     try {
       setLoading(true);
-      const [orderRes, ticketsRes] = await Promise.all([
-        cartApi.getOrderDetail(id, user.id),
-        ticketsApi.getByOrder(id),
-      ]);
+      const orderRes = await cartApi.getOrderDetail(id, user.id);
       setOrder(orderRes.data);
-      setTickets(ticketsRes.data || []);
+
+      try {
+        const ticketsRes = await ticketsApi.getByUserOrder(id);
+        setTickets(ticketsRes.data || []);
+      } catch (ticketError) {
+        console.error("Error fetching tickets for order:", ticketError);
+        setTickets([]);
+      }
     } catch (error) {
       console.error("Error fetching order detail:", error);
       alert("Không tìm thấy đơn hàng");

@@ -1,4 +1,11 @@
-import { IsNotEmpty, IsOptional, IsDateString, IsEnum, IsArray } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsOptional,
+  IsDateString,
+  IsEnum,
+  IsArray,
+  IsBoolean,
+} from 'class-validator';
 import { EventStatus } from '../entities/event.entity';
 
 export class CreateEventDto {
@@ -20,8 +27,14 @@ export class CreateEventDto {
   @IsDateString({}, { message: 'End datetime phải là ngày hợp lệ' })
   endDatetime: string;
 
-  @IsEnum(EventStatus, { message: 'Status phải là COMING_SOON, ONGOING, FINISHED hoặc CANCELLED' })
+  @IsEnum(EventStatus, {
+    message: 'Status phải là COMING_SOON, ONGOING, FINISHED hoặc CANCELLED',
+  })
   status: EventStatus;
+
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
 
   @IsOptional()
   @IsArray({ message: 'Images phải là mảng' })

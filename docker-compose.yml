@@ -5,12 +5,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 123456
-      MYSQL_DATABASE: dbweb
-    ports:
-      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database:/docker-entrypoint-initdb.d
+      - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p123456"]
       interval: 10s
@@ -28,8 +25,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    ports:
-      - "3001:3001"
     networks:
       - theme-park-net
 
@@ -41,8 +36,6 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    ports:
-      - "3002:3002"
     networks:
       - theme-park-net
 
@@ -52,9 +45,8 @@ services:
     restart: unless-stopped
     env_file: ./backend/services/revenue-service/.env
     depends_on:
-      - ticket-service
-    ports:
-      - "3003:3003"
+      ticket-service:
+        condition: service_healthy
     networks:
       - theme-park-net
 
@@ -67,9 +59,7 @@ services:
       mysql:
         condition: service_healthy
       ticket-service:
-        condition: service_started
-    ports:
-      - "3004:3004"
+        condition: service_healthy
     networks:
       - theme-park-net
 
@@ -82,9 +72,9 @@ services:
       mysql:
         condition: service_healthy
       user-service:
-        condition: service_started
-    ports:
-      - "3005:3005"
+        condition: service_healthy
+    volumes:
+      - gateway_uploads:/app/uploads
     networks:
       - theme-park-net
 
@@ -96,8 +86,8 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-    ports:
-      - "3006:3006"
+    volumes:
+      - gateway_uploads:/app/uploads
     networks:
       - theme-park-net
 
@@ -110,12 +100,18 @@ services:
     volumes:
       - gateway_uploads:/app/uploads
     depends_on:
-      - user-service
-      - ticket-service
-      - game-service
-      - event-service
-      - promotion-service
-      - revenue-service
+      user-service:
+        condition: service_healthy
+      ticket-service:
+        condition: service_healthy
+      game-service:
+        condition: service_healthy
+      event-service:
+        condition: service_healthy
+      promotion-service:
+        condition: service_healthy
+      revenue-service:
+        condition: service_healthy
     ports:
       - "8000:8000"
     expose:
@@ -129,7 +125,8 @@ services:
     container_name: frontend
     restart: unless-stopped
     depends_on:
-      - api-gateway
+      api-gateway:
+        condition: service_healthy
     ports:
       - "80:80"
     networks:

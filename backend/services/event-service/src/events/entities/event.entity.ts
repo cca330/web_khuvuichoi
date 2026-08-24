@@ -27,6 +27,9 @@ export class Event {
   @Column()
   thumbnail: string;
 
+  @Column({ name: 'is_featured', type: 'tinyint', default: 0 })
+  isFeatured: boolean;
+
   @Column({ type: 'text', nullable: true })
   description: string;
 

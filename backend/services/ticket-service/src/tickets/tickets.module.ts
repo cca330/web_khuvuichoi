@@ -8,14 +8,25 @@ import { GateTicket } from './entities/gate-ticket.entity';
 import { Order } from './entities/order.entity';
 import { OrderItem } from './entities/order-item.entity';
 import { AuthModule } from '../auth/auth.module';
+import { InternalServiceGuard } from '../auth/guards/internal-service.guard';
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Ticket, TicketScan, GateTicket, Order, OrderItem]),
+    TypeOrmModule.forFeature([
+      Ticket,
+      TicketScan,
+      GateTicket,
+      Order,
+      OrderItem,
+    ]),
     AuthModule,
+    HttpModule,
+    ConfigModule,
   ],
   controllers: [TicketsController],
-  providers: [TicketsService],
+  providers: [TicketsService, InternalServiceGuard],
   exports: [TicketsService],
 })
 export class TicketsModule {}

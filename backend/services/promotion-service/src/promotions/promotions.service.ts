@@ -1,9 +1,14 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { firstValueFrom } from 'rxjs';
+import { retry, timeout } from 'rxjs/operators';
 import { Promotion, PromotionStatus } from './entities/promotion.entity';
 import { PromotionGateTicket } from './entities/promotion-gate-ticket.entity';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
@@ -13,6 +18,7 @@ import { ApplyPromotionDto } from './dto/apply-promotion.dto';
 @Injectable()
 export class PromotionsService {
   private readonly ticketServiceUrl: string;
+  private readonly internalServiceToken: string;
 
   constructor(
     @InjectRepository(Promotion)
@@ -22,7 +28,12 @@ export class PromotionsService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.ticketServiceUrl = this.configService.get<string>('TICKET_SERVICE_URL') as string;
+    this.ticketServiceUrl = this.configService.get<string>(
+      'TICKET_SERVICE_URL',
+    ) as string;
+    this.internalServiceToken = this.configService.get<string>(
+      'INTERNAL_SERVICE_TOKEN',
+    ) as string;
   }
 
   // Lấy tất cả promotions
@@ -55,8 +66,21 @@ export class PromotionsService {
     });
   }
 
+  async getEligibleGateTicketIds(promotionId: number) {
+    const gateTickets = await this.promotionGateTicketRepository.find({
+      where: { promotionId },
+      select: { gateTicketId: true },
+    });
+
+    return {
+      appliesToAll: gateTickets.length === 0,
+      gateTicketIds: gateTickets.map(({ gateTicketId }) => gateTicketId),
+    };
+  }
+
   async create(dto: CreatePromotionDto) {
-    const queryRunner = this.promotionRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.promotionRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -69,7 +93,10 @@ export class PromotionsService {
         status: PromotionStatus.ACTIVE,
       });
 
-      const savedPromotion = await queryRunner.manager.save(Promotion, promotion);
+      const savedPromotion = await queryRunner.manager.save(
+        Promotion,
+        promotion,
+      );
 
       if (dto.gateTicketIds && dto.gateTicketIds.length > 0) {
         for (const gateTicketId of dto.gateTicketIds) {
@@ -92,12 +119,15 @@ export class PromotionsService {
   }
 
   async update(id: number, dto: UpdatePromotionDto) {
-    const queryRunner = this.promotionRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.promotionRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      const promotion = await queryRunner.manager.findOne(Promotion, { where: { id } });
+      const promotion = await queryRunner.manager.findOne(Promotion, {
+        where: { id },
+      });
       if (!promotion) {
         await queryRunner.rollbackTransaction();
         throw new NotFoundException('Promotion not found');
@@ -110,7 +140,9 @@ export class PromotionsService {
       promotion.status = dto.status;
 
       await queryRunner.manager.save(Promotion, promotion);
-      await queryRunner.manager.delete(PromotionGateTicket, { promotionId: id });
+      await queryRunner.manager.delete(PromotionGateTicket, {
+        promotionId: id,
+      });
 
       if (dto.gateTicketIds && dto.gateTicketIds.length > 0) {
         for (const gateTicketId of dto.gateTicketIds) {
@@ -150,15 +182,20 @@ export class PromotionsService {
 
     const today = new Date().toISOString().split('T')[0];
 
-const toDateString = (value: Date | string): string => {
-  return value instanceof Date ? value.toISOString().split('T')[0] : String(value);
-};
+    const toDateString = (value: Date | string): string => {
+      return value instanceof Date
+        ? value.toISOString().split('T')[0]
+        : String(value);
+    };
 
-const startDate = toDateString(promotion.startDate);
-const endDate = toDateString(promotion.endDate);
+    const startDate = toDateString(promotion.startDate);
+    const endDate = toDateString(promotion.endDate);
 
     if (today < startDate || today > endDate) {
-      return { success: false, message: 'Mã giảm giá đã hết hạn hoặc chưa có hiệu lực' };
+      return {
+        success: false,
+        message: 'Mã giảm giá đã hết hạn hoặc chưa có hiệu lực',
+      };
     }
 
     // Gọi sang ticket-service để tính base total (thay vì tự query order_items)
@@ -175,11 +212,15 @@ const endDate = toDateString(promotion.endDate);
     const discount = (baseTotal * promotion.discount) / 100;
 
     // Gọi sang ticket-service để ghi promotion_order + cập nhật total_price (thay vì tự UPDATE)
-    await this.callTicketService('post', '/tickets/internal/apply-promotion-order', {
-      promotionId: promotion.id,
-      orderId: dto.orderId,
-      discountAmount: discount,
-    });
+    await this.callTicketService(
+      'post',
+      '/tickets/internal/apply-promotion-order',
+      {
+        promotionId: promotion.id,
+        orderId: dto.orderId,
+        discountAmount: discount,
+      },
+    );
 
     return { success: true, discount };
   }
@@ -190,29 +231,49 @@ const endDate = toDateString(promotion.endDate);
   }
 
   async getTotalUsed(promotionId: number) {
-  const { total } = await this.callTicketService(
-    'get',
-    `/tickets/internal/promotion/${promotionId}/total-used`,
-  );
-  return total;
-}
+    const { total } = await this.callTicketService(
+      'get',
+      `/tickets/internal/promotion/${promotionId}/total-used`,
+    );
+    return total;
+  }
 
-async getTotalDiscount(promotionId: number) {
-  const { total } = await this.callTicketService(
-    'get',
-    `/tickets/internal/promotion/${promotionId}/total-discount`,
-  );
-  return total;
-}
+  async getTotalDiscount(promotionId: number) {
+    const { total } = await this.callTicketService(
+      'get',
+      `/tickets/internal/promotion/${promotionId}/total-discount`,
+    );
+    return total;
+  }
 
   // Hàm dùng chung để gọi HTTP sang ticket-service
-  private async callTicketService(method: 'get' | 'post', path: string, body?: any) {
+  private async callTicketService(
+    method: 'get' | 'post',
+    path: string,
+    body?: any,
+  ) {
     try {
       const url = `${this.ticketServiceUrl}${path}`;
       const response =
         method === 'get'
-          ? await firstValueFrom(this.httpService.get(url))
-          : await firstValueFrom(this.httpService.post(url, body));
+          ? await firstValueFrom(
+              this.httpService
+                .get(url, {
+                  headers: {
+                    'x-internal-service-token': this.internalServiceToken,
+                  },
+                })
+                .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+            )
+          : await firstValueFrom(
+              this.httpService
+                .post(url, body, {
+                  headers: {
+                    'x-internal-service-token': this.internalServiceToken,
+                  },
+                })
+                .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+            );
       return response.data;
     } catch (error) {
       throw new InternalServerErrorException(

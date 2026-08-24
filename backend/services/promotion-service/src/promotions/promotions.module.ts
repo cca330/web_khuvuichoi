@@ -7,6 +7,7 @@ import { PromotionsService } from './promotions.service';
 import { Promotion } from './entities/promotion.entity';
 import { PromotionGateTicket } from './entities/promotion-gate-ticket.entity';
 import { AuthModule } from '../auth/auth.module';
+import { InternalServiceGuard } from '../auth/guards/internal-service.guard';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { AuthModule } from '../auth/auth.module';
     AuthModule,
   ],
   controllers: [PromotionsController],
-  providers: [PromotionsService],
+  providers: [PromotionsService, InternalServiceGuard],
   exports: [PromotionsService],
 })
 export class PromotionsModule {}

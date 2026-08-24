@@ -17,8 +17,15 @@ import { FilterRevenueDto } from './dto/filter-revenue.dto';
 import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
 import { GateTicket, GateTicketStatus } from './entities/gate-ticket.entity';
+import { HttpService } from '@nestjs/axios';
+import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
+import { retry, timeout } from 'rxjs/operators';
 @Injectable()
 export class TicketsService {
+  private readonly promotionServiceUrl: string;
+  private readonly internalServiceToken: string;
+
   constructor(
     @InjectRepository(Ticket)
     private readonly ticketRepository: Repository<Ticket>,
@@ -30,7 +37,16 @@ export class TicketsService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(OrderItem)
     private readonly orderItemRepository: Repository<OrderItem>,
-  ) {}
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
+  ) {
+    this.promotionServiceUrl = this.configService.get<string>(
+      'PROMOTION_SERVICE_URL',
+    ) as string;
+    this.internalServiceToken = this.configService.get<string>(
+      'INTERNAL_SERVICE_TOKEN',
+    ) as string;
+  }
 
   // Lấy danh sách vé đã bán (chỉ lấy vé thuộc đơn đã PAID)
   async findAll(filter: FilterTicketsDto) {
@@ -109,6 +125,17 @@ export class TicketsService {
       .where('ticket.orderItemId IN (:...ids)', { ids })
       .orderBy('ticket.id', 'ASC')
       .getMany();
+  }
+
+  async getTicketsByOrderForUser(orderId: number, userId: number) {
+    const order = await this.orderRepository.findOne({
+      where: { id: orderId, userId },
+    });
+    if (!order) {
+      throw new NotFoundException('Đơn hàng không tồn tại');
+    }
+
+    return this.getTicketsByOrder(orderId);
   }
 
   // Quét vé tại cổng
@@ -349,23 +376,34 @@ export class TicketsService {
 
   // Tính base total theo phạm vi áp dụng của 1 promotion
   async calculateBaseTotal(dto: CalculateBaseTotalDto) {
+    const { data: promotionScope } = await firstValueFrom(
+      this.httpService
+        .get<{
+          appliesToAll: boolean;
+          gateTicketIds: number[];
+        }>(
+          `${this.promotionServiceUrl}/promotions/internal/${dto.promotionId}/eligible-gate-tickets`,
+          {
+            headers: { 'x-internal-service-token': this.internalServiceToken },
+          },
+        )
+        .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+    );
+    const scopeClause = promotionScope.appliesToAll
+      ? ''
+      : ' AND oi.gate_ticket_id IN (?)';
+    const params = promotionScope.appliesToAll
+      ? [dto.orderId]
+      : [dto.orderId, promotionScope.gateTicketIds];
+
     const result = await this.ticketRepository.manager.query(
       `
     SELECT SUM(oi.quantity * oi.price) AS total
     FROM order_items oi
     WHERE oi.order_id = ?
-      AND (
-            NOT EXISTS (
-                SELECT 1 FROM promotion_gate_tickets
-                WHERE promotion_id = ?
-            )
-            OR oi.gate_ticket_id IN (
-                SELECT gate_ticket_id FROM promotion_gate_tickets
-                WHERE promotion_id = ?
-            )
-          )
+      ${scopeClause}
     `,
-      [dto.orderId, dto.promotionId, dto.promotionId],
+      params,
     );
     return { total: parseFloat(result[0]?.total || '0') };
   }

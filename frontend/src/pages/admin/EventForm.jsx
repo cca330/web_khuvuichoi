@@ -23,7 +23,7 @@ export default function EventForm({ initialData, eventId }) {
   const navigate = useNavigate();
 
   const [thumbnail, setThumbnail] = useState(
-    initialData?.thumbnail ? [initialData.thumbnail] : []
+    initialData?.thumbnail ? [initialData.thumbnail] : [],
   );
   const [form, setForm] = useState({
     title: initialData?.title || "",
@@ -33,9 +33,10 @@ export default function EventForm({ initialData, eventId }) {
     startDatetime: toDatetimeLocal(initialData?.startDatetime),
     endDatetime: toDatetimeLocal(initialData?.endDatetime),
     status: initialData?.status || "COMING_SOON",
+    isFeatured: initialData?.isFeatured || false,
   });
   const [additionalImages, setAdditionalImages] = useState(
-    initialData?.images?.map((img) => img.image) || []
+    initialData?.images?.map((img) => img.image) || [],
   );
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -76,6 +77,7 @@ export default function EventForm({ initialData, eventId }) {
       startDatetime: form.startDatetime,
       endDatetime: form.endDatetime,
       status: form.status,
+      isFeatured: form.isFeatured,
       images,
     };
 
@@ -88,7 +90,7 @@ export default function EventForm({ initialData, eventId }) {
       navigate("/admin/events");
     } catch (err) {
       setError(
-        err.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại"
+        err.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại",
       );
     } finally {
       setSaving(false);
@@ -183,6 +185,19 @@ export default function EventForm({ initialData, eventId }) {
             <option value="FINISHED">FINISHED</option>
             <option value="CANCELLED">CANCELLED</option>
           </select>
+        </div>
+
+        <div className="form-group">
+          <label>
+            <input
+              type="checkbox"
+              checked={form.isFeatured}
+              onChange={(e) =>
+                setForm({ ...form, isFeatured: e.target.checked })
+              }
+            />{" "}
+            Hiển thị làm sự kiện nổi bật ở trang chủ
+          </label>
         </div>
 
         <div className="form-group">

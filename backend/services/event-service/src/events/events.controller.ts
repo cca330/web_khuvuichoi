@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, UseGuards, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { EventsService } from './events.service';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
@@ -15,6 +27,11 @@ export class EventsController {
   @Get()
   findAll() {
     return this.eventsService.findAll();
+  }
+
+  @Get('featured')
+  findFeatured() {
+    return this.eventsService.findFeatured();
   }
 
   @Get(':id')
@@ -53,7 +70,10 @@ export class EventsController {
   @Put('schedules/:id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  updateSchedule(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateEventScheduleDto) {
+  updateSchedule(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateEventScheduleDto,
+  ) {
     return this.eventsService.updateSchedule(id, dto);
   }
 

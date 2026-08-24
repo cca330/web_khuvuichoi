@@ -4,16 +4,18 @@ import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { retry, timeout } from 'rxjs/operators';
 import { Game, GameStatus, AllowedTicket } from './entities/game.entity';
 import { GameImage } from './entities/game-image.entity';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { In } from 'typeorm';
-import { isBase64Image, saveBase64Images } from './image-helper'; 
+import { isBase64Image, saveBase64Images } from './image-helper';
 
 @Injectable()
 export class GamesService {
   private readonly userServiceUrl: string;
+  private readonly internalServiceToken: string;
 
   constructor(
     @InjectRepository(Game)
@@ -23,7 +25,12 @@ export class GamesService {
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {
-    this.userServiceUrl = this.configService.get<string>('USER_SERVICE_URL') as string;
+    this.userServiceUrl = this.configService.get<string>(
+      'USER_SERVICE_URL',
+    ) as string;
+    this.internalServiceToken = this.configService.get<string>(
+      'INTERNAL_SERVICE_TOKEN',
+    ) as string;
   }
 
   // Lấy tất cả games
@@ -55,18 +62,16 @@ export class GamesService {
     return game;
   }
 
-  
-
-async getByGate(gateType: AllowedTicket) {
-  return this.gameRepository.find({
-    where: {
-      status: GameStatus.OPEN,
-      allowedTicket: In([AllowedTicket.ALL, gateType]), // ✅ ĐÚNG — dùng In() cho danh sách nhiều giá trị
-    },
-    relations: ['images'],
-    order: { id: 'ASC' },
-  });
-}
+  async getByGate(gateType: AllowedTicket) {
+    return this.gameRepository.find({
+      where: {
+        status: GameStatus.OPEN,
+        allowedTicket: In([AllowedTicket.ALL, gateType]), // ✅ ĐÚNG — dùng In() cho danh sách nhiều giá trị
+      },
+      relations: ['images'],
+      order: { id: 'ASC' },
+    });
+  }
 
   // Tìm kiếm game theo tên
   async search(keyword: string) {
@@ -80,7 +85,8 @@ async getByGate(gateType: AllowedTicket) {
 
   // Tạo game mới
   async create(dto: CreateGameDto) {
-    const queryRunner = this.gameRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.gameRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -122,7 +128,8 @@ async getByGate(gateType: AllowedTicket) {
 
   // Cập nhật game
   async update(id: number, dto: UpdateGameDto) {
-    const queryRunner = this.gameRepository.manager.connection.createQueryRunner();
+    const queryRunner =
+      this.gameRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
@@ -137,7 +144,8 @@ async getByGate(gateType: AllowedTicket) {
 
       game.name = dto.name;
       if (dto.description !== undefined) game.description = dto.description;
-      if (dto.recommendedAge !== undefined) game.recommendedAge = dto.recommendedAge;
+      if (dto.recommendedAge !== undefined)
+        game.recommendedAge = dto.recommendedAge;
       game.allowedTicket = dto.allowedTicket;
       game.status = dto.status;
 
@@ -252,9 +260,12 @@ async getByGate(gateType: AllowedTicket) {
     let users: any[] = [];
     try {
       const { data } = await firstValueFrom(
-        this.httpService.get(`${this.userServiceUrl}/users/internal/by-ids`, {
-          params: { ids: userIds.join(',') },
-        }),
+        this.httpService
+          .get(`${this.userServiceUrl}/users/internal/by-ids`, {
+            params: { ids: userIds.join(',') },
+            headers: { 'x-internal-service-token': this.internalServiceToken },
+          })
+          .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
       );
       users = data;
     } catch (error) {
@@ -271,5 +282,4 @@ async getByGate(gateType: AllowedTicket) {
       username: userMap.get(f.user_id) || 'Unknown',
     }));
   }
-
 }

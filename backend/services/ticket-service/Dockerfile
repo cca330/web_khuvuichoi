@@ -6,7 +6,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install ALL dependencies (including devDependencies for @nestjs/cli)
-RUN npm ci --retry 3 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000
+RUN npm install --retry 3 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000
 
 # Copy source code
 COPY . .
@@ -28,7 +28,7 @@ COPY --from=build --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=build --chown=nodejs:nodejs /app/node_modules ./node_modules
 
 # Install production dependencies only
-RUN npm ci --omit=dev --ignore-scripts && \
+RUN npm install --omit=dev --ignore-scripts --retry 3 --fetch-retry-mintimeout 20000 --fetch-retry-maxtimeout 120000 && \
     npm cache clean --force
 
 # Switch to non-root user

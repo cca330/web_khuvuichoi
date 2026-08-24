@@ -15,6 +15,7 @@ import { UserStatus } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { InternalServiceGuard } from '../auth/guards/internal-service.guard';
 
 @Controller('users')
 export class UsersController {
@@ -22,7 +23,7 @@ export class UsersController {
 
   // Internal API - protected by JWT
   @Get('internal/by-ids')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(InternalServiceGuard)
   findByIds(@Query('ids') ids: string) {
     const idArray = ids.split(',').map((id) => parseInt(id.trim()));
     return this.usersService.findByIds(idArray);

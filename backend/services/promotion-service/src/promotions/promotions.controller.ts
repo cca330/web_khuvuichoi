@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, HttpCode, HttpStatus, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import { PromotionsService } from './promotions.service';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
 import { UpdatePromotionDto } from './dto/update-promotion.dto';
@@ -6,6 +17,7 @@ import { ApplyPromotionDto } from './dto/apply-promotion.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { InternalServiceGuard } from '../auth/guards/internal-service.guard';
 
 @Controller('promotions')
 export class PromotionsController {
@@ -19,6 +31,14 @@ export class PromotionsController {
   @Get('gate-tickets')
   getGateTickets() {
     return this.promotionsService.getAllGateTickets();
+  }
+
+  @Get('internal/:promotionId/eligible-gate-tickets')
+  @UseGuards(InternalServiceGuard)
+  getEligibleGateTickets(@Param('promotionId') promotionId: string) {
+    return this.promotionsService.getEligibleGateTicketIds(
+      parseInt(promotionId),
+    );
   }
 
   @Get(':id')

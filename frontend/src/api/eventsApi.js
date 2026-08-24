@@ -1,9 +1,14 @@
-import axiosClient from './axiosClient';
+import axiosClient from "./axiosClient";
 
 const eventsApi = {
   // Lấy tất cả events
   getAll: () => {
-    return axiosClient.get('/events');
+    return axiosClient.get("/events");
+  },
+
+  // Lấy event nổi bật
+  getFeatured: () => {
+    return axiosClient.get("/events/featured");
   },
 
   // Lấy event theo id
@@ -18,12 +23,12 @@ const eventsApi = {
 
   // Tạo event mới
   create: (data) => {
-    return axiosClient.post('/events', data);
+    return axiosClient.post("/events", data);
   },
 
   // Tạo schedule mới
   createSchedule: (data) => {
-    return axiosClient.post('/events/schedules', data);
+    return axiosClient.post("/events/schedules", data);
   },
 
   // Cập nhật event
