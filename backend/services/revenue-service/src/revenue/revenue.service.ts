@@ -3,10 +3,13 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { retry, timeout } from 'rxjs/operators';
+import { CircuitBreaker } from '../common/circuit-breaker';
+import { getTraceId } from '../common/trace-context';
 import { FilterRevenueDto } from './dto/filter-revenue.dto';
 
 @Injectable()
 export class RevenueService {
+  private readonly ticketServiceCircuit = new CircuitBreaker();
   private readonly ticketServiceUrl: string;
   private readonly internalServiceToken: string;
 
@@ -24,13 +27,18 @@ export class RevenueService {
 
   private async callTicketService(path: string, params?: any) {
     try {
-      const { data } = await firstValueFrom(
-        this.httpService
-          .get(`${this.ticketServiceUrl}${path}`, {
-            params,
-            headers: { 'x-internal-service-token': this.internalServiceToken },
-          })
-          .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+      const { data } = await this.ticketServiceCircuit.execute(() =>
+        firstValueFrom(
+          this.httpService
+            .get(`${this.ticketServiceUrl}${path}`, {
+              params,
+              headers: {
+                'x-internal-service-token': this.internalServiceToken,
+                'x-trace-id': getTraceId() || 'system',
+              },
+            })
+            .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+        ),
       );
       return data;
     } catch (error) {

@@ -1,0 +1,108 @@
+name: Independent Services CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      user: ${{ steps.filter.outputs.user }}
+      ticket: ${{ steps.filter.outputs.ticket }}
+      event: ${{ steps.filter.outputs.event }}
+      game: ${{ steps.filter.outputs.game }}
+      promotion: ${{ steps.filter.outputs.promotion }}
+      revenue: ${{ steps.filter.outputs.revenue }}
+      gateway: ${{ steps.filter.outputs.gateway }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            user:
+              - 'backend/services/user-service/**'
+              - 'docker-compose.yml'
+              - 'database/init/**'
+            ticket:
+              - 'backend/services/ticket-service/**'
+              - 'docker-compose.yml'
+              - 'database/init/**'
+            event:
+              - 'backend/services/event-service/**'
+              - 'docker-compose.yml'
+              - 'database/init/**'
+            game:
+              - 'backend/services/game-service/**'
+              - 'docker-compose.yml'
+              - 'database/init/**'
+            promotion:
+              - 'backend/services/promotion-service/**'
+              - 'docker-compose.yml'
+              - 'database/init/**'
+            revenue:
+              - 'backend/services/revenue-service/**'
+              - 'docker-compose.yml'
+              - 'database/init/**'
+            gateway:
+              - 'backend/api-gateway/**'
+              - 'docker-compose.yml'
+
+  user-service:
+    needs: changes
+    if: needs.changes.outputs.user == 'true'
+    uses: ./.github/workflows/service-build.yml
+    with:
+      service_name: user-service
+      service_path: backend/services/user-service
+
+  ticket-service:
+    needs: changes
+    if: needs.changes.outputs.ticket == 'true'
+    uses: ./.github/workflows/service-build.yml
+    with:
+      service_name: ticket-service
+      service_path: backend/services/ticket-service
+
+  event-service:
+    needs: changes
+    if: needs.changes.outputs.event == 'true'
+    uses: ./.github/workflows/service-build.yml
+    with:
+      service_name: event-service
+      service_path: backend/services/event-service
+
+  game-service:
+    needs: changes
+    if: needs.changes.outputs.game == 'true'
+    uses: ./.github/workflows/service-build.yml
+    with:
+      service_name: game-service
+      service_path: backend/services/game-service
+
+  promotion-service:
+    needs: changes
+    if: needs.changes.outputs.promotion == 'true'
+    uses: ./.github/workflows/service-build.yml
+    with:
+      service_name: promotion-service
+      service_path: backend/services/promotion-service
+
+  revenue-service:
+    needs: changes
+    if: needs.changes.outputs.revenue == 'true'
+    uses: ./.github/workflows/service-build.yml
+    with:
+      service_name: revenue-service
+      service_path: backend/services/revenue-service
+
+  api-gateway:
+    needs: changes
+    if: needs.changes.outputs.gateway == 'true'
+    uses: ./.github/workflows/service-build.yml
+    with:
+      service_name: api-gateway
+      service_path: backend/api-gateway

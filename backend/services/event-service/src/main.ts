@@ -5,9 +5,25 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import helmet from 'helmet';
 import * as express from 'express';
+import { randomUUID } from 'crypto';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use((req, res, next) => {
+    const traceId = req.header('x-trace-id') || randomUUID();
+    req.headers['x-trace-id'] = traceId;
+    res.setHeader('x-trace-id', traceId);
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        service: 'event-service',
+        traceId,
+        method: req.method,
+        path: req.originalUrl,
+      }),
+    );
+    next();
+  });
   const expressApp = app.getHttpAdapter().getInstance();
 
   // Security headers với Helmet
@@ -15,7 +31,11 @@ async function bootstrap() {
 
   // CORS - chỉ cho phép API Gateway localhost
   app.enableCors({
-    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:8000'],
+    origin: [
+      'http://localhost',
+      'http://localhost:80',
+      'http://localhost:8000',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

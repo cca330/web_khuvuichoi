@@ -5,16 +5,37 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import helmet from 'helmet';
+import { randomUUID } from 'crypto';
+import { runWithTraceId } from './common/trace-context';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use((req, res, next) => {
+    const traceId = req.header('x-trace-id') || randomUUID();
+    req.headers['x-trace-id'] = traceId;
+    res.setHeader('x-trace-id', traceId);
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        service: 'ticket-service',
+        traceId,
+        method: req.method,
+        path: req.originalUrl,
+      }),
+    );
+    runWithTraceId(traceId, next);
+  });
 
   // Security headers với Helmet
   app.use(helmet());
 
   // CORS - chỉ cho phép API Gateway localhost
   app.enableCors({
-    origin: ['http://localhost', 'http://localhost:80', 'http://localhost:8000'],
+    origin: [
+      'http://localhost',
+      'http://localhost:80',
+      'http://localhost:8000',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],

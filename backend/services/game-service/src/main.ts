@@ -5,9 +5,26 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import helmet from 'helmet';
 import * as express from 'express';
+import { randomUUID } from 'crypto';
+import { runWithTraceId } from './common/trace-context';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.use((req, res, next) => {
+    const traceId = req.header('x-trace-id') || randomUUID();
+    req.headers['x-trace-id'] = traceId;
+    res.setHeader('x-trace-id', traceId);
+    console.log(
+      JSON.stringify({
+        level: 'info',
+        service: 'game-service',
+        traceId,
+        method: req.method,
+        path: req.originalUrl,
+      }),
+    );
+    runWithTraceId(traceId, next);
+  });
   const expressApp = app.getHttpAdapter().getInstance();
 
   // Security headers với Helmet

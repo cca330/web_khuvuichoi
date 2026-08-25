@@ -11,9 +11,12 @@ import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
 import { In } from 'typeorm';
 import { isBase64Image, saveBase64Images } from './image-helper';
+import { CircuitBreaker } from '../common/circuit-breaker';
+import { getTraceId } from '../common/trace-context';
 
 @Injectable()
 export class GamesService {
+  private readonly userServiceCircuit = new CircuitBreaker();
   private readonly userServiceUrl: string;
   private readonly internalServiceToken: string;
 
@@ -259,13 +262,18 @@ export class GamesService {
 
     let users: any[] = [];
     try {
-      const { data } = await firstValueFrom(
-        this.httpService
-          .get(`${this.userServiceUrl}/users/internal/by-ids`, {
-            params: { ids: userIds.join(',') },
-            headers: { 'x-internal-service-token': this.internalServiceToken },
-          })
-          .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+      const { data } = await this.userServiceCircuit.execute(() =>
+        firstValueFrom(
+          this.httpService
+            .get(`${this.userServiceUrl}/users/internal/by-ids`, {
+              params: { ids: userIds.join(',') },
+              headers: {
+                'x-internal-service-token': this.internalServiceToken,
+                'x-trace-id': getTraceId() || 'system',
+              },
+            })
+            .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+        ),
       );
       users = data;
     } catch (error) {

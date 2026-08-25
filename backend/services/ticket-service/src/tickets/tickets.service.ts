@@ -21,10 +21,13 @@ import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { retry, timeout } from 'rxjs/operators';
+import { CircuitBreaker } from '../common/circuit-breaker';
+import { getTraceId } from '../common/trace-context';
 @Injectable()
 export class TicketsService {
   private readonly promotionServiceUrl: string;
   private readonly internalServiceToken: string;
+  private readonly promotionServiceCircuit = new CircuitBreaker();
 
   constructor(
     @InjectRepository(Ticket)
@@ -376,18 +379,24 @@ export class TicketsService {
 
   // Tính base total theo phạm vi áp dụng của 1 promotion
   async calculateBaseTotal(dto: CalculateBaseTotalDto) {
-    const { data: promotionScope } = await firstValueFrom(
-      this.httpService
-        .get<{
-          appliesToAll: boolean;
-          gateTicketIds: number[];
-        }>(
-          `${this.promotionServiceUrl}/promotions/internal/${dto.promotionId}/eligible-gate-tickets`,
-          {
-            headers: { 'x-internal-service-token': this.internalServiceToken },
-          },
-        )
-        .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+    const { data: promotionScope } = await this.promotionServiceCircuit.execute(
+      () =>
+        firstValueFrom(
+          this.httpService
+            .get<{
+              appliesToAll: boolean;
+              gateTicketIds: number[];
+            }>(
+              `${this.promotionServiceUrl}/promotions/internal/${dto.promotionId}/eligible-gate-tickets`,
+              {
+                headers: {
+                  'x-internal-service-token': this.internalServiceToken,
+                  'x-trace-id': getTraceId() || 'system',
+                },
+              },
+            )
+            .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
+        ),
     );
     const scopeClause = promotionScope.appliesToAll
       ? ''

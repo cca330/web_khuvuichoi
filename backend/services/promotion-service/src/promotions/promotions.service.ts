@@ -9,6 +9,8 @@ import { ConfigService } from '@nestjs/config';
 import { Repository } from 'typeorm';
 import { firstValueFrom } from 'rxjs';
 import { retry, timeout } from 'rxjs/operators';
+import { CircuitBreaker } from '../common/circuit-breaker';
+import { getTraceId } from '../common/trace-context';
 import { Promotion, PromotionStatus } from './entities/promotion.entity';
 import { PromotionGateTicket } from './entities/promotion-gate-ticket.entity';
 import { CreatePromotionDto } from './dto/create-promotion.dto';
@@ -17,6 +19,7 @@ import { ApplyPromotionDto } from './dto/apply-promotion.dto';
 
 @Injectable()
 export class PromotionsService {
+  private readonly ticketServiceCircuit = new CircuitBreaker();
   private readonly ticketServiceUrl: string;
   private readonly internalServiceToken: string;
 
@@ -254,26 +257,29 @@ export class PromotionsService {
   ) {
     try {
       const url = `${this.ticketServiceUrl}${path}`;
-      const response =
+      const response = await this.ticketServiceCircuit.execute(() =>
         method === 'get'
-          ? await firstValueFrom(
+          ? firstValueFrom(
               this.httpService
                 .get(url, {
                   headers: {
                     'x-internal-service-token': this.internalServiceToken,
+                    'x-trace-id': getTraceId() || 'system',
                   },
                 })
                 .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
             )
-          : await firstValueFrom(
+          : firstValueFrom(
               this.httpService
                 .post(url, body, {
                   headers: {
                     'x-internal-service-token': this.internalServiceToken,
+                    'x-trace-id': getTraceId() || 'system',
                   },
                 })
                 .pipe(timeout(5000), retry({ count: 2, delay: 500 })),
-            );
+            ),
+      );
       return response.data;
     } catch (error) {
       throw new InternalServerErrorException(

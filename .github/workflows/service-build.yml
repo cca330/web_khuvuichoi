@@ -1,0 +1,25 @@
+name: Build one service
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        required: true
+        type: string
+      service_path:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        working-directory: ${{ inputs.service_path }}
+        run: npm install
+      - name: Build service
+        working-directory: ${{ inputs.service_path }}
+        run: npm run build
+      - name: Build Docker image
+        run: docker build -t local/${{ inputs.service_name }}:ci ${{ inputs.service_path }}
