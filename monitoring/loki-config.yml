@@ -1,23 +1,31 @@
+#Đây là cấu hình cho Loki.
 auth_enabled: false
+#Loki lắng nghe HTTP ở port 3100
 server:
   http_listen_port: 3100
 common:
   path_prefix: /loki
   replication_factor: 1
+  #ring là cơ chế Loki sử dụng để quản lý các instance trong hệ thống phân tán
   ring:
     kvstore:
       store: inmemory
+#Loki sẽ biết dữ liệu ở thời gian nào sử dụng schema nào.
 schema_config:
   configs:
     - from: 2024-01-01
+      #Time Series Database.
       store: tsdb
       object_store: filesystem
       schema: v13
       index:
         prefix: index_
+        #khoảng thời gian Loki tạo index
         period: 24h
+#phần cấu hình nơi Loki lưu dữ liệu thực tế
 storage_config:
   filesystem:
     directory: /loki/chunks
 ruler:
+#Alertmanager = nhận và quản lý cảnh báo
   alertmanager_url: http://localhost:9093
