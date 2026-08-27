@@ -3,7 +3,7 @@ import "../styles/admin.css";
 
 // Component dùng lại cho việc chọn, upload, hiển thị và xóa ảnh.
 export default function ImageUpload({
-  // Danh sách ảnh ban đầu, thường được truyền từ dữ liệu backend.
+  // Danh sách ảnh ban đầu, thường được truyền từ dữ liệu backend
   images = [],
   // Callback gửi danh sách ảnh mới về component cha.
   onChange,
