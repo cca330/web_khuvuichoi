@@ -24,6 +24,7 @@ jobs:
           echo "${{ secrets.USER_SERVICE_ENV }}" > backend/services/user-service/.env
           printf "REDIS_URL=redis://redis:6379\n" >> backend/services/user-service/.env
           echo "${{ secrets.TICKET_SERVICE_ENV }}" > backend/services/ticket-service/.env
+          printf "\nDB_HOST=mysql\nDB_PORT=3306\nDB_DATABASE=ticket_db\nDB_USERNAME=ticket_app\nDB_PASSWORD=ticket-password-change-me\nPROMOTION_SERVICE_URL=http://promotion-service:3004\n" >> backend/services/ticket-service/.env
           echo "${{ secrets.PROMOTION_SERVICE_ENV }}" > backend/services/promotion-service/.env
           echo "${{ secrets.GAME_SERVICE_ENV }}" > backend/services/game-service/.env
           echo "${{ secrets.EVENT_SERVICE_ENV }}" > backend/services/event-service/.env
@@ -42,7 +43,12 @@ jobs:
         run: docker compose build --no-cache
 
       - name: Start Containers
-        run: docker compose up -d
+        run: |
+          docker compose up -d || {
+            docker compose ps -a
+            docker compose logs --tail=200 ticket-service user-service mysql
+            exit 1
+          }
 
       - name: Show Running Containers
         run: docker ps -a

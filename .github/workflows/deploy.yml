@@ -49,6 +49,8 @@ jobs:
 
           printf "%s" "${{ secrets.TICKET_SERVICE_ENV }}" \
           > backend/services/ticket-service/.env
+          printf "\nDB_HOST=mysql\nDB_PORT=3306\nDB_DATABASE=ticket_db\nDB_USERNAME=ticket_app\nDB_PASSWORD=ticket-password-change-me\nPROMOTION_SERVICE_URL=http://promotion-service:3004\n" \
+          >> backend/services/ticket-service/.env
 
 
           printf "%s" "${{ secrets.PROMOTION_SERVICE_ENV }}" \
