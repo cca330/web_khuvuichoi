@@ -39,9 +39,12 @@ jobs:
         run: |
           cd /home/user1/Doan
 
+          printf "MYSQL_ROOT_PASSWORD=%s\n" "${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
 
           printf "%s" "${{ secrets.USER_SERVICE_ENV }}" \
           > backend/services/user-service/.env
+          printf "\nREDIS_URL=redis://redis:6379\n" \
+          >> backend/services/user-service/.env
 
 
           printf "%s" "${{ secrets.TICKET_SERVICE_ENV }}" \
@@ -66,6 +69,13 @@ jobs:
 
           printf "%s" "${{ secrets.API_GATEWAY_ENV }}" \
           > backend/api-gateway/.env
+
+          for file in backend/services/*-service/.env
+          do
+            printf "\nJWT_SECRET=%s\nINTERNAL_SERVICE_TOKEN=%s\n" \
+              "${{ secrets.JWT_SECRET }}" "${{ secrets.INTERNAL_SERVICE_TOKEN }}" >> "$file"
+          done
+          printf "\nJWT_SECRET=%s\n" "${{ secrets.JWT_SECRET }}" >> backend/api-gateway/.env
 
 
           echo ".env files created"

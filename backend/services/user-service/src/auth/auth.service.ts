@@ -9,9 +9,10 @@ import * as bcrypt from 'bcryptjs';
 import { UsersService } from '../users/users.service';
 import { UserStatus } from '../users/entities/user.entity';
 import { SecurityLogger } from './security-logger.service';
-
-// In-memory store for refresh tokens (nên dùng Redis trong production)
-const refreshTokens = new Map<string, { userId: number; username: string; expiresAt: Date }>();
+import { createHash } from 'crypto';
+import Redis from 'ioredis';
+import { REDIS_CLIENT } from './redis.provider';
+import { Inject } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -19,7 +20,13 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly securityLogger: SecurityLogger,
+    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
+
+  private refreshTokenKey(refreshToken: string): string {
+    const tokenHash = createHash('sha256').update(refreshToken).digest('hex');
+    return `auth:refresh:${tokenHash}`;
+  }
 
   // Tương ứng handleLogin() trong PHP
   async login(username: string, password: string) {
@@ -53,10 +60,13 @@ export class AuthService {
       { expiresIn: '7d' }
     );
 
-    // Lưu refresh token
-    const expiresAt = new Date();
-    expiresAt.setDate(expiresAt.getDate() + 7);
-    refreshTokens.set(refreshToken, { userId: user.id, username: user.username, expiresAt });
+    // Lưu metadata trong Redis với TTL 7 ngày; không lưu token thô.
+    await this.redis.set(
+      this.refreshTokenKey(refreshToken),
+      JSON.stringify({ userId: user.id, username: user.username }),
+      'EX',
+      7 * 24 * 60 * 60,
+    );
 
     return {
       accessToken,
@@ -75,14 +85,12 @@ export class AuthService {
         throw new UnauthorizedException('Invalid token type');
       }
 
-      const stored = refreshTokens.get(refreshToken);
+      const storedValue = await this.redis.get(this.refreshTokenKey(refreshToken));
+      const stored = storedValue
+        ? (JSON.parse(storedValue) as { userId: number; username: string })
+        : null;
       if (!stored) {
         throw new UnauthorizedException('Refresh token không tồn tại');
-      }
-
-      if (stored.expiresAt < new Date()) {
-        refreshTokens.delete(refreshToken);
-        throw new UnauthorizedException('Refresh token đã hết hạn');
       }
 
       // Lấy user info
@@ -107,7 +115,7 @@ export class AuthService {
 
   // Đăng xuất - xóa refresh token
   async logout(refreshToken: string) {
-    refreshTokens.delete(refreshToken);
+    await this.redis.del(this.refreshTokenKey(refreshToken));
     return { message: 'Đăng xuất thành công' };
   }
 

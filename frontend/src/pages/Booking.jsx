@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import cartApi from "../api/cartApi";
+import promotionsApi from "../api/promotionsApi";
 import { useAuth } from "../context/AuthContext";
 import "../styles/datve.css";
-import promotionsApi from "../api/promotionsApi";
 
 const Booking = () => {
   const { user } = useAuth();
@@ -15,7 +15,8 @@ const Booking = () => {
   const [processing, setProcessing] = useState(false);
 
   // State dành cho Mã giảm giá
-  const [couponCode, setCouponCode] = useState("");
+  const [promotions, setPromotions] = useState([]);
+  const [selectedCoupon, setSelectedCoupon] = useState("");
   const [applyingCoupon, setApplyingCoupon] = useState(false);
   const [couponMessage, setCouponMessage] = useState(null);
 
@@ -32,12 +33,17 @@ const Booking = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [ticketsRes, cartRes] = await Promise.all([
+      const [ticketsRes, cartRes, promoRes] = await Promise.all([
         cartApi.getGateTickets(),
         cartApi.getCart(user.id),
+        promotionsApi.getActivePromotions ? promotionsApi.getActivePromotions() : Promise.resolve({ data: [] }),
       ]);
       setGateTickets(ticketsRes.data || []);
       setCartData(cartRes.data || null);
+      
+      // Lấy danh sách ưu đãi
+      const activePromos = promoRes.data || promoRes || [];
+      setPromotions(Array.isArray(activePromos) ? activePromos : []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -45,7 +51,7 @@ const Booking = () => {
     }
   };
 
-  // 🟢 Hàm tải lại giỏ hàng ngầm (KHÔNG reset giao diện / KHÔNG bật loading)
+  // Hàm tải lại giỏ hàng ngầm
   const refreshCartOnly = async () => {
     try {
       const cartRes = await cartApi.getCart(user.id);
@@ -58,7 +64,6 @@ const Booking = () => {
   const handleAddGate = async (gateTicketId) => {
     try {
       const res = await cartApi.addGate(user.id, gateTicketId);
-      // Nếu API trả về cart mới thì set trực tiếp, không thì refresh ngầm
       if (res?.data?.cart) {
         setCartData(res.data.cart);
       } else {
@@ -97,12 +102,11 @@ const Booking = () => {
     }
   };
 
-  // 🎟️ Hàm Áp dụng Mã giảm giá
+  // 🎟️ Hàm Áp dụng Mã giảm giá từ Dropdown
   const handleApplyCoupon = async (e) => {
     e.preventDefault();
-    if (!couponCode.trim()) return;
+    if (!selectedCoupon) return;
 
-    // Kiểm tra xem có order chưa
     if (!cartData || !cartData.order || !cartData.order.id) {
       setCouponMessage({
         type: "error",
@@ -115,22 +119,18 @@ const Booking = () => {
       setApplyingCoupon(true);
       setCouponMessage(null);
 
-      // Gọi API áp dụng mã giảm giá (Promotion Service)
-      const res = await cartApi.applyCoupon(couponCode.trim(), cartData.order.id);
+      const res = await cartApi.applyCoupon(selectedCoupon, cartData.order.id);
 
       if (res?.data?.success) {
-        // Áp dụng thành công - refresh giỏ hàng để lấy discount mới
         await refreshCartOnly();
-
         setCouponMessage({
           type: "success",
-          text: `Áp dụng mã giảm giá thành công! Giảm ${res.data.discount?.toLocaleString() || 0}đ`,
+          text: `Áp dụng thành công! Giảm ${res.data.discount?.toLocaleString() || 0}đ`,
         });
       } else {
-        // API trả về lỗi
         setCouponMessage({
           type: "error",
-          text: res?.data?.message || "Mã giảm giá không hợp lệ!",
+          text: res?.data?.message || "Không thể áp dụng mã giảm giá này!",
         });
       }
     } catch (error) {
@@ -155,7 +155,6 @@ const Booking = () => {
       const res = await cartApi.checkout(user.id, cartData.order.id);
 
       if (res.data.success) {
-        // 🚀 Chuyển thẳng sang trang chi tiết và truyền trạng thái thanh toán thành công
         navigate(`/order/${res.data.orderId}`, {
           state: {
             justPaid: true,
@@ -185,9 +184,7 @@ const Booking = () => {
         >
           <div className="cart-hero-overlay"></div>
           <div className="container cart-hero-content">
-            <span className="cart-hero-tagline">
-              Hệ Thống Đặt Vé Trực Tuyến
-            </span>
+            <span className="cart-hero-tagline">Hệ Thống Đặt Vé Trực Tuyến</span>
             <h2 className="cart-hero-title">Đặt Vé HG Playground</h2>
             <p className="cart-hero-desc">
               Sở hữu ngay tấm vé thông hành để trải nghiệm hàng loạt trò chơi và
@@ -201,21 +198,9 @@ const Booking = () => {
       <section className="cart-list-section">
         <div className="container">
           <div className="cart-header-bar">
-            <h3>🎫 Đặt Vé & Thanh Toán</h3>
+            <h3> Đặt Vé & Thanh Toán</h3>
             <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-              <button
-                className="btn-coupon-apply"
-                style={{
-                  background: "#ff4081",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  padding: "8px 16px",
-                }}
-                onClick={() => navigate("/promotions")} // 👈 Chuyển sang trang khuyến mãi của bạn
-              >
-                🎁 Khuyến mãi đang hoạt động
-              </button>
+              {/* Đã xóa nút Khuyến mãi đang hoạt động */}
               <button
                 className="btn-modern-primary"
                 onClick={() => navigate("/orders")}
@@ -245,8 +230,7 @@ const Booking = () => {
                           <b style={{ color: "#0f172a" }}>{gate.name}</b>
                           {gate.isCombo && (
                             <span className="combo-info">
-                              (Combo: {gate.admitsAdult} NL + {gate.admitsChild}{" "}
-                              TE)
+                              (Combo: {gate.admitsAdult} NL + {gate.admitsChild} TE)
                             </span>
                           )}
                         </td>
@@ -335,7 +319,7 @@ const Booking = () => {
                 className="modern-cart-box"
                 style={{ position: "sticky", top: "100px" }}
               >
-                <h4>💰 Thông tin thanh toán</h4>
+                <h4> Thông tin thanh toán</h4>
 
                 {!cartData || !cartData.items || cartData.items.length === 0 ? (
                   <div className="text-center py-4 text-muted">
@@ -361,30 +345,48 @@ const Booking = () => {
                       </div>
                     )}
 
-                    {/* 🎟️ KHU VỰC NHẬP MÃ GIẢM GIÁ */}
+                    {/* 🎟️ KHU VỰC CHỌN MÃ GIẢM GIÁ (DROPDOWN) */}
                     <div className="coupon-box">
                       <label className="coupon-label">
-                        🏷️ Mã giảm giá / Ưu đãi
+                         Chọn mã giảm giá / Ưu đãi
                       </label>
-                      <form
-                        onSubmit={handleApplyCoupon}
-                        className="coupon-form"
-                      >
-                        <input
-                          type="text"
+                      <form onSubmit={handleApplyCoupon} className="coupon-form">
+                        <select
                           className="modern-input coupon-input"
-                          placeholder="Nhập mã giảm giá..."
-                          value={couponCode}
-                          onChange={(e) => setCouponCode(e.target.value)}
-                        />
+                          value={selectedCoupon}
+                          onChange={(e) => setSelectedCoupon(e.target.value)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <option value="">-- Chọn mã giảm giá --</option>
+                          {promotions.map((promo) => {
+                            const code = promo.code || promo.couponCode;
+                            const isEligible =
+                              !promo.minOrderValue ||
+                              (cartData.baseTotal || 0) >= promo.minOrderValue;
+
+                            return (
+                              <option
+                                key={promo.id || code}
+                                value={code}
+                                disabled={!isEligible}
+                              >
+                                {code} - {promo.name || promo.description || "Giảm giá"}
+                                {!isEligible
+                                  ? ` (Đơn từ ${promo.minOrderValue.toLocaleString()}đ)`
+                                  : ""}
+                              </option>
+                            );
+                          })}
+                        </select>
                         <button
                           type="submit"
                           className="btn-coupon-apply"
-                          disabled={applyingCoupon || !couponCode.trim()}
+                          disabled={applyingCoupon || !selectedCoupon}
                         >
                           {applyingCoupon ? "..." : "Áp dụng"}
                         </button>
                       </form>
+
                       {couponMessage && (
                         <p
                           className={`coupon-msg ${
@@ -419,7 +421,7 @@ const Booking = () => {
                       onClick={handleCheckout}
                       disabled={processing || cartData.finalTotal <= 0}
                     >
-                      {processing ? "Đang xử lý..." : "✅ Xác nhận đặt vé"}
+                      {processing ? "Đang xử lý..." : " Xác nhận đặt vé"}
                     </button>
                   </>
                 )}

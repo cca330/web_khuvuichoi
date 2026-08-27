@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { SecurityLogger } from './security-logger.service';
+import { redisProvider } from './redis.provider';
 
 // Validate JWT config at startup
 function validateJwtConfig(configService: ConfigService): void {
@@ -45,6 +46,6 @@ function validateJwtConfig(configService: ConfigService): void {
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, SecurityLogger],
+  providers: [AuthService, JwtStrategy, SecurityLogger, redisProvider],
 })
 export class AuthModule {}

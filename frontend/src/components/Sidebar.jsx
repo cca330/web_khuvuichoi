@@ -18,7 +18,7 @@ const Sidebar = () => {
     <aside className="adm-sidebar-container">
       {/* Brand/Logo Area */}
       <div className="adm-sidebar-brand">
-        <div className="adm-brand-icon">🎡</div>
+      
         <div className="adm-brand-text">
           <h2>HG Admin</h2>
           <span>Management Portal</span>
@@ -50,7 +50,7 @@ const Sidebar = () => {
       {/* Footer Logout Area */}
       <div className="adm-sidebar-footer">
         <Link to="/login" className="adm-logout-btn">
-          <span className="adm-logout-icon">🚪</span>
+    
           <span className="adm-logout-text">Đăng xuất</span>
         </Link>
       </div>

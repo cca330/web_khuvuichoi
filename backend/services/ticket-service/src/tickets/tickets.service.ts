@@ -548,9 +548,13 @@ export class TicketsService {
   async updateCartItemQuantity(
     itemId: number,
     action: 'plus' | 'minus',
+    userId: number,
   ): Promise<void> {
     const item = await this.orderItemRepository.findOne({
-      where: { id: itemId },
+      where: {
+        id: itemId,
+        order: { userId, status: OrderStatus.PENDING },
+      },
     });
 
     if (!item) {
@@ -574,9 +578,12 @@ export class TicketsService {
   }
 
   // Xóa item khỏi giỏ hàng
-  async deleteCartItem(itemId: number): Promise<void> {
+  async deleteCartItem(itemId: number, userId: number): Promise<void> {
     const item = await this.orderItemRepository.findOne({
-      where: { id: itemId },
+      where: {
+        id: itemId,
+        order: { userId, status: OrderStatus.PENDING },
+      },
     });
 
     if (!item) {

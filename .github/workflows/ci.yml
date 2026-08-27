@@ -20,13 +20,20 @@ jobs:
 
       - name: Create .env files
         run: |
+          printf "MYSQL_ROOT_PASSWORD=%s\n" "${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
           echo "${{ secrets.USER_SERVICE_ENV }}" > backend/services/user-service/.env
+          printf "REDIS_URL=redis://redis:6379\n" >> backend/services/user-service/.env
           echo "${{ secrets.TICKET_SERVICE_ENV }}" > backend/services/ticket-service/.env
           echo "${{ secrets.PROMOTION_SERVICE_ENV }}" > backend/services/promotion-service/.env
           echo "${{ secrets.GAME_SERVICE_ENV }}" > backend/services/game-service/.env
           echo "${{ secrets.EVENT_SERVICE_ENV }}" > backend/services/event-service/.env
           echo "${{ secrets.REVENUE_SERVICE_ENV }}" > backend/services/revenue-service/.env
           echo "${{ secrets.API_GATEWAY_ENV }}" > backend/api-gateway/.env
+          for file in backend/services/*-service/.env; do
+            printf "\nJWT_SECRET=%s\nINTERNAL_SERVICE_TOKEN=%s\n" \
+              "${{ secrets.JWT_SECRET }}" "${{ secrets.INTERNAL_SERVICE_TOKEN }}" >> "$file"
+          done
+          printf "\nJWT_SECRET=%s\n" "${{ secrets.JWT_SECRET }}" >> backend/api-gateway/.env
 
       - name: Validate Docker Compose
         run: docker compose config

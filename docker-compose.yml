@@ -4,15 +4,30 @@ services:
     container_name: mysql_container
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD is required}
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p123456"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - theme-park-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redis_data:/data
     networks:
       - theme-park-net
 
@@ -24,6 +39,8 @@ services:
     env_file: ./backend/services/user-service/.env
     depends_on:
       mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     networks:
       - theme-park-net
@@ -174,6 +191,7 @@ networks:
 
 volumes:
   mysql_data:
+  redis_data:
   gateway_uploads:
   loki_data:
   grafana_data:

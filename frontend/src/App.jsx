@@ -15,7 +15,6 @@ import Feedbacks from "./pages/admin/Feedbacks";
 import Home from "./pages/Home";
 import GamesPage from "./pages/Games";
 import EventsPage from "./pages/Events";
-import PromotionsPage from "./pages/Promotions";
 import GameDetail from "./pages/GameDetail";
 import EventDetail from "./pages/EventDetail";
 import GameCreate from "./pages/admin/GameCreate";
@@ -62,7 +61,6 @@ function App() {
             <Route path="/games/:id" element={<GameDetail />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:id" element={<EventDetail />} />
-            <Route path="/promotions" element={<PromotionsPage />} />
             <Route path="/users" element={<UserList />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/orders" element={<OrderHistory />} />

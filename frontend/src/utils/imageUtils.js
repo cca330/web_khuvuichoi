@@ -1,5 +1,5 @@
 // API base URL for images
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = '';
 
 /**
  * Build full image URL from filename or URL

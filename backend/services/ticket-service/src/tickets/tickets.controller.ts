@@ -31,25 +31,25 @@ class AddGateDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
-  gateTicketId: number;
+  gateTicketId!: number;
 }
 
 class UpdateQtyDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
-  itemId: number;
+  itemId!: number;
 
   @IsNotEmpty()
   @IsIn(['plus', 'minus'])
-  action: 'plus' | 'minus';
+  action!: 'plus' | 'minus';
 }
 
 class CheckoutDto {
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
-  orderId: number;
+  orderId!: number;
 }
 
 @Controller('tickets')
@@ -83,16 +83,20 @@ export class TicketsController {
   @Post('cart/update-qty')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  updateCartItemQuantity(@Body() dto: UpdateQtyDto) {
-    return this.ticketsService.updateCartItemQuantity(dto.itemId, dto.action);
+  updateCartItemQuantity(@Body() dto: UpdateQtyDto, @Request() req) {
+    return this.ticketsService.updateCartItemQuantity(
+      dto.itemId,
+      dto.action,
+      req.user.id,
+    );
   }
 
   // Xóa item khỏi giỏ hàng - Protected
   @Post('cart/delete-item')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  deleteCartItem(@Body('itemId') itemId: number) {
-    return this.ticketsService.deleteCartItem(itemId);
+  deleteCartItem(@Body('itemId') itemId: number, @Request() req) {
+    return this.ticketsService.deleteCartItem(itemId, req.user.id);
   }
 
   // Lịch sử đơn hàng - Protected

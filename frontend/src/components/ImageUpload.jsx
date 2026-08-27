@@ -66,8 +66,14 @@ export default function ImageUpload({
 
       try {
         // Gửi file đến API Gateway để lưu trên server.
-        const res = await fetch("http://localhost:8000/upload", {
+        const accessToken =
+          sessionStorage.getItem("accessToken") ||
+          localStorage.getItem("accessToken");
+        const res = await fetch("/upload", {
           method: "POST",
+          headers: accessToken
+            ? { Authorization: `Bearer ${accessToken}` }
+            : undefined,
           body: formData,
         });
 
@@ -119,7 +125,7 @@ export default function ImageUpload({
     if (preview.startsWith("data:") || preview.startsWith("http")) {
       return preview;
     }
-    return `http://localhost:8000/uploads/${preview}`;
+    return `/uploads/${preview}`;
   };
 
   // Giao diện vùng chọn file, thông báo lỗi và danh sách ảnh preview.

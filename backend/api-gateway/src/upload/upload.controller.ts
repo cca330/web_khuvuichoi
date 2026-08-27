@@ -4,10 +4,16 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
+import { extname, join } from 'path';
+import { mkdir, writeFile } from 'fs/promises';
+import { randomBytes } from 'crypto';
+import { fromBuffer } from 'file-type';
+import { Throttle } from '@nestjs/throttler';
+import { UploadAuthGuard } from './upload-auth.guard';
 
 // Allowed image extensions
 const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
@@ -17,16 +23,11 @@ const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'
 @Controller('upload')
 export class UploadController {
   @Post()
+  @UseGuards(UploadAuthGuard)
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, cb) => {
-          // Generate unique filename to prevent overwrites
-          const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${extname(file.originalname)}`;
-          cb(null, uniqueName);
-        },
-      }),
+      storage: memoryStorage(),
       limits: { fileSize: 5 * 1024 * 1024 }, // giới hạn 5MB/ảnh
       fileFilter: (req, file, cb) => {
         const ext = extname(file.originalname).toLowerCase();
@@ -48,8 +49,22 @@ export class UploadController {
       },
     }),
   )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  async uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('Không có file nào được gửi lên');
-    return { filename: file.filename };
+
+    const detected = await fromBuffer(file.buffer);
+    if (!detected || !ALLOWED_MIME_TYPES.includes(detected.mime)) {
+      throw new BadRequestException('Nội dung file không phải ảnh hợp lệ');
+    }
+
+    const uploadDirectory = join(process.cwd(), 'uploads');
+    await mkdir(uploadDirectory, { recursive: true });
+
+    const uniqueName = `${Date.now()}-${randomBytes(16).toString('hex')}${extname(`file.${detected.ext}`)}`;
+    await writeFile(join(uploadDirectory, uniqueName), file.buffer, {
+      flag: 'wx',
+    });
+
+    return { filename: uniqueName };
   }
 }
