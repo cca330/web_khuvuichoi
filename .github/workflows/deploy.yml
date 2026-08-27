@@ -172,17 +172,22 @@ jobs:
 
       - name: Health Check Frontend
         run: |
+          for i in {1..30}
+          do
+            if curl -fsS http://127.0.0.1:80 > /dev/null
+            then
+              echo "Frontend is ready"
+              exit 0
+            fi
 
-          curl -f http://localhost:80 \
-          || (
+            echo "Waiting frontend... ($i/30)"
+            sleep 2
+          done
 
+          echo "Frontend failed"
           cd /home/user1/Doan
-
           docker compose logs frontend
-
           exit 1
-
-          )
 
       # ============================
       # API Gateway health check

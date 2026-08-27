@@ -55,7 +55,18 @@ jobs:
           exit 1
 
       - name: Check Frontend Health
-        run: curl -f http://localhost:80 || (docker compose logs frontend && exit 1)
+        run: |
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:80 > /dev/null; then
+              echo "Frontend is up!"
+              exit 0
+            fi
+            echo "Waiting for frontend... ($i/30)"
+            sleep 2
+          done
+          echo "Frontend did not become ready in time"
+          docker compose logs frontend
+          exit 1
 
       - name: Stop Containers
         if: always()
