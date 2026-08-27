@@ -39,6 +39,9 @@ jobs:
         run: |
           cd /home/user1/Doan
 
+          test -n "${{ secrets.MYSQL_ROOT_PASSWORD }}" || { echo "Missing MYSQL_ROOT_PASSWORD secret"; exit 1; }
+          test -n "${{ secrets.JWT_SECRET }}" || { echo "Missing JWT_SECRET secret"; exit 1; }
+          test -n "${{ secrets.INTERNAL_SERVICE_TOKEN }}" || { echo "Missing INTERNAL_SERVICE_TOKEN secret"; exit 1; }
           printf "MYSQL_ROOT_PASSWORD=%s\n" "${{ secrets.MYSQL_ROOT_PASSWORD }}" > .env
 
           printf "%s" "${{ secrets.USER_SERVICE_ENV }}" \
