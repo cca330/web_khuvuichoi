@@ -4,6 +4,93 @@ import gamesApi from "../api/gamesApi";
 import { getImageUrl } from "../utils/imageUtils";
 import "../styles/game.css";
 
+// ─── COMPONENT SLIDER HÌNH ẢNH TỰ ĐỘNG LƯỚT VÔ TẬN ───
+const GameImageSlider = ({ images, name, category, getCategoryBadge }) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // Chuẩn hóa danh sách URL ảnh
+  const imageList =
+    images && images.length > 0
+      ? images.map((img) => getImageUrl(img.image))
+      : ["/img/default-game.jpg"];
+
+  // Tự động chuyển ảnh sau mỗi 3 giây nếu có nhiều hơn 1 ảnh
+  useEffect(() => {
+    if (imageList.length <= 1) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % imageList.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [imageList.length]);
+
+  const handlePrev = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentIndex((prevIndex) =>
+      prevIndex === 0 ? imageList.length - 1 : prevIndex - 1
+    );
+  };
+
+  const handleNext = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentIndex((prevIndex) => (prevIndex + 1) % imageList.length);
+  };
+
+  return (
+    <div className="game-card-img-wrap">
+      {/* Container lướt ngang */}
+      <div
+        className="game-card-slider-track"
+        style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+      >
+        {imageList.map((imgSrc, index) => (
+          <img
+            key={index}
+            src={imgSrc}
+            alt={`${name} ${index + 1}`}
+            className="game-card-img"
+          />
+        ))}
+      </div>
+
+      {/* Nút chuyển ảnh Trước / Sau (chỉ hiển thị khi có > 1 ảnh) */}
+      {imageList.length > 1 && (
+        <>
+          <button className="slider-btn slider-btn-prev" onClick={handlePrev}>
+            ❮
+          </button>
+          <button className="slider-btn slider-btn-next" onClick={handleNext}>
+            ❯
+          </button>
+
+          {/* Dấu chấm chỉ số ảnh */}
+          <div className="slider-dots">
+            {imageList.map((_, idx) => (
+              <span
+                key={idx}
+                className={`slider-dot ${idx === currentIndex ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setCurrentIndex(idx);
+                }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {/* Badge danh mục */}
+      <span className={`game-card-category ${getCategoryBadge(category)}`}>
+        {category}
+      </span>
+    </div>
+  );
+};
+
 const Games = () => {
   const [games, setGames] = useState([]);
   const [filteredGames, setFilteredGames] = useState([]);
@@ -27,7 +114,7 @@ const Games = () => {
             }
           });
         },
-        { threshold: 0.1 },
+        { threshold: 0.1 }
       );
 
       const elements = document.querySelectorAll(".scroll-reveal");
@@ -69,7 +156,7 @@ const Games = () => {
 
     if (searchKeyword) {
       filtered = filtered.filter((game) =>
-        game.name.toLowerCase().includes(searchKeyword.toLowerCase()),
+        game.name.toLowerCase().includes(searchKeyword.toLowerCase())
       );
     }
 
@@ -104,7 +191,7 @@ const Games = () => {
 
   return (
     <div className="games-page-modern">
-      {/* ─── BANNER TRÒ CHƠI HOÀNH TRÁNG (TƯƠNG TỰ TRANG CHỦ) ─── */}
+      {/* ─── BANNER TRÒ CHƠI HOÀNH TRÁNG ─── */}
       <section className="games-hero-section">
         <div
           className="games-hero-bg"
@@ -130,7 +217,7 @@ const Games = () => {
       <section className="games-list-section spad scroll-reveal">
         <div className="container">
           <div className="row">
-            {/* Sidebar Filter tinh tế */}
+            {/* Sidebar Filter */}
             <div className="col-lg-3 mb-4">
               <div className="modern-filter-sidebar">
                 <h4>Bộ Lọc Tìm Kiếm</h4>
@@ -200,22 +287,13 @@ const Games = () => {
                       className="col-md-6 col-lg-4 mb-4 d-flex"
                     >
                       <div className="modern-game-card">
-                        <div className="game-card-img-wrap">
-                          <img
-                            src={
-                              game.images?.[0]
-                                ? getImageUrl(game.images[0].image)
-                                : "/img/default-game.jpg"
-                            }
-                            alt={game.name}
-                            className="game-card-img"
-                          />
-                          <span
-                            className={`game-card-category ${getCategoryBadge(game.category)}`}
-                          >
-                            {game.category}
-                          </span>
-                        </div>
+                        {/* Thay phần img cố định bằng component Slider */}
+                        <GameImageSlider
+                          images={game.images}
+                          name={game.name}
+                          category={game.category}
+                          getCategoryBadge={getCategoryBadge}
+                        />
 
                         <div className="game-card-body">
                           <h3 className="game-card-title">{game.name}</h3>
@@ -231,7 +309,9 @@ const Games = () => {
                               {game.recommendedAge}+ Tuổi
                             </span>
                             <span
-                              className={`meta-status ${getStatusBadge(game.status)}`}
+                              className={`meta-status ${getStatusBadge(
+                                game.status
+                              )}`}
                             >
                               <span className="status-dot"></span>
                               {game.status === "OPEN" ? "Đang mở" : "Tạm đóng"}

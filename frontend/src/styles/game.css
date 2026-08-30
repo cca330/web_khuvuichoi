@@ -323,3 +323,90 @@
     font-size: 16px;
   }
 }
+/* Container khung chứa ảnh */
+.game-card-img-wrap {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 220px;
+  border-radius: 12px 12px 0 0;
+}
+
+/* Đường ray chuyển ảnh mượt mà */
+.game-card-slider-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s ease-in-out;
+}
+
+/* Kích thước mỗi ảnh trong slider */
+.game-card-slider-track .game-card-img {
+  min-width: 100%;
+  height: 100%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Nút bấm chuyển ảnh Trái/Phải */
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.4);
+  color: #fff;
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0;
+  transition: opacity 0.3s ease, background 0.3s ease;
+  z-index: 2;
+}
+
+.game-card-img-wrap:hover .slider-btn {
+  opacity: 1;
+}
+
+.slider-btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.slider-btn-prev {
+  left: 8px;
+}
+
+.slider-btn-next {
+  right: 8px;
+}
+
+/* Các chấm tròn chỉ số ảnh ở dưới cùng */
+.slider-dots {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+
+.slider-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.slider-dot.active {
+  background: #ffffff;
+  width: 16px;
+  border-radius: 4px;
+}
