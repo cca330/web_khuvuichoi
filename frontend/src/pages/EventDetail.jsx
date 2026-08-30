@@ -48,14 +48,10 @@ const EventDetail = () => {
     try {
       setLoading(true);
       const response = await eventsApi.getById(id);
-      setEvent(response.data);
+      const eventData = response.data || {};
 
-      try {
-        const imagesRes = await eventsApi.getImages(id);
-        setImages(imagesRes.data || []);
-      } catch (error) {
-        console.error("Error fetching images:", error);
-      }
+      setEvent(eventData);
+      setImages(eventData.images || []);
 
       try {
         const schedulesRes = await eventsApi.getSchedules(id);

@@ -247,9 +247,6 @@ const GameDetail = () => {
                   <div key={fb.id} className="gdetail-review-item">
                     <div className="review-header">
                       <div className="review-user">
-                        <div className="avatar-circle">
-                          {(fb.username || "U")[0].toUpperCase()}
-                        </div>
                         <div>
                           <span className="username">
                             {fb.username || "Khách tham quan"}

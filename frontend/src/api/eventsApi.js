@@ -16,6 +16,13 @@ const eventsApi = {
     return axiosClient.get(`/events/${id}`);
   },
 
+  // Lấy danh sách ảnh event theo id
+  getImages: (eventId) => {
+    return axiosClient.get(`/events/${eventId}`).then((response) => ({
+      data: response.data?.images || [],
+    }));
+  },
+
   // Lấy schedules theo event
   getSchedules: (eventId) => {
     return axiosClient.get(`/events/${eventId}/schedules`);

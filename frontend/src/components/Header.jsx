@@ -34,7 +34,7 @@ const Header = () => {
               <Link to="/games">Trò Chơi</Link>
             </li>
             <li className={isActive("/events") ? "active" : ""}>
-              <Link to="/events">Tin Tức & Sự Kiện</Link>
+              <Link to="/events">Sự Kiện</Link>
             </li>
             <li
               className={
@@ -45,7 +45,7 @@ const Header = () => {
                   : ""
               }
             >
-              <Link to={user ? "/booking" : "/login"}>Vé & Combo</Link>
+              <Link to={user ? "/booking" : "/login"}>Vé & Ưu Đãi</Link>
             </li>
           </ul>
         </nav>

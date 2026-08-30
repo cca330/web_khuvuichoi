@@ -422,10 +422,6 @@ const Home = () => {
                     alt={item.title}
                     draggable="false"
                   />
-                  <div className="panorama-card-overlay">
-                    <h4>{item.title}</h4>
-                    <p>{item.description}</p>
-                  </div>
                 </div>
               </div>
             ))}
