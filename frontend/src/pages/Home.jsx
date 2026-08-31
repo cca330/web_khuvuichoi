@@ -185,32 +185,36 @@ const Home = () => {
         eventsApi.getFeatured(),
       ]);
 
-      setGames(gamesRes.data.slice(0, 4));
+      const gameList = Array.isArray(gamesRes.data) ? gamesRes.data : [];
+      setGames(gameList.slice(0, 4));
       setEvents(eventsRes.data || []);
 
-      setFeedbacks([
-        {
-          id: 1,
-          name: "Nguyễn Văn A",
-          rating: 5,
-          content: "Khu vui chơi tuyệt vời!",
-          created_at: "2024-01-15",
-        },
-        {
-          id: 2,
-          name: "Trần Thị B",
-          rating: 4,
-          content: "Trẻ em rất thích",
-          created_at: "2024-01-10",
-        },
-        {
-          id: 3,
-          name: "Lê Văn C",
-          rating: 5,
-          content: "Dịch vụ tốt, giá hợp lý",
-          created_at: "2024-01-05",
-        },
-      ]);
+      const collectedFeedbacks = [];
+
+      for (const game of gameList) {
+        try {
+          const feedbackRes = await gamesApi.getFeedbacks(game.id);
+          const arr = Array.isArray(feedbackRes.data) ? feedbackRes.data : [];
+          arr.forEach((fb) => {
+            collectedFeedbacks.push({
+              ...fb,
+              name: fb.username || "Khách hàng",
+              gameName: game.name,
+            });
+          });
+        } catch (error) {
+          console.error(`Error fetching feedbacks for game ${game.id}:`, error);
+        }
+      }
+
+      const prioritizedFeedbacks = collectedFeedbacks.sort((a, b) => {
+        if (Number(b.rating) !== Number(a.rating)) {
+          return Number(b.rating) - Number(a.rating);
+        }
+        return new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at);
+      });
+
+      setFeedbacks(prioritizedFeedbacks.slice(0, 5));
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
