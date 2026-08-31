@@ -50,9 +50,9 @@ export class AuthService {
 
     this.securityLogger.logLoginSuccess(username, user.id);
 
-    // Access token ngắn hạn (15 phút)
+    // Access token ngắn hạn (30 phút)
     const payload = { sub: user.id, username: user.username, role: user.role };
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '15m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
 
     // Refresh token dài hạn (7 ngày)
     const refreshToken = this.jwtService.sign(
@@ -71,7 +71,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken,
-      expiresIn: 900, // 15 phút = 900 giây
+      expiresIn: 1800, // 30 phút = 1800 giây
       user: { id: user.id, username: user.username, role: user.role },
     };
   }
@@ -101,11 +101,11 @@ export class AuthService {
 
       // Tạo access token mới
       const newPayload = { sub: user.id, username: user.username, role: user.role };
-      const newAccessToken = this.jwtService.sign(newPayload, { expiresIn: '15m' });
+      const newAccessToken = this.jwtService.sign(newPayload, { expiresIn: '30m' });
 
       return {
         accessToken: newAccessToken,
-        expiresIn: 900,
+        expiresIn: 1800,
       };
     } catch (error) {
       if (error instanceof UnauthorizedException) throw error;

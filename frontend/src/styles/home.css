@@ -360,38 +360,34 @@ li {
   padding: 80px 0;
 }
 
-.featured__controls {
-  margin-bottom: 40px;
-  text-align: center;
-}
-
-.featured__controls ul {
-  display: inline-flex !important;
-  flex-wrap: wrap;
+.featured__explore-bar {
+  display: flex;
   justify-content: center;
-  gap: 12px;
-  padding: 0 !important;
-  margin: 0 !important;
+  margin-bottom: 32px;
 }
 
-.featured__controls ul li {
-  display: inline-block;
-  cursor: pointer;
-  font-size: 15px;
+.btn-featured-explore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 210px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ff5b84 0%, #ff7d59 100%);
+  color: #fff;
+  font-size: 1.05rem;
   font-weight: 700;
-  color: var(--muted-color);
-  padding: 10px 24px;
-  background: #f8fafc;
-  border: 1px solid var(--border-color);
-  border-radius: 50px;
-  transition: all 0.2s ease;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  box-shadow: 0 14px 30px rgba(255, 91, 132, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.featured__controls ul li.active,
-.featured__controls ul li:hover {
-  background: rgba(255, 91, 132, 0.1);
-  color: var(--primary-strong);
-  border-color: rgba(255, 91, 132, 0.3);
+.btn-featured-explore:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px rgba(255, 91, 132, 0.32);
+  color: #fff;
+  text-decoration: none;
 }
 
 .featured__filter {
@@ -1281,8 +1277,11 @@ li {
   animation: filterFadeIn 0.45s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 #games-section .section-title h2 {
-  color: #1a1a2e !important; /* Đổi sang màu tối nổi bật trên nền sáng */
+  color: #1a1a2e !important;
+  font-size: clamp(2rem, 3vw, 3rem);
   font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1.2;
   text-shadow: none !important;
   margin-bottom: 20px;
 }

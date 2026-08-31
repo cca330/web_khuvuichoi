@@ -14,7 +14,6 @@ const Home = () => {
   const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [activeFilter, setActiveFilter] = useState("*");
 
   // ─── REF & LOGIC CHO VÒNG CUNG PANORAMA 3D ───
   const viewportRef = useRef(null);
@@ -227,24 +226,6 @@ const Home = () => {
       ));
   };
 
-  const categoryMap = {
-    Adventure: "oranges",
-    "Mạo hiểm": "oranges",
-    "Mạo Hiểm": "oranges",
-    VR: "fresh-meat",
-    Relaxation: "fresh-meat",
-    "Thư giãn": "fresh-meat",
-    Family: "vegetables",
-    "Gia đình": "vegetables",
-    Kids: "fastfood",
-    "Trẻ em": "fastfood",
-  };
-
-  const filteredGames =
-    activeFilter === "*"
-      ? games
-      : games.filter((game) => categoryMap[game.category] === activeFilter);
-
   const featuredSlides = (events || []).flatMap((event) => {
     const images =
       Array.isArray(event.images) && event.images.length > 0
@@ -447,54 +428,25 @@ const Home = () => {
                 </h2>
               </div>
 
-              <div className="featured__controls">
-                <ul>
-                  <li
-                    className={activeFilter === "*" ? "active" : ""}
-                    onClick={() => setActiveFilter("*")}
-                  >
-                    Tất Cả
-                  </li>
-                  <li
-                    className={activeFilter === "oranges" ? "active" : ""}
-                    onClick={() => setActiveFilter("oranges")}
-                  >
-                    Mạo hiểm
-                  </li>
-                  <li
-                    className={activeFilter === "fresh-meat" ? "active" : ""}
-                    onClick={() => setActiveFilter("fresh-meat")}
-                  >
-                    Thư giãn
-                  </li>
-                  <li
-                    className={activeFilter === "vegetables" ? "active" : ""}
-                    onClick={() => setActiveFilter("vegetables")}
-                  >
-                    Ocean Park
-                  </li>
-                  <li
-                    className={activeFilter === "fastfood" ? "active" : ""}
-                    onClick={() => setActiveFilter("fastfood")}
-                  >
-                    Trẻ em
-                  </li>
-                </ul>
+              <div className="featured__explore-bar">
+                <Link to="/games" className="btn-featured-explore">
+                  Khám phá ngay
+                </Link>
               </div>
             </div>
           </div>
 
-          <div className="row featured__filter mt-3" key={activeFilter}>
+          <div className="row featured__filter mt-3">
             {loading ? (
               <div className="col-12 text-center py-4 text-white">
                 Đang tải danh sách trò chơi...
               </div>
-            ) : filteredGames.length === 0 ? (
+            ) : games.length === 0 ? (
               <div className="col-12 text-center py-4 text-white-50">
                 Không tìm thấy trò chơi phù hợp!
               </div>
             ) : (
-              filteredGames.map((game, index) => (
+              games.map((game, index) => (
                 <div
                   key={game.id}
                   className="col-lg-3 col-md-4 col-sm-6 mb-4 d-flex filter-animate-item"
