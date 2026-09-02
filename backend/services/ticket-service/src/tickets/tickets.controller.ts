@@ -20,6 +20,7 @@ import { GenerateTicketsDto } from './dto/generate-tickets.dto';
 import { FilterRevenueDto } from './dto/filter-revenue.dto';
 import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
+import { CheckoutDto } from './dto/checkout.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { InternalServiceGuard } from '../auth/guards/internal-service.guard';
@@ -43,13 +44,6 @@ class UpdateQtyDto {
   @IsNotEmpty()
   @IsIn(['plus', 'minus'])
   action!: 'plus' | 'minus';
-}
-
-class CheckoutDto {
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(1)
-  orderId!: number;
 }
 
 @Controller('tickets')
@@ -131,7 +125,11 @@ export class TicketsController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   checkout(@Body() dto: CheckoutDto, @Request() req) {
-    return this.ticketsService.checkout(dto.orderId, req.user.id);
+    return this.ticketsService.checkout(
+      dto.orderId,
+      req.user.id,
+      dto.bookingDate,
+    );
   }
 
   // ==================== Internal APIs - Protected ====================

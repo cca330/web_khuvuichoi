@@ -33,6 +33,9 @@ export class Order {
   })
   totalPrice: number;
 
+  @Column({ name: 'booking_date', type: 'date', nullable: true })
+  bookingDate: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 

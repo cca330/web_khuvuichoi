@@ -51,4 +51,10 @@ export class GateTicket {
 
   @Column({ name: 'is_combo', type: 'tinyint', default: 0 })
   isCombo: boolean;
+
+  @Column({ name: 'valid_from_time', type: 'time', default: '00:00:00' })
+  validFromTime: string;
+
+  @Column({ name: 'valid_until_time', type: 'time', default: '23:59:59' })
+  validUntilTime: string;
 }

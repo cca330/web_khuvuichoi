@@ -168,12 +168,11 @@ export class TicketsService {
         };
       }
 
-      const today = new Date().toISOString().split('T')[0];
-      const validDate = ticket.validDate.toISOString().split('T')[0];
+      const now = new Date();
 
-      if (validDate !== today) {
+      if (now < ticket.validFrom || now > ticket.validUntil) {
         await queryRunner.rollbackTransaction();
-        return { ok: false, message: 'TICKET_NOT_VALID_TODAY', scanType: null };
+        return { ok: false, message: 'TICKET_OUTSIDE_VALID_TIME', scanType: null };
       }
 
       const lastScan = await queryRunner.manager.findOne(TicketScan, {
@@ -215,17 +214,24 @@ export class TicketsService {
     try {
       const orderItems = await queryRunner.manager.query(
         `
-        SELECT oi.id, oi.gate_ticket_id, oi.quantity, oi.price,
-               gt.admits_adult, gt.admits_child
+         SELECT oi.id, oi.gate_ticket_id, oi.quantity, oi.price,
+           gt.admits_adult, gt.admits_child,
+           gt.valid_from_time, gt.valid_until_time,
+           o.booking_date
         FROM order_items oi
         JOIN gate_tickets gt ON gt.id = oi.gate_ticket_id
+         JOIN orders o ON o.id = oi.order_id
         WHERE oi.order_id = ?
         `,
         [orderId],
       );
 
-      const validDate = new Date();
-      const datePrefix = validDate.toISOString().slice(0, 10).replace(/-/g, '');
+      const bookingDate = orderItems[0]?.booking_date;
+      if (!bookingDate) {
+        throw new BadRequestException('Đơn hàng chưa có ngày sử dụng vé');
+      }
+
+      const datePrefix = String(bookingDate).replace(/-/g, '').slice(0, 8);
       const prefix = `QR-${datePrefix}-`;
 
       for (const item of orderItems) {
@@ -249,7 +255,9 @@ export class TicketsService {
             ticketCode,
             admitsAdult: item.admits_adult,
             admitsChild: item.admits_child,
-            validDate,
+            validDate: bookingDate,
+            validFrom: new Date(`${bookingDate}T${item.valid_from_time}`),
+            validUntil: new Date(`${bookingDate}T${item.valid_until_time}`),
             status: TicketStatus.ACTIVE,
           });
 
@@ -705,7 +713,7 @@ export class TicketsService {
   }
 
   // Thanh toán đơn hàng
-  async checkout(orderId: number, userId: number) {
+  async checkout(orderId: number, userId: number, bookingDate: string) {
     const order = await this.orderRepository.findOne({
       where: { id: orderId, userId, status: OrderStatus.PENDING },
     });
@@ -713,6 +721,15 @@ export class TicketsService {
     if (!order) {
       throw new NotFoundException('Đơn hàng không tồn tại hoặc đã thanh toán');
     }
+
+    const selectedDate = new Date(`${bookingDate}T00:00:00`);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (Number.isNaN(selectedDate.getTime()) || selectedDate < today) {
+      throw new BadRequestException('Ngày sử dụng vé không được ở quá khứ');
+    }
+
+    order.bookingDate = bookingDate;
 
     // Kiểm tra giỏ hàng không trống
     const itemCount = await this.orderItemRepository.count({

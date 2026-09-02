@@ -36,6 +36,12 @@ export class Ticket {
   @Column({ name: 'valid_date', type: 'date' })
   validDate: Date;
 
+  @Column({ name: 'valid_from', type: 'datetime' })
+  validFrom: Date;
+
+  @Column({ name: 'valid_until', type: 'datetime' })
+  validUntil: Date;
+
   @Column({
     type: 'enum',
     enum: TicketStatus,
