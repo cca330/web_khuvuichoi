@@ -226,12 +226,22 @@ export class TicketsService {
         [orderId],
       );
 
-      const bookingDate = orderItems[0]?.booking_date;
-      if (!bookingDate) {
+      const rawBookingDate = orderItems[0]?.booking_date;
+      if (!rawBookingDate) {
         throw new BadRequestException('Đơn hàng chưa có ngày sử dụng vé');
       }
 
-      const datePrefix = String(bookingDate).replace(/-/g, '').slice(0, 8);
+      const bookingDate =
+        rawBookingDate instanceof Date
+          ? `${rawBookingDate.getFullYear()}-${String(
+              rawBookingDate.getMonth() + 1,
+            ).padStart(2, '0')}-${String(rawBookingDate.getDate()).padStart(
+              2,
+              '0',
+            )}`
+          : String(rawBookingDate).slice(0, 10);
+
+      const datePrefix = bookingDate.replace(/-/g, '');
       const prefix = `QR-${datePrefix}-`;
 
       for (const item of orderItems) {
