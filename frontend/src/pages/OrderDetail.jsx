@@ -18,6 +18,22 @@ const OrderDetail = () => {
   // 🟢 Đã đồng bộ tên biến thành showToast
   const [showToast, setShowToast] = useState(location.state?.justPaid || false);
 
+  const isTicketExpired = (ticket) => {
+    if (ticket.status === "EXPIRED") return true;
+    return ticket.validUntil && new Date(ticket.validUntil).getTime() < Date.now();
+  };
+
+  const formatTicketDateTime = (value) => {
+    if (!value) return "--";
+    return new Date(value).toLocaleString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   useEffect(() => {
     if (!user) {
       alert("Bạn cần đăng nhập!");
@@ -282,7 +298,12 @@ const OrderDetail = () => {
               <h4>🎟️ Mã Vé Điện Tử (Check-in)</h4>
               <div className="ticket-grid">
                 {tickets.map((ticket) => (
-                  <div key={ticket.id} className="ticket-card-item">
+                  <div
+                    key={ticket.id}
+                    className={`ticket-card-item ${
+                      isTicketExpired(ticket) ? "ticket-expired" : ""
+                    }`}
+                  >
                     <div className="ticket-card-title">
                       {ticket.gateTicket?.name || "Vé cổng"}
                     </div>
@@ -290,8 +311,15 @@ const OrderDetail = () => {
                       {ticket.ticketCode}
                     </div>
                     <div className="ticket-card-status">
-                      Còn hiệu lực: {ticket.status === "ACTIVE" ? "✅" : "❌"}{" "}
-                      {ticket.status}
+                      {isTicketExpired(ticket)
+                        ? "❌ Đã quá hạn"
+                        : ticket.status === "CANCELLED"
+                          ? "❌ Đã hủy"
+                          : "✅ Còn hiệu lực"}
+                    </div>
+                    <div className="ticket-card-validity">
+                      Hiệu lực: {formatTicketDateTime(ticket.validFrom)} -{" "}
+                      {formatTicketDateTime(ticket.validUntil)}
                     </div>
                   </div>
                 ))}

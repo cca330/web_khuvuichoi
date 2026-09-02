@@ -8,7 +8,8 @@ ALTER TABLE gate_tickets
 ALTER TABLE tickets
   ADD COLUMN valid_from DATETIME NULL,
   ADD COLUMN valid_until DATETIME NULL;
-  UPDATE tickets
+
+UPDATE tickets
 SET
   valid_from = CONCAT(valid_date, ' 00:00:00'),
   valid_until = CONCAT(valid_date, ' 23:59:59')

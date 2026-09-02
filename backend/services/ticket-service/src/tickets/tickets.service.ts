@@ -722,10 +722,22 @@ export class TicketsService {
       throw new NotFoundException('Đơn hàng không tồn tại hoặc đã thanh toán');
     }
 
-    const selectedDate = new Date(`${bookingDate}T00:00:00`);
+    const dateParts = bookingDate.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const selectedDate = dateParts
+      ? new Date(
+          Number(dateParts[1]),
+          Number(dateParts[2]) - 1,
+          Number(dateParts[3]),
+        )
+      : new Date(Number.NaN);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (Number.isNaN(selectedDate.getTime()) || selectedDate < today) {
+    const isRealDate =
+      dateParts &&
+      selectedDate.getFullYear() === Number(dateParts[1]) &&
+      selectedDate.getMonth() === Number(dateParts[2]) - 1 &&
+      selectedDate.getDate() === Number(dateParts[3]);
+    if (!isRealDate || selectedDate < today) {
       throw new BadRequestException('Ngày sử dụng vé không được ở quá khứ');
     }
 

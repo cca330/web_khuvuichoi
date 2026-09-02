@@ -210,6 +210,23 @@
   background: #f0fdf4;
 }
 
+.ticket-card-item.ticket-expired {
+  border-color: #fecaca;
+  background: #fff7f7;
+  opacity: 0.82;
+}
+
+.ticket-card-item.ticket-expired .ticket-card-status {
+  color: #dc2626;
+}
+
+.ticket-card-validity {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
 .ticket-card-title {
   font-weight: 800;
   color: #0f172a;

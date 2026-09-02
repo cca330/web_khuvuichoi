@@ -37,8 +37,8 @@ const cartApi = {
   },
 
   // Thanh toán
-  checkout: (userId, orderId) => {
-    return axiosClient.post(`/tickets/checkout?userId=${userId}`, { orderId });
+  checkout: (userId, orderId, bookingDate) => {
+    return axiosClient.post(`/tickets/checkout?userId=${userId}`, { orderId, bookingDate });
   },
 
   // Áp dụng mã giảm giá

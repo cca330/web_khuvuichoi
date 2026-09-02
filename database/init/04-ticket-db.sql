@@ -11,22 +11,26 @@ CREATE TABLE `gate_tickets` (
 	`admits_adult` int NOT NULL DEFAULT 0,
 	`admits_child` int NOT NULL DEFAULT 0,
 	`is_combo` tinyint(1) NOT NULL DEFAULT 0,
+	`valid_from_time` time NOT NULL DEFAULT '00:00:00',
+	`valid_until_time` time NOT NULL DEFAULT '23:59:59',
 	PRIMARY KEY (`id`),
-	CONSTRAINT `chk_gate_admits` CHECK (`admits_adult` + `admits_child` >= 1)
+	CONSTRAINT `chk_gate_admits` CHECK (`admits_adult` + `admits_child` >= 1),
+	CONSTRAINT `chk_gate_valid_time` CHECK (`valid_until_time` >= `valid_from_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `gate_tickets` (`id`, `name`, `price`, `description`, `status`, `type`, `admits_adult`, `admits_child`, `is_combo`) VALUES
-(1, 'Ve nguoi lon', 40000.00, 'Danh cho nguoi lon', 'ACTIVE', 'ADULT', 1, 0, 0),
-(2, 'Ve tre em', 20000.00, 'Danh cho tre em', 'ACTIVE', 'CHILD', 0, 1, 0),
-(3, 'Combo gia dinh', 100000.00, '2 nguoi lon va 2 tre em, dung chung 1 ma QR', 'ACTIVE', 'ALL', 2, 2, 1),
-(4, 'Combo VIP', 150000.00, '2 nguoi lon, uu tien vao cong, dung chung 1 ma QR', 'ACTIVE', 'ADULT', 2, 0, 1),
-(5, 'Ve buoi toi', 30000.00, 'Ap dung sau 18 gio', 'ACTIVE', 'ALL', 1, 0, 0);
+INSERT INTO `gate_tickets` (`id`, `name`, `price`, `description`, `status`, `type`, `admits_adult`, `admits_child`, `is_combo`, `valid_from_time`, `valid_until_time`) VALUES
+(1, 'Ve nguoi lon', 40000.00, 'Danh cho nguoi lon', 'ACTIVE', 'ADULT', 1, 0, 0, '00:00:00', '23:59:59'),
+(2, 'Ve tre em', 20000.00, 'Danh cho tre em', 'ACTIVE', 'CHILD', 0, 1, 0, '00:00:00', '23:59:59'),
+(3, 'Combo gia dinh', 100000.00, '2 nguoi lon va 2 tre em, dung chung 1 ma QR', 'ACTIVE', 'ALL', 2, 2, 1, '00:00:00', '23:59:59'),
+(4, 'Combo VIP', 150000.00, '2 nguoi lon, uu tien vao cong, dung chung 1 ma QR', 'ACTIVE', 'ADULT', 2, 0, 1, '00:00:00', '23:59:59'),
+(5, 'Ve buoi toi', 30000.00, 'Ap dung sau 18 gio', 'ACTIVE', 'ALL', 1, 0, 0, '18:00:00', '23:59:59');
 
 CREATE TABLE `orders` (
 	`id` int NOT NULL AUTO_INCREMENT,
 	`user_id` int NOT NULL,
 	`status` enum('PENDING','PAID','FAILED') DEFAULT 'PENDING',
 	`total_price` decimal(10,2) DEFAULT NULL,
+	`booking_date` date DEFAULT NULL,
 	`created_at` datetime DEFAULT CURRENT_TIMESTAMP,
 	`paid_at` datetime DEFAULT NULL,
 	PRIMARY KEY (`id`)
@@ -64,19 +68,22 @@ CREATE TABLE `tickets` (
 	`admits_adult` int NOT NULL DEFAULT 0,
 	`admits_child` int NOT NULL DEFAULT 0,
 	`valid_date` date NOT NULL,
+	`valid_from` datetime NOT NULL,
+	`valid_until` datetime NOT NULL,
 	`status` enum('ACTIVE','EXPIRED','CANCELLED') DEFAULT 'ACTIVE',
 	`created_at` datetime DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`), UNIQUE KEY `ticket_code` (`ticket_code`),
 	CONSTRAINT `fk_tickets_order_item` FOREIGN KEY (`order_item_id`) REFERENCES `order_items` (`id`) ON DELETE CASCADE,
 	CONSTRAINT `fk_tickets_gate_ticket` FOREIGN KEY (`gate_ticket_id`) REFERENCES `gate_tickets` (`id`),
-	CONSTRAINT `chk_tickets_admits` CHECK (`admits_adult` + `admits_child` >= 1)
+	CONSTRAINT `chk_tickets_admits` CHECK (`admits_adult` + `admits_child` >= 1),
+	CONSTRAINT `chk_ticket_valid_period` CHECK (`valid_until` >= `valid_from`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-INSERT INTO `tickets` (`id`, `order_item_id`, `gate_ticket_id`, `ticket_code`, `admits_adult`, `admits_child`, `valid_date`, `status`, `created_at`) VALUES
-(1, 1, 3, 'QR-20260708-0001', 2, 2, '2026-07-08', 'ACTIVE', '2026-07-08 08:00:30'),
-(2, 2, 1, 'QR-20260708-0002', 1, 0, '2026-07-08', 'ACTIVE', '2026-07-08 08:10:20'),
-(3, 2, 1, 'QR-20260708-0003', 1, 0, '2026-07-08', 'ACTIVE', '2026-07-08 08:10:20'),
-(4, 3, 2, 'QR-20260708-0004', 0, 1, '2026-07-08', 'ACTIVE', '2026-07-08 08:10:20');
+INSERT INTO `tickets` (`id`, `order_item_id`, `gate_ticket_id`, `ticket_code`, `admits_adult`, `admits_child`, `valid_date`, `valid_from`, `valid_until`, `status`, `created_at`) VALUES
+(1, 1, 3, 'QR-20260708-0001', 2, 2, '2026-07-08', '2026-07-08 00:00:00', '2026-07-08 23:59:59', 'ACTIVE', '2026-07-08 08:00:30'),
+(2, 2, 1, 'QR-20260708-0002', 1, 0, '2026-07-08', '2026-07-08 00:00:00', '2026-07-08 23:59:59', 'ACTIVE', '2026-07-08 08:10:20'),
+(3, 2, 1, 'QR-20260708-0003', 1, 0, '2026-07-08', '2026-07-08 00:00:00', '2026-07-08 23:59:59', 'ACTIVE', '2026-07-08 08:10:20'),
+(4, 3, 2, 'QR-20260708-0004', 0, 1, '2026-07-08', '2026-07-08 00:00:00', '2026-07-08 23:59:59', 'ACTIVE', '2026-07-08 08:10:20');
 
 CREATE TABLE `ticket_scans` (
 	`id` int NOT NULL AUTO_INCREMENT,

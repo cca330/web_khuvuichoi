@@ -13,6 +13,11 @@ const Booking = () => {
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
+  const minBookingDate = new Date().toISOString().split("T")[0];
+  const [bookingDate, setBookingDate] = useState(() => {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  });
 
   // State dành cho Mã giảm giá
   const [promotions, setPromotions] = useState([]);
@@ -149,10 +154,14 @@ const Booking = () => {
 
   const handleCheckout = async () => {
     if (!cartData || !cartData.order || cartData.finalTotal <= 0) return;
+    if (!bookingDate) {
+      alert("Vui lòng chọn ngày sử dụng vé!");
+      return;
+    }
 
     try {
       setProcessing(true);
-      const res = await cartApi.checkout(user.id, cartData.order.id);
+      const res = await cartApi.checkout(user.id, cartData.order.id, bookingDate);
 
       if (res.data.success) {
         navigate(`/order/${res.data.orderId}`, {
@@ -333,6 +342,19 @@ const Booking = () => {
                   </div>
                 ) : (
                   <>
+                    <div className="booking-date-box">
+                      <label htmlFor="booking-date">Ngày sử dụng vé</label>
+                      <input
+                        id="booking-date"
+                        type="date"
+                        value={bookingDate}
+                        min={minBookingDate}
+                        onChange={(event) => setBookingDate(event.target.value)}
+                        required
+                      />
+                      <small>Vé chỉ có hiệu lực trong ngày đã chọn và khung giờ của từng loại vé.</small>
+                    </div>
+
                     <div className="summary-row">
                       <span>Tổng tiền:</span>
                       <span>{cartData.baseTotal?.toLocaleString() || 0}đ</span>
@@ -419,7 +441,7 @@ const Booking = () => {
                     <button
                       className="btn-checkout-action"
                       onClick={handleCheckout}
-                      disabled={processing || cartData.finalTotal <= 0}
+                      disabled={processing || cartData.finalTotal <= 0 || !bookingDate}
                     >
                       {processing ? "Đang xử lý..." : " Xác nhận đặt vé"}
                     </button>

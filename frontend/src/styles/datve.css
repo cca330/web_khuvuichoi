@@ -111,6 +111,34 @@
   padding-bottom: 12px;
 }
 
+.booking-date-box {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 20px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+
+.booking-date-box label {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.booking-date-box input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #0f172a;
+  background: #ffffff;
+}
+
+.booking-date-box small {
+  color: #64748b;
+}
+
 /* ─── 3. BẢNG DỮ LIỆU ĐẶT VÉ CHUẨN TINH TẾ ─── */
 .modern-cart-table {
   width: 100%;
