@@ -20,7 +20,9 @@ const OrderDetail = () => {
 
   const isTicketExpired = (ticket) => {
     if (ticket.status === "EXPIRED") return true;
-    return ticket.validUntil && new Date(ticket.validUntil).getTime() < Date.now();
+    return (
+      ticket.validUntil && new Date(ticket.validUntil).getTime() < Date.now()
+    );
   };
 
   const formatTicketDateTime = (value) => {
@@ -273,7 +275,7 @@ const OrderDetail = () => {
                       </td>
                       <td>
                         <b>{item.name}</b>
-                        {item.isCombo && (
+                        {Boolean(item.isCombo) && (
                           <span className="combo-info">
                             (Combo: {item.admitsAdult} NL + {item.admitsChild}{" "}
                             TE)

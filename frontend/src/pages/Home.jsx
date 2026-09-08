@@ -211,7 +211,10 @@ const Home = () => {
         if (Number(b.rating) !== Number(a.rating)) {
           return Number(b.rating) - Number(a.rating);
         }
-        return new Date(b.createdAt || b.created_at) - new Date(a.createdAt || a.created_at);
+        return (
+          new Date(b.createdAt || b.created_at) -
+          new Date(a.createdAt || a.created_at)
+        );
       });
 
       setFeedbacks(prioritizedFeedbacks.slice(0, 5));
@@ -428,7 +431,7 @@ const Home = () => {
                     textShadow: "0 0 20px rgba(73,229,255,0.3)",
                   }}
                 >
-                  Tìm một tấm vé hoàn hảo dành cho bạn
+                  Hè rộn ràng, Niềm vui ngập tràn
                 </h2>
               </div>
 
@@ -588,7 +591,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-      s
     </div>
   );
 };

@@ -41,11 +41,13 @@ const Booking = () => {
       const [ticketsRes, cartRes, promoRes] = await Promise.all([
         cartApi.getGateTickets(),
         cartApi.getCart(user.id),
-        promotionsApi.getActivePromotions ? promotionsApi.getActivePromotions() : Promise.resolve({ data: [] }),
+        promotionsApi.getActivePromotions
+          ? promotionsApi.getActivePromotions()
+          : Promise.resolve({ data: [] }),
       ]);
       setGateTickets(ticketsRes.data || []);
       setCartData(cartRes.data || null);
-      
+
       // Lấy danh sách ưu đãi
       const activePromos = promoRes.data || promoRes || [];
       setPromotions(Array.isArray(activePromos) ? activePromos : []);
@@ -161,7 +163,11 @@ const Booking = () => {
 
     try {
       setProcessing(true);
-      const res = await cartApi.checkout(user.id, cartData.order.id, bookingDate);
+      const res = await cartApi.checkout(
+        user.id,
+        cartData.order.id,
+        bookingDate,
+      );
 
       if (res.data.success) {
         navigate(`/order/${res.data.orderId}`, {
@@ -193,7 +199,9 @@ const Booking = () => {
         >
           <div className="cart-hero-overlay"></div>
           <div className="container cart-hero-content">
-            <span className="cart-hero-tagline">Hệ Thống Đặt Vé Trực Tuyến</span>
+            <span className="cart-hero-tagline">
+              Hệ Thống Đặt Vé Trực Tuyến
+            </span>
             <h2 className="cart-hero-title">Đặt Vé HG Playground</h2>
             <p className="cart-hero-desc">
               Sở hữu ngay tấm vé thông hành để trải nghiệm hàng loạt trò chơi và
@@ -237,9 +245,10 @@ const Booking = () => {
                       <tr key={gate.id}>
                         <td>
                           <b style={{ color: "#0f172a" }}>{gate.name}</b>
-                          {gate.isCombo && (
+                          {Boolean(gate.isCombo) && (
                             <span className="combo-info">
-                              (Combo: {gate.admitsAdult} NL + {gate.admitsChild} TE)
+                              (Combo: {gate.admitsAdult} NL + {gate.admitsChild}{" "}
+                              TE)
                             </span>
                           )}
                         </td>
@@ -352,7 +361,10 @@ const Booking = () => {
                         onChange={(event) => setBookingDate(event.target.value)}
                         required
                       />
-                      <small>Vé chỉ có hiệu lực trong ngày đã chọn và khung giờ của từng loại vé.</small>
+                      <small>
+                        Vé chỉ có hiệu lực trong ngày đã chọn và khung giờ của
+                        từng loại vé.
+                      </small>
                     </div>
 
                     <div className="summary-row">
@@ -370,9 +382,12 @@ const Booking = () => {
                     {/* 🎟️ KHU VỰC CHỌN MÃ GIẢM GIÁ (DROPDOWN) */}
                     <div className="coupon-box">
                       <label className="coupon-label">
-                         Chọn mã giảm giá / Ưu đãi
+                        Chọn mã giảm giá / Ưu đãi
                       </label>
-                      <form onSubmit={handleApplyCoupon} className="coupon-form">
+                      <form
+                        onSubmit={handleApplyCoupon}
+                        className="coupon-form"
+                      >
                         <select
                           className="modern-input coupon-input"
                           value={selectedCoupon}
@@ -392,7 +407,8 @@ const Booking = () => {
                                 value={code}
                                 disabled={!isEligible}
                               >
-                                {code} - {promo.name || promo.description || "Giảm giá"}
+                                {code} -{" "}
+                                {promo.name || promo.description || "Giảm giá"}
                                 {!isEligible
                                   ? ` (Đơn từ ${promo.minOrderValue.toLocaleString()}đ)`
                                   : ""}
@@ -441,7 +457,9 @@ const Booking = () => {
                     <button
                       className="btn-checkout-action"
                       onClick={handleCheckout}
-                      disabled={processing || cartData.finalTotal <= 0 || !bookingDate}
+                      disabled={
+                        processing || cartData.finalTotal <= 0 || !bookingDate
+                      }
                     >
                       {processing ? "Đang xử lý..." : " Xác nhận đặt vé"}
                     </button>

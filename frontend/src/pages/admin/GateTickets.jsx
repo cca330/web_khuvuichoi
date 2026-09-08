@@ -86,7 +86,7 @@ export default function GateTickets() {
                   <td>{ticket.id}</td>
                   <td>
                     <strong>{ticket.name}</strong>
-                    {ticket.isCombo && (
+                    {Boolean(ticket.isCombo) && (
                       <span className="badge blue"> COMBO</span>
                     )}
                   </td>
