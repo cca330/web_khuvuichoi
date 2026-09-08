@@ -152,7 +152,7 @@
 .footer.spad {
   padding-top: 78px;
   padding-bottom: 34px;
-  background: #0c101a;
+  background: #f4f7fb;
 }
 
 .footer .row {
@@ -163,10 +163,10 @@
 .footer__widget {
   height: 100%;
   padding: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid #dfe7f0;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.06);
-  box-shadow: none;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(30, 55, 90, 0.08);
 }
 
 .footer__about__logo {
@@ -181,20 +181,28 @@
 .footer__about ul li,
 .footer__widget ul li {
   margin-bottom: 12px;
-  color: rgba(255, 255, 255, 0.78);
+  color: #475569;
   font-size: 15px;
   line-height: 1.7;
 }
 
+.footer__widget ul li a {
+  color: #2563eb;
+}
+
+.footer__widget ul li a:hover {
+  color: #ef4779;
+}
+
 .footer__widget h6 {
   margin-bottom: 22px;
-  color: #ffffff;
+  color: #172033;
   font-size: 18px;
   font-weight: 800;
 }
 
 .footer__widget p {
-  color: rgba(255, 255, 255, 0.72);
+  color: #64748b;
   font-size: 15px;
 }
 
@@ -202,7 +210,7 @@
   display: flex;
   overflow: hidden;
   margin-top: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid #d5deea;
   border-radius: 999px;
   background: #ffffff;
 }
@@ -238,14 +246,24 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: #e9eef5;
+  color: #334155;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.footer__widget__social a:hover {
+  background: #ef4779;
   color: #ffffff;
+  transform: translateY(-2px);
 }
 
 .footer__copyright {
   margin-top: 28px;
   padding-top: 22px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid #dfe7f0;
   text-align: center;
 }
 

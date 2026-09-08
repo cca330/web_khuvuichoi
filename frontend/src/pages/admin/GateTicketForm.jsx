@@ -41,8 +41,9 @@ export default function GateTicketForm({ initialData, gateTicketId }) {
       price: Number(form.price),
       admitsAdult: Number(form.admitsAdult),
       admitsChild: Number(form.admitsChild),
-      validFromTime: `${form.validFromTime}:00`.slice(0, 8),
-      validUntilTime: `${form.validUntilTime}:00`.slice(0, 8),
+      isCombo: Boolean(form.isCombo),
+      validFromTime: String(form.validFromTime).slice(0, 5),
+      validUntilTime: String(form.validUntilTime).slice(0, 5),
     };
 
     try {
