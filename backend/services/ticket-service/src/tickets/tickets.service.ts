@@ -16,6 +16,8 @@ import { ScanTicketDto } from './dto/scan-ticket.dto';
 import { FilterRevenueDto } from './dto/filter-revenue.dto';
 import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
+import { CreateGateTicketDto } from './dto/create-gate-ticket.dto';
+import { UpdateGateTicketDto } from './dto/update-gate-ticket.dto';
 import { GateTicket, GateTicketStatus } from './entities/gate-ticket.entity';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -172,7 +174,11 @@ export class TicketsService {
 
       if (now < ticket.validFrom || now > ticket.validUntil) {
         await queryRunner.rollbackTransaction();
-        return { ok: false, message: 'TICKET_OUTSIDE_VALID_TIME', scanType: null };
+        return {
+          ok: false,
+          message: 'TICKET_OUTSIDE_VALID_TIME',
+          scanType: null,
+        };
       }
 
       const lastScan = await queryRunner.manager.findOne(TicketScan, {
@@ -521,6 +527,61 @@ export class TicketsService {
       where: { status: GateTicketStatus.ACTIVE }, // ✅ dùng enum thay vì chuỗi 'ACTIVE'
       order: { id: 'ASC' },
     });
+  }
+
+  async getAllGateTicketsForAdmin() {
+    return this.gateTicketRepository.find({ order: { id: 'ASC' } });
+  }
+
+  async getGateTicketForAdmin(id: number) {
+    const gateTicket = await this.gateTicketRepository.findOne({
+      where: { id },
+    });
+    if (!gateTicket) {
+      throw new NotFoundException('Loại vé không tồn tại');
+    }
+    return gateTicket;
+  }
+
+  async createGateTicket(dto: CreateGateTicketDto) {
+    this.validateGateTicketRules(dto);
+    const gateTicket = this.gateTicketRepository.create(dto);
+    return this.gateTicketRepository.save(gateTicket);
+  }
+
+  async updateGateTicket(id: number, dto: UpdateGateTicketDto) {
+    this.validateGateTicketRules(dto);
+    const gateTicket = await this.getGateTicketForAdmin(id);
+    Object.assign(gateTicket, dto);
+    return this.gateTicketRepository.save(gateTicket);
+  }
+
+  async deleteGateTicket(id: number) {
+    await this.getGateTicketForAdmin(id);
+    const references = await this.orderItemRepository.count({
+      where: { gateTicketId: id },
+    });
+    if (references > 0) {
+      throw new BadRequestException(
+        'Không thể xóa loại vé đã xuất hiện trong đơn hàng. Hãy chuyển sang INACTIVE.',
+      );
+    }
+
+    await this.gateTicketRepository.delete(id);
+    return { deleted: true };
+  }
+
+  private validateGateTicketRules(
+    dto: CreateGateTicketDto | UpdateGateTicketDto,
+  ) {
+    if (dto.admitsAdult + dto.admitsChild < 1) {
+      throw new BadRequestException(
+        'Loại vé phải áp dụng cho ít nhất một người',
+      );
+    }
+    if (dto.validUntilTime < dto.validFromTime) {
+      throw new BadRequestException('Giờ kết thúc phải sau giờ bắt đầu');
+    }
   }
 
   // Thêm vé cổng vào giỏ hàng

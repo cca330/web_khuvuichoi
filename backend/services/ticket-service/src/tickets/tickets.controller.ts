@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Post,
+  Put,
+  Delete,
   Body,
   Query,
   Param,
@@ -21,6 +23,8 @@ import { FilterRevenueDto } from './dto/filter-revenue.dto';
 import { CalculateBaseTotalDto } from './dto/calculate-base-total.dto';
 import { ApplyPromotionOrderDto } from './dto/apply-promotion-order.dto';
 import { CheckoutDto } from './dto/checkout.dto';
+import { CreateGateTicketDto } from './dto/create-gate-ticket.dto';
+import { UpdateGateTicketDto } from './dto/update-gate-ticket.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { InternalServiceGuard } from '../auth/guards/internal-service.guard';
@@ -49,7 +53,6 @@ class UpdateQtyDto {
 @Controller('tickets')
 export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
-  
 
   // ==================== Cart/Order APIs ====================
 
@@ -184,6 +187,45 @@ export class TicketsController {
   @Roles('ADMIN')
   getStats() {
     return this.ticketsService.getStats();
+  }
+
+  @Get('admin/gate-tickets')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  getAllGateTicketsForAdmin() {
+    return this.ticketsService.getAllGateTicketsForAdmin();
+  }
+
+  @Get('admin/gate-tickets/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  getGateTicketForAdmin(@Param('id', ParseIntPipe) id: number) {
+    return this.ticketsService.getGateTicketForAdmin(id);
+  }
+
+  @Post('admin/gate-tickets')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  @HttpCode(HttpStatus.CREATED)
+  createGateTicket(@Body() dto: CreateGateTicketDto) {
+    return this.ticketsService.createGateTicket(dto);
+  }
+
+  @Put('admin/gate-tickets/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  updateGateTicket(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateGateTicketDto,
+  ) {
+    return this.ticketsService.updateGateTicket(id, dto);
+  }
+
+  @Delete('admin/gate-tickets/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  deleteGateTicket(@Param('id', ParseIntPipe) id: number) {
+    return this.ticketsService.deleteGateTicket(id);
   }
 
   @Get('order/:orderId')

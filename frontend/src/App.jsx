@@ -8,6 +8,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import UserList from "./pages/UserList";
 import Tickets from "./pages/admin/Tickets";
+import GateTickets from "./pages/admin/GateTickets";
+import GateTicketForm from "./pages/admin/GateTicketForm";
+import GateTicketEdit from "./pages/admin/GateTicketEdit";
 import Promotions from "./pages/admin/Promotions";
 import Games from "./pages/admin/Games";
 import Events from "./pages/admin/Events";
@@ -83,6 +86,9 @@ function App() {
             }
           >
             <Route path="tickets" element={<Tickets />} />
+            <Route path="ticket-types" element={<GateTickets />} />
+            <Route path="ticket-types/create" element={<GateTicketForm />} />
+            <Route path="ticket-types/edit/:id" element={<GateTicketEdit />} />
             <Route path="promotions" element={<Promotions />} />
             <Route
               path="/admin/promotions/create"
