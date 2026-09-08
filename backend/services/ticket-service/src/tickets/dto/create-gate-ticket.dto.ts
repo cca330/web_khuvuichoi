@@ -17,36 +17,36 @@ import {
 export class CreateGateTicketDto {
   @IsNotEmpty({ message: 'Tên loại vé không được để trống' })
   @IsString()
-  name: string;
+  name!: string;
 
   @IsNumber()
   @Min(0)
-  price: number;
+  price!: number;
 
   @IsOptional()
   @IsString()
   description?: string;
 
   @IsEnum(GateTicketStatus)
-  status: GateTicketStatus;
+  status!: GateTicketStatus;
 
   @IsEnum(GateTicketType)
-  type: GateTicketType;
+  type!: GateTicketType;
 
   @IsInt()
   @Min(0)
-  admitsAdult: number;
+  admitsAdult!: number;
 
   @IsInt()
   @Min(0)
-  admitsChild: number;
+  admitsChild!: number;
 
   @IsBoolean()
-  isCombo: boolean;
+  isCombo!: boolean;
 
   @IsMilitaryTime()
-  validFromTime: string;
+  validFromTime!: string;
 
   @IsMilitaryTime()
-  validUntilTime: string;
+  validUntilTime!: string;
 }

@@ -37,7 +37,10 @@ export default function GateTicketForm({ initialData, gateTicketId }) {
     setSaving(true);
 
     const payload = {
-      ...form,
+      name: form.name.trim(),
+      description: form.description?.trim() || undefined,
+      status: form.status,
+      type: form.type,
       price: Number(form.price),
       admitsAdult: Number(form.admitsAdult),
       admitsChild: Number(form.admitsChild),
