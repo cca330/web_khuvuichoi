@@ -53,17 +53,14 @@ const Tickets = () => {
     }
   };
 
-  const handleSearch = async () => {
-    if (!searchTerm) {
-      fetchTickets();
-      return;
-    }
-    // Filter locally for now (can be moved to backend)
-    const filtered = tickets.filter((ticket) =>
-      ticket.code.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-    setTickets(filtered);
-  };
+  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+  const visibleTickets = normalizedSearchTerm
+    ? tickets.filter((ticket) =>
+        String(ticket.code || "")
+          .toLowerCase()
+          .includes(normalizedSearchTerm),
+      )
+    : tickets;
 
   const getStatusBadge = (status) => {
     const colors = {
@@ -159,12 +156,12 @@ const Tickets = () => {
               <tr>
                 <td colSpan="7">Đang tải...</td>
               </tr>
-            ) : tickets.length === 0 ? (
+            ) : visibleTickets.length === 0 ? (
               <tr>
                 <td colSpan="7">Không có dữ liệu</td>
               </tr>
             ) : (
-              tickets.map((ticket) => (
+              visibleTickets.map((ticket) => (
                 <tr key={ticket.id}>
                   <td>{ticket.code}</td>
                   <td>{ticket.orderId}</td>
