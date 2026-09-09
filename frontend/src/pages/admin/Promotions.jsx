@@ -15,7 +15,12 @@ const Promotions = () => {
     try {
       setLoading(true);
       const response = await promotionsApi.getAll();
-      setPromotions(response.data);
+      const promotions = Array.isArray(response.data) ? response.data : [];
+      setPromotions(
+        promotions.sort(
+          (first, second) => Number(first.id) - Number(second.id),
+        ),
+      );
     } catch (error) {
       console.error('Error fetching promotions:', error);
     } finally {
