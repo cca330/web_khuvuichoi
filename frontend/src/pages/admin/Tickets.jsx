@@ -1,27 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import ticketsApi from '../../api/ticketsApi';
-import '../../styles/admin.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import ticketsApi from "../../api/ticketsApi";
+import "../../styles/admin.css";
 
 const Tickets = () => {
   const [tickets, setTickets] = useState([]);
-  const [stats, setStats] = useState({ total: 0, unused: 0, used: 0, revenue: 0 });
+  const [stats, setStats] = useState({
+    total: 0,
+    unused: 0,
+    used: 0,
+    revenue: 0,
+  });
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [typeFilter, setTypeFilter] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
 
   useEffect(() => {
     fetchStats();
     fetchTickets();
-  }, []);
+
+    const refreshTimer = setInterval(() => {
+      fetchStats();
+      fetchTickets();
+    }, 60000);
+
+    return () => clearInterval(refreshTimer);
+  }, [statusFilter, typeFilter]);
 
   const fetchStats = async () => {
     try {
       const response = await ticketsApi.getStats();
       setStats(response.data);
     } catch (error) {
-      console.error('Error fetching stats:', error);
+      console.error("Error fetching stats:", error);
     }
   };
 
@@ -31,11 +43,11 @@ const Tickets = () => {
       const params = {};
       if (statusFilter) params.status = statusFilter;
       if (typeFilter) params.type = typeFilter;
-      
+
       const response = await ticketsApi.getAll(params);
       setTickets(response.data);
     } catch (error) {
-      console.error('Error fetching tickets:', error);
+      console.error("Error fetching tickets:", error);
     } finally {
       setLoading(false);
     }
@@ -47,23 +59,28 @@ const Tickets = () => {
       return;
     }
     // Filter locally for now (can be moved to backend)
-    const filtered = tickets.filter(ticket => 
-      ticket.code.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = tickets.filter((ticket) =>
+      ticket.code.toLowerCase().includes(searchTerm.toLowerCase()),
     );
     setTickets(filtered);
   };
 
   const getStatusBadge = (status) => {
     const colors = {
-      ACTIVE: 'green',
-      EXPIRED: 'gray',
-      CANCELLED: 'red'
+      ACTIVE: "green",
+      EXPIRED: "gray",
+      CANCELLED: "red",
     };
-    return <span className={`badge ${colors[status] || 'gray'}`}>{status}</span>;
+    return (
+      <span className={`badge ${colors[status] || "gray"}`}>{status}</span>
+    );
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
   };
 
   return (
@@ -95,17 +112,16 @@ const Tickets = () => {
       </div>
 
       <div className="filters filter-toolbar">
-        <input 
-          type="text" 
+        <input
+          type="text"
           placeholder="Tìm theo mã vé..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <select 
+        <select
           value={statusFilter}
           onChange={(e) => {
             setStatusFilter(e.target.value);
-            fetchTickets();
           }}
         >
           <option value="">Tất cả trạng thái</option>
@@ -113,11 +129,10 @@ const Tickets = () => {
           <option value="EXPIRED">Hết hạn</option>
           <option value="CANCELLED">Đã hủy</option>
         </select>
-        <select 
+        <select
           value={typeFilter}
           onChange={(e) => {
             setTypeFilter(e.target.value);
-            fetchTickets();
           }}
         >
           <option value="">Tất cả loại</option>
@@ -156,7 +171,9 @@ const Tickets = () => {
                   <td>{ticket.type}</td>
                   <td>{ticket.name}</td>
                   <td>{formatPrice(ticket.price)}</td>
-                  <td>{new Date(ticket.createdAt).toLocaleDateString('vi-VN')}</td>
+                  <td>
+                    {new Date(ticket.createdAt).toLocaleDateString("vi-VN")}
+                  </td>
                   <td>{getStatusBadge(ticket.status)}</td>
                 </tr>
               ))

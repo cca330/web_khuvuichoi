@@ -19,18 +19,18 @@ import { AuthModule } from './auth/auth.module';
     ThrottlerModule.forRoot([
       {
         name: 'short',
-        ttl: 1000,   // 1 giây
-        limit: 10,   // 10 requests/giây
+        ttl: 1000, // 1 giây
+        limit: 10, // 10 requests/giây
       },
       {
         name: 'medium',
-        ttl: 10000,  // 10 giây
-        limit: 50,   // 50 requests/10 giây
+        ttl: 10000, // 10 giây
+        limit: 50, // 50 requests/10 giây
       },
       {
         name: 'long',
-        ttl: 60000,  // 1 phút
-        limit: 200,  // 200 requests/phút
+        ttl: 60000, // 1 phút
+        limit: 200, // 200 requests/phút
       },
     ]),
 

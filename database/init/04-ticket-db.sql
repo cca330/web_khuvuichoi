@@ -73,6 +73,7 @@ CREATE TABLE `tickets` (
 	`status` enum('ACTIVE','EXPIRED','CANCELLED') DEFAULT 'ACTIVE',
 	`created_at` datetime DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`), UNIQUE KEY `ticket_code` (`ticket_code`),
+	KEY `idx_tickets_status_valid_until` (`status`, `valid_until`),
 	CONSTRAINT `fk_tickets_order_item` FOREIGN KEY (`order_item_id`) REFERENCES `order_items` (`id`) ON DELETE CASCADE,
 	CONSTRAINT `fk_tickets_gate_ticket` FOREIGN KEY (`gate_ticket_id`) REFERENCES `gate_tickets` (`id`),
 	CONSTRAINT `chk_tickets_admits` CHECK (`admits_adult` + `admits_child` >= 1),

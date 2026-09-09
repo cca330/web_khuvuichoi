@@ -3,6 +3,8 @@ import {
   NotFoundException,
   BadRequestException,
   UnauthorizedException,
+  OnModuleDestroy,
+  OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -26,10 +28,11 @@ import { retry, timeout } from 'rxjs/operators';
 import { CircuitBreaker } from '../common/circuit-breaker';
 import { getTraceId } from '../common/trace-context';
 @Injectable()
-export class TicketsService {
+export class TicketsService implements OnModuleInit, OnModuleDestroy {
   private readonly promotionServiceUrl: string;
   private readonly internalServiceToken: string;
   private readonly promotionServiceCircuit = new CircuitBreaker();
+  private expirationTimer?: ReturnType<typeof setInterval>;
 
   constructor(
     @InjectRepository(Ticket)
@@ -53,8 +56,33 @@ export class TicketsService {
     ) as string;
   }
 
+  async onModuleInit() {
+    await this.markExpiredTickets();
+    this.expirationTimer = setInterval(() => {
+      void this.markExpiredTickets();
+    }, 60000);
+  }
+
+  onModuleDestroy() {
+    if (this.expirationTimer) {
+      clearInterval(this.expirationTimer);
+    }
+  }
+
+  private async markExpiredTickets() {
+    await this.ticketRepository.manager.query(
+      `
+      UPDATE tickets
+      SET status = 'EXPIRED'
+      WHERE status = 'ACTIVE'
+        AND valid_until < CURRENT_TIMESTAMP
+      `,
+    );
+  }
+
   // Lấy danh sách vé đã bán (chỉ lấy vé thuộc đơn đã PAID)
   async findAll(filter: FilterTicketsDto) {
+    await this.markExpiredTickets();
     let query = `
     SELECT
       t.id AS id,
@@ -92,6 +120,7 @@ export class TicketsService {
 
   // Thống kê tổng quan (dùng cho trang danh sách vé)
   async getStats() {
+    await this.markExpiredTickets();
     const result = await this.ticketRepository.manager.query(
       `
       SELECT
@@ -117,6 +146,7 @@ export class TicketsService {
 
   // Lấy vé theo order_id
   async getTicketsByOrder(orderId: number) {
+    await this.markExpiredTickets();
     const itemIds = await this.ticketRepository.manager.query(
       `SELECT id FROM order_items WHERE order_id = ?`,
       [orderId],
@@ -145,6 +175,7 @@ export class TicketsService {
 
   // Quét vé tại cổng
   async scanTicket(dto: ScanTicketDto) {
+    await this.markExpiredTickets();
     const queryRunner =
       this.ticketRepository.manager.connection.createQueryRunner();
     await queryRunner.connect();
