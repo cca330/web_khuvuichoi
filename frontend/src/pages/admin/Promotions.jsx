@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import promotionsApi from '../../api/promotionsApi';
-import '../../styles/admin.css';
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import promotionsApi from "../../api/promotionsApi";
+import "../../styles/admin.css";
 
 const Promotions = () => {
   const [promotions, setPromotions] = useState([]);
@@ -22,30 +22,32 @@ const Promotions = () => {
         ),
       );
     } catch (error) {
-      console.error('Error fetching promotions:', error);
+      console.error("Error fetching promotions:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDisable = async (id) => {
-    if (!window.confirm('Vô hiệu hóa khuyến mãi này?')) return;
-    
+    if (!window.confirm("Vô hiệu hóa khuyến mãi này?")) return;
+
     try {
       await promotionsApi.disable(id);
       fetchPromotions();
     } catch (error) {
-      console.error('Error disabling promotion:', error);
-      alert('Không thể vô hiệu hóa khuyến mãi');
+      console.error("Error disabling promotion:", error);
+      alert("Không thể vô hiệu hóa khuyến mãi");
     }
   };
 
   const getStatusBadge = (status) => {
     const colors = {
-      ACTIVE: 'green',
-      EXPIRED: 'red'
+      ACTIVE: "green",
+      EXPIRED: "red",
     };
-    return <span className={`badge ${colors[status] || 'gray'}`}>{status}</span>;
+    return (
+      <span className={`badge ${colors[status] || "gray"}`}>{status}</span>
+    );
   };
 
   return (
@@ -56,7 +58,9 @@ const Promotions = () => {
           <p className="muted">Danh sách tất cả mã khuyến mãi trong hệ thống</p>
         </div>
         <div className="top-buttons">
-          <Link to="/admin/promotions/create" className="btn primary">+ Thêm khuyến mãi</Link>
+          <Link to="/admin/promotions/create" className="btn primary">
+            + Thêm khuyến mãi
+          </Link>
         </div>
       </div>
 
@@ -88,7 +92,10 @@ const Promotions = () => {
                   <td>{promotion.id}</td>
                   <td>{promotion.code}</td>
                   <td>{promotion.discount}%</td>
-                  <td>{new Date(promotion.startDate).toLocaleDateString('vi-VN')} → {new Date(promotion.endDate).toLocaleDateString('vi-VN')}</td>
+                  <td>
+                    {new Date(promotion.startDate).toLocaleDateString("vi-VN")}{" "}
+                    → {new Date(promotion.endDate).toLocaleDateString("vi-VN")}
+                  </td>
                   <td>{getStatusBadge(promotion.status)}</td>
                   <td>
                     {promotion.scopeNames ? (
@@ -98,10 +105,23 @@ const Promotions = () => {
                     )}
                   </td>
                   <td>
-                    <Link className="btn" to={`/admin/promotions/${promotion.id}`}>Chi tiết</Link>
-                    <Link className="btn" to={`/admin/promotions/edit/${promotion.id}`}>Sửa</Link>
-                    {promotion.status === 'ACTIVE' && (
-                      <button className="btn danger" onClick={() => handleDisable(promotion.id)}>
+                    <Link
+                      className="btn"
+                      to={`/admin/promotions/${promotion.id}`}
+                    >
+                      Chi tiết
+                    </Link>
+                    <Link
+                      className="btn"
+                      to={`/admin/promotions/edit/${promotion.id}`}
+                    >
+                      Sửa
+                    </Link>
+                    {promotion.status === "ACTIVE" && (
+                      <button
+                        className="btn danger"
+                        onClick={() => handleDisable(promotion.id)}
+                      >
                         Vô hiệu hóa
                       </button>
                     )}

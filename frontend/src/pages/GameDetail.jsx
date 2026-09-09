@@ -9,16 +9,22 @@ import {
   FaComments,
 } from "react-icons/fa";
 import gamesApi from "../api/gamesApi";
+import { useAuth } from "../context/AuthContext";
 import { getImageUrl } from "../utils/imageUtils";
 import "../styles/gameDetail.css";
 
 const GameDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
   const [game, setGame] = useState(null);
   const [feedbacks, setFeedbacks] = useState([]);
   const [stats, setStats] = useState({ total: 0, avgRating: 0 });
   const [loading, setLoading] = useState(true);
   const [activeImgIndex, setActiveImgIndex] = useState(0);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewContent, setReviewContent] = useState("");
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState("");
 
   useEffect(() => {
     fetchGameDetail();
@@ -57,6 +63,42 @@ const GameDetail = () => {
       .map((_, i) => (
         <FaStar key={i} className={`star-icon ${i < rating ? "filled" : ""}`} />
       ));
+  };
+
+  const currentUserReview = feedbacks.find(
+    (feedback) => Number(feedback.userId) === Number(user?.id),
+  );
+
+  const handleSubmitReview = async (event) => {
+    event.preventDefault();
+    const content = reviewContent.trim();
+
+    if (!user) {
+      setReviewMessage("Vui lòng đăng nhập để gửi đánh giá.");
+      return;
+    }
+    if (!content) {
+      setReviewMessage("Vui lòng nhập nội dung đánh giá.");
+      return;
+    }
+
+    try {
+      setReviewSubmitting(true);
+      setReviewMessage("");
+      await gamesApi.createFeedback(id, {
+        rating: reviewRating,
+        content,
+      });
+      setReviewContent("");
+      setReviewMessage("Đánh giá của bạn đã được gửi.");
+      await fetchGameDetail();
+    } catch (error) {
+      setReviewMessage(
+        error.response?.data?.message || "Không thể gửi đánh giá lúc này.",
+      );
+    } finally {
+      setReviewSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -233,6 +275,54 @@ const GameDetail = () => {
           {/* ─── DANH SÁCH ĐÁNH GIÁ CỦA KHÁCH HÀNG ─── */}
           <div className="gdetail-reviews-card">
             <h3 className="gdetail-section-title">Đánh giá từ du khách</h3>
+
+            <div className="gdetail-review-form">
+              <h4>Chia sẻ đánh giá của bạn</h4>
+              {!user ? (
+                <p className="gdetail-review-note">
+                  Vui lòng đăng nhập để viết đánh giá.
+                </p>
+              ) : currentUserReview ? (
+                <p className="gdetail-review-note">
+                  Bạn đã đánh giá trò chơi này rồi.
+                </p>
+              ) : (
+                <form onSubmit={handleSubmitReview}>
+                  <div
+                    className="gdetail-rating-picker"
+                    aria-label="Chọn số sao"
+                  >
+                    {[1, 2, 3, 4, 5].map((rating) => (
+                      <button
+                        key={rating}
+                        type="button"
+                        className={rating <= reviewRating ? "selected" : ""}
+                        onClick={() => setReviewRating(rating)}
+                        aria-label={`${rating} sao`}
+                      >
+                        <FaStar />
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={reviewContent}
+                    onChange={(event) => setReviewContent(event.target.value)}
+                    maxLength={1000}
+                    placeholder="Viết cảm nhận của bạn..."
+                    rows={4}
+                  />
+                  <div className="gdetail-review-form-footer">
+                    <span>{reviewContent.length}/1000</span>
+                    <button type="submit" disabled={reviewSubmitting}>
+                      {reviewSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
+                    </button>
+                  </div>
+                </form>
+              )}
+              {reviewMessage && (
+                <p className="gdetail-review-message">{reviewMessage}</p>
+              )}
+            </div>
 
             {feedbacks.length === 0 ? (
               <div className="gdetail-no-reviews">

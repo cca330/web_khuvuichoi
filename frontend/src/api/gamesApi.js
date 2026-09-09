@@ -1,14 +1,14 @@
-import axiosClient from './axiosClient';
+import axiosClient from "./axiosClient";
 
 const gamesApi = {
   // Lấy tất cả games
   getAll: () => {
-    return axiosClient.get('/games');
+    return axiosClient.get("/games");
   },
 
   // Tìm kiếm game
   search: (keyword) => {
-    return axiosClient.get('/games/search', { params: { keyword } });
+    return axiosClient.get("/games/search", { params: { keyword } });
   },
 
   // Lấy game theo loại vé cổng
@@ -31,9 +31,13 @@ const gamesApi = {
     return axiosClient.get(`/games/${id}/feedbacks`);
   },
 
+  createFeedback: (id, data) => {
+    return axiosClient.post(`/games/${id}/feedbacks`, data);
+  },
+
   // Tạo game mới
   create: (data) => {
-    return axiosClient.post('/games', data);
+    return axiosClient.post("/games", data);
   },
 
   // Cập nhật game

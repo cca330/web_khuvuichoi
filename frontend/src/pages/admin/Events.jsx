@@ -16,7 +16,9 @@ const Events = () => {
       setLoading(true);
       const response = await eventsApi.getAll();
       const events = Array.isArray(response.data) ? response.data : [];
-      setEvents(events.sort((first, second) => Number(first.id) - Number(second.id)));
+      setEvents(
+        events.sort((first, second) => Number(first.id) - Number(second.id)),
+      );
     } catch (error) {
       console.error("Error fetching events:", error);
     } finally {

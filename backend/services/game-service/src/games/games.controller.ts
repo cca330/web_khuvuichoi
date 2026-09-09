@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Put, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Query,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  ParseIntPipe,
+  Request,
+} from '@nestjs/common';
 import { GamesService } from './games.service';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
@@ -6,6 +20,7 @@ import { GameStatus, AllowedTicket } from './entities/game.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CreateFeedbackDto } from './dto/create-feedback.dto';
 
 @Controller('games')
 export class GamesController {
@@ -40,6 +55,17 @@ export class GamesController {
   @Get(':id/feedbacks')
   getFeedbacks(@Param('id', ParseIntPipe) id: number) {
     return this.gamesService.getFeedbacks(id);
+  }
+
+  @Post(':id/feedbacks')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  createFeedback(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: CreateFeedbackDto,
+    @Request() req,
+  ) {
+    return this.gamesService.createFeedback(id, req.user.id, dto);
   }
 
   @Post()

@@ -43,6 +43,7 @@ CREATE TABLE `feedbacks` (
 	`created_at` datetime DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`id`),
 	KEY `idx_feedbacks_game` (`game_id`),
+	UNIQUE KEY `uq_feedbacks_user_game` (`user_id`, `game_id`),
 	CONSTRAINT `fk_feedbacks_game` FOREIGN KEY (`game_id`) REFERENCES `games` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

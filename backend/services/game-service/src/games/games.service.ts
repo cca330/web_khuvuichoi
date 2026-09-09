@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
@@ -9,6 +13,7 @@ import { Game, GameStatus, AllowedTicket } from './entities/game.entity';
 import { GameImage } from './entities/game-image.entity';
 import { CreateGameDto } from './dto/create-game.dto';
 import { UpdateGameDto } from './dto/update-game.dto';
+import { CreateFeedbackDto } from './dto/create-feedback.dto';
 import { In } from 'typeorm';
 import { isBase64Image, saveBase64Images } from './image-helper';
 import { CircuitBreaker } from '../common/circuit-breaker';
@@ -284,10 +289,36 @@ export class GamesService {
 
     return feedbacks.map((f: any) => ({
       id: f.id,
+      userId: f.user_id,
       content: f.content,
       rating: f.rating,
       createdAt: f.created_at,
       username: userMap.get(f.user_id) || 'Unknown',
     }));
+  }
+
+  async createFeedback(gameId: number, userId: number, dto: CreateFeedbackDto) {
+    const game = await this.gameRepository.findOne({ where: { id: gameId } });
+    if (!game) {
+      throw new NotFoundException('Game not found');
+    }
+
+    const existing = await this.gameRepository.manager.query(
+      'SELECT id FROM feedbacks WHERE user_id = ? AND game_id = ? LIMIT 1',
+      [userId, gameId],
+    );
+    if (existing.length > 0) {
+      throw new ConflictException('Bạn đã đánh giá trò chơi này rồi');
+    }
+
+    const result = await this.gameRepository.manager.query(
+      'INSERT INTO feedbacks (user_id, game_id, content, rating) VALUES (?, ?, ?, ?)',
+      [userId, gameId, dto.content.trim(), dto.rating],
+    );
+
+    return {
+      id: result.insertId,
+      message: 'Đánh giá đã được gửi',
+    };
   }
 }
