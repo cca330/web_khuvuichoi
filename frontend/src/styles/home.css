@@ -469,6 +469,12 @@ li {
 
   .hero-container-inner {
     padding: 24px 16px 18px;
+    transition: transform 0.25s ease;
+  }
+
+  /* Chừa khoảng trống cho menu mở rộng để nội dung hero không bị che. */
+  body:has(.lucid-nav-bar.is-open) .hero-container-inner {
+    transform: translateY(112px);
   }
 
   .hero-text-modern {
