@@ -20,6 +20,19 @@
 
 /* ─── 2. MÀN HÌNH ĐIỆN THOẠI MOBILE (MOBILE: < 576px) ─── */
 @media (max-width: 575.98px) {
+  /* Đẩy nội dung banner xuống khi menu mobile đang mở. */
+  body:has(.lucid-nav-bar.is-open)
+    :is(
+      .games-hero-content,
+      .events-hero-content,
+      .cart-hero-content,
+      .gdetail-hero-content,
+      .event-hero-content
+    ) {
+    transform: translateY(112px);
+    transition: transform 0.25s ease;
+  }
+
   /* Tiêu đề trò chơi nhỏ lại */
   #games-section .section-title h2 {
     font-size: 1.4rem !important;
