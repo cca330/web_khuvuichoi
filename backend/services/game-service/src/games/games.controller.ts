@@ -68,6 +68,28 @@ export class GamesController {
     return this.gamesService.createFeedback(id, req.user.id, dto);
   }
 
+  @Put(':id/feedbacks/:feedbackId')
+  @UseGuards(JwtAuthGuard)
+  updateFeedback(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('feedbackId', ParseIntPipe) feedbackId: number,
+    @Body() dto: CreateFeedbackDto,
+    @Request() req,
+  ) {
+    return this.gamesService.updateFeedback(id, feedbackId, req.user.id, dto);
+  }
+
+  @Delete(':id/feedbacks/:feedbackId')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  deleteFeedback(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('feedbackId', ParseIntPipe) feedbackId: number,
+    @Request() req,
+  ) {
+    return this.gamesService.deleteFeedback(id, feedbackId, req.user.id);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')

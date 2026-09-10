@@ -321,4 +321,42 @@ export class GamesService {
       message: 'Đánh giá đã được gửi',
     };
   }
+
+  async updateFeedback(
+    gameId: number,
+    feedbackId: number,
+    userId: number,
+    dto: CreateFeedbackDto,
+  ) {
+    const result = await this.gameRepository.manager.query(
+      `
+      UPDATE feedbacks
+      SET rating = ?, content = ?
+      WHERE id = ? AND game_id = ? AND user_id = ?
+      `,
+      [dto.rating, dto.content.trim(), feedbackId, gameId, userId],
+    );
+
+    if (result.affectedRows === 0) {
+      throw new NotFoundException('Không tìm thấy đánh giá của bạn');
+    }
+
+    return { message: 'Đánh giá đã được cập nhật' };
+  }
+
+  async deleteFeedback(gameId: number, feedbackId: number, userId: number) {
+    const result = await this.gameRepository.manager.query(
+      `
+      DELETE FROM feedbacks
+      WHERE id = ? AND game_id = ? AND user_id = ?
+      `,
+      [feedbackId, gameId, userId],
+    );
+
+    if (result.affectedRows === 0) {
+      throw new NotFoundException('Không tìm thấy đánh giá của bạn');
+    }
+
+    return { message: 'Đánh giá đã được xóa' };
+  }
 }

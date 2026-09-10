@@ -25,10 +25,20 @@ const GameDetail = () => {
   const [reviewContent, setReviewContent] = useState("");
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewMessage, setReviewMessage] = useState("");
+  const [editingFeedbackId, setEditingFeedbackId] = useState(null);
+  const [editingRating, setEditingRating] = useState(5);
+  const [editingContent, setEditingContent] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const reviewsPerPage = 10;
 
   useEffect(() => {
     fetchGameDetail();
   }, [id]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [id, feedbacks.length]);
 
   const fetchGameDetail = async () => {
     try {
@@ -68,6 +78,15 @@ const GameDetail = () => {
   const currentUserReview = feedbacks.find(
     (feedback) => Number(feedback.userId) === Number(user?.id),
   );
+  const otherFeedbacks = feedbacks.filter(
+    (feedback) => Number(feedback.userId) !== Number(user?.id),
+  );
+  const totalReviewPages = Math.ceil(otherFeedbacks.length / reviewsPerPage);
+  const safeCurrentPage = Math.min(currentPage, Math.max(totalReviewPages, 1));
+  const visibleFeedbacks = otherFeedbacks.slice(
+    (safeCurrentPage - 1) * reviewsPerPage,
+    safeCurrentPage * reviewsPerPage,
+  );
 
   const handleSubmitReview = async (event) => {
     event.preventDefault();
@@ -95,6 +114,65 @@ const GameDetail = () => {
     } catch (error) {
       setReviewMessage(
         error.response?.data?.message || "Không thể gửi đánh giá lúc này.",
+      );
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const startEditingReview = (feedback) => {
+    setEditingFeedbackId(feedback.id);
+    setEditingRating(feedback.rating);
+    setEditingContent(feedback.content);
+    setReviewMessage("");
+  };
+
+  const cancelEditingReview = () => {
+    setEditingFeedbackId(null);
+    setEditingContent("");
+    setEditingRating(5);
+  };
+
+  const handleUpdateReview = async (event) => {
+    event.preventDefault();
+    const content = editingContent.trim();
+
+    if (!content) {
+      setReviewMessage("Vui lòng nhập nội dung đánh giá.");
+      return;
+    }
+
+    try {
+      setReviewSubmitting(true);
+      setReviewMessage("");
+      await gamesApi.updateFeedback(id, editingFeedbackId, {
+        rating: editingRating,
+        content,
+      });
+      cancelEditingReview();
+      setReviewMessage("Đánh giá đã được cập nhật.");
+      await fetchGameDetail();
+    } catch (error) {
+      setReviewMessage(
+        error.response?.data?.message || "Không thể cập nhật đánh giá lúc này.",
+      );
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
+
+  const handleDeleteReview = async (feedbackId) => {
+    if (!window.confirm("Bạn có chắc muốn xóa đánh giá này?")) return;
+
+    try {
+      setReviewSubmitting(true);
+      setReviewMessage("");
+      await gamesApi.deleteFeedback(id, feedbackId);
+      setReviewMessage("Đánh giá đã được xóa.");
+      await fetchGameDetail();
+    } catch (error) {
+      setReviewMessage(
+        error.response?.data?.message || "Không thể xóa đánh giá lúc này.",
       );
     } finally {
       setReviewSubmitting(false);
@@ -283,9 +361,94 @@ const GameDetail = () => {
                   Vui lòng đăng nhập để viết đánh giá.
                 </p>
               ) : currentUserReview ? (
-                <p className="gdetail-review-note">
-                  Bạn đã đánh giá trò chơi này rồi.
-                </p>
+                <div className="gdetail-own-review">
+                  <p className="gdetail-review-note">
+                    Bạn đã đánh giá trò chơi này rồi.
+                  </p>
+                  {editingFeedbackId === currentUserReview.id ? (
+                    <form onSubmit={handleUpdateReview}>
+                      <div
+                        className="gdetail-rating-picker"
+                        aria-label="Chọn số sao"
+                      >
+                        {[1, 2, 3, 4, 5].map((rating) => (
+                          <button
+                            key={rating}
+                            type="button"
+                            className={
+                              rating <= editingRating ? "selected" : ""
+                            }
+                            onClick={() => setEditingRating(rating)}
+                            aria-label={`${rating} sao`}
+                          >
+                            <FaStar />
+                          </button>
+                        ))}
+                      </div>
+                      <textarea
+                        className="gdetail-inline-review-input"
+                        value={editingContent}
+                        onChange={(event) =>
+                          setEditingContent(event.target.value)
+                        }
+                        maxLength={1000}
+                        rows={4}
+                      />
+                      <div className="gdetail-review-form-footer">
+                        <span>{editingContent.length}/1000</span>
+                        <div className="gdetail-review-actions">
+                          <button
+                            type="button"
+                            className="secondary"
+                            onClick={cancelEditingReview}
+                          >
+                            Hủy
+                          </button>
+                          <button type="submit" disabled={reviewSubmitting}>
+                            {reviewSubmitting ? "Đang lưu..." : "Lưu thay đổi"}
+                          </button>
+                        </div>
+                      </div>
+                    </form>
+                  ) : (
+                    <>
+                      <div className="gdetail-own-review-header">
+                        <div className="review-stars">
+                          {renderStars(currentUserReview.rating)}
+                        </div>
+                        <span className="review-date">
+                          {currentUserReview.createdAt
+                            ? new Date(
+                                currentUserReview.createdAt,
+                              ).toLocaleString("vi-VN")
+                            : ""}
+                        </span>
+                      </div>
+                      <p className="review-content">
+                        {currentUserReview.content}
+                      </p>
+                      <div className="gdetail-review-actions">
+                        <button
+                          type="button"
+                          className="secondary"
+                          onClick={() => startEditingReview(currentUserReview)}
+                        >
+                          Sửa
+                        </button>
+                        <button
+                          type="button"
+                          className="danger"
+                          onClick={() =>
+                            handleDeleteReview(currentUserReview.id)
+                          }
+                          disabled={reviewSubmitting}
+                        >
+                          Xóa
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
               ) : (
                 <form onSubmit={handleSubmitReview}>
                   <div
@@ -324,38 +487,58 @@ const GameDetail = () => {
               )}
             </div>
 
-            {feedbacks.length === 0 ? (
+            {otherFeedbacks.length === 0 ? (
               <div className="gdetail-no-reviews">
-                <p>
-                  Chưa có đánh giá nào cho trò chơi này. Hãy là người đầu tiên
-                  trải nghiệm!
-                </p>
+                <p>Chưa có đánh giá nào khác cho trò chơi này.</p>
               </div>
             ) : (
-              <div className="gdetail-reviews-list">
-                {feedbacks.map((fb) => (
-                  <div key={fb.id} className="gdetail-review-item">
-                    <div className="review-header">
-                      <div className="review-user">
-                        <div>
-                          <span className="username">
-                            {fb.username || "Khách tham quan"}
-                          </span>
-                          <span className="review-date">
-                            {fb.createdAt
-                              ? new Date(fb.createdAt).toLocaleString("vi-VN")
-                              : ""}
-                          </span>
+              <>
+                <div className="gdetail-reviews-list">
+                  {visibleFeedbacks.map((fb) => (
+                    <div key={fb.id} className="gdetail-review-item">
+                      <div className="review-header">
+                        <div className="review-user">
+                          <div>
+                            <span className="username">
+                              {fb.username || "Khách tham quan"}
+                            </span>
+                            <span className="review-date">
+                              {fb.createdAt
+                                ? new Date(fb.createdAt).toLocaleString("vi-VN")
+                                : ""}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="review-stars">
+                          {renderStars(fb.rating)}
                         </div>
                       </div>
-                      <div className="review-stars">
-                        {renderStars(fb.rating)}
-                      </div>
+                      <p className="review-content">{fb.content}</p>
                     </div>
-                    <p className="review-content">{fb.content}</p>
+                  ))}
+                </div>
+                {totalReviewPages > 1 && (
+                  <div className="gdetail-pagination">
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage === 1}
+                      onClick={() => setCurrentPage(safeCurrentPage - 1)}
+                    >
+                      Trước
+                    </button>
+                    <span>
+                      Trang {safeCurrentPage} / {totalReviewPages}
+                    </span>
+                    <button
+                      type="button"
+                      disabled={safeCurrentPage === totalReviewPages}
+                      onClick={() => setCurrentPage(safeCurrentPage + 1)}
+                    >
+                      Sau
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
         </div>

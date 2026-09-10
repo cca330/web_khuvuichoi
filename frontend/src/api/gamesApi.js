@@ -35,6 +35,14 @@ const gamesApi = {
     return axiosClient.post(`/games/${id}/feedbacks`, data);
   },
 
+  updateFeedback: (gameId, feedbackId, data) => {
+    return axiosClient.put(`/games/${gameId}/feedbacks/${feedbackId}`, data);
+  },
+
+  deleteFeedback: (gameId, feedbackId) => {
+    return axiosClient.delete(`/games/${gameId}/feedbacks/${feedbackId}`);
+  },
+
   // Tạo game mới
   create: (data) => {
     return axiosClient.post("/games", data);
