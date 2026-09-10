@@ -380,7 +380,9 @@ li {
   letter-spacing: 0.02em;
   text-decoration: none;
   box-shadow: 0 14px 30px rgba(255, 91, 132, 0.25);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .btn-featured-explore:hover {
@@ -459,8 +461,8 @@ li {
   }
 
   .hero-background-image {
-    width: calc(100vw - 18px) !important;
-    min-height: 560px;
+    width: calc(100vw - 24px) !important;
+    min-height: 620px;
     height: auto;
     border-radius: 22px;
   }
@@ -474,9 +476,11 @@ li {
   }
 
   .hero-title-main {
-    font-size: clamp(2.4rem, 10vw, 3.5rem);
-    line-height: 1.04;
-    letter-spacing: -0.06em;
+    max-width: 100%;
+    font-size: clamp(2.25rem, 11vw, 3.5rem);
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    overflow-wrap: anywhere;
   }
 
   .hero-slogan-text {
@@ -1389,7 +1393,7 @@ li {
 
 /* Tiêu đề chính - Màu tối nổi bật */
 .hero-title {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 44px;
   font-weight: 700;
   line-height: 1.2;
@@ -1400,7 +1404,7 @@ li {
 
 /* Chữ nghiêng nghệ thuật - Màu hồng / tím nổi bật */
 .hero-title .highlight-italic {
-  font-family: 'Instrument Serif', serif;
+  font-family: "Instrument Serif", serif;
   font-style: italic;
   font-weight: 600;
   font-size: 52px;
@@ -1409,7 +1413,7 @@ li {
 
 /* Mô tả ngắn - Màu xám dễ đọc */
 .hero-subtitle {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 15px;
   color: #555555 !important;
   max-width: 520px;
@@ -1420,7 +1424,7 @@ li {
 /* Nút bấm chủ đạo Theme Sáng */
 .btn-get-started-light {
   display: inline-block;
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: #ffffff !important;
@@ -1456,7 +1460,7 @@ li {
 .panorama-track {
   display: flex;
   align-items: center;
-  gap: 6px; 
+  gap: 6px;
   width: max-content;
   padding: 20px 15vw;
   transform-style: preserve-3d;
@@ -1472,7 +1476,7 @@ li {
   transform-style: preserve-3d;
   will-change: transform;
   /* Giảm transition xuống cực ngắn để khi cuộn mượt và không bị trễ góc xoay 3D */
-  transition: transform 0.05s linear; 
+  transition: transform 0.05s linear;
 }
 
 .panorama-card.no-transition {
@@ -1508,10 +1512,19 @@ li {
 
 /* Responsive di động */
 @media (max-width: 768px) {
-  .hero-title { font-size: 30px; }
-  .hero-title .highlight-italic { font-size: 36px; }
-  .hero-subtitle { font-size: 13px; }
-  .panorama-card { width: 200px; height: 260px; }
+  .hero-title {
+    font-size: 30px;
+  }
+  .hero-title .highlight-italic {
+    font-size: 36px;
+  }
+  .hero-subtitle {
+    font-size: 13px;
+  }
+  .panorama-card {
+    width: 200px;
+    height: 260px;
+  }
 }
 
 /* ==========================================================================
@@ -1621,7 +1634,7 @@ li {
   margin-bottom: 16px;
 }
 
-.stars-rating i, 
+.stars-rating i,
 .stars-rating .fa-star {
   color: #ffc107;
   font-size: 18px;

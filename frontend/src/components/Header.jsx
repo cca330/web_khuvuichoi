@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import "../styles/header.css";
@@ -5,6 +6,7 @@ import "../styles/header.css";
 const Header = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isActive = (path) => {
     if (path === "/") {
@@ -25,16 +27,34 @@ const Header = () => {
         </div>
 
         {/* MENU ĐIỀU HƯỚNG DÀN NGANG CỰC SANG */}
-        <nav className="lucid-nav-bar">
+        <button
+          className="lucid-menu-toggle"
+          type="button"
+          aria-label={isMenuOpen ? "Đóng menu" : "Mở menu"}
+          aria-expanded={isMenuOpen}
+          onClick={() => setIsMenuOpen((open) => !open)}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav className={`lucid-nav-bar ${isMenuOpen ? "is-open" : ""}`}>
           <ul>
             <li className={isActive("/") ? "active" : ""}>
-              <Link to="/">Trang Chủ</Link>
+              <Link to="/" onClick={() => setIsMenuOpen(false)}>
+                Trang Chủ
+              </Link>
             </li>
             <li className={isActive("/games") ? "active" : ""}>
-              <Link to="/games">Trò Chơi</Link>
+              <Link to="/games" onClick={() => setIsMenuOpen(false)}>
+                Trò Chơi
+              </Link>
             </li>
             <li className={isActive("/events") ? "active" : ""}>
-              <Link to="/events">Sự Kiện</Link>
+              <Link to="/events" onClick={() => setIsMenuOpen(false)}>
+                Sự Kiện
+              </Link>
             </li>
             <li
               className={
@@ -45,7 +65,12 @@ const Header = () => {
                   : ""
               }
             >
-              <Link to={user ? "/booking" : "/login"}>Vé & Ưu Đãi</Link>
+              <Link
+                to={user ? "/booking" : "/login"}
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Vé & Ưu Đãi
+              </Link>
             </li>
           </ul>
         </nav>

@@ -29,6 +29,7 @@ const GameDetail = () => {
   const [editingRating, setEditingRating] = useState(5);
   const [editingContent, setEditingContent] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteFeedbackId, setDeleteFeedbackId] = useState(null);
 
   const reviewsPerPage = 10;
 
@@ -162,8 +163,6 @@ const GameDetail = () => {
   };
 
   const handleDeleteReview = async (feedbackId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa đánh giá này?")) return;
-
     try {
       setReviewSubmitting(true);
       setReviewMessage("");
@@ -176,6 +175,7 @@ const GameDetail = () => {
       );
     } finally {
       setReviewSubmitting(false);
+      setDeleteFeedbackId(null);
     }
   };
 
@@ -439,7 +439,7 @@ const GameDetail = () => {
                           type="button"
                           className="danger"
                           onClick={() =>
-                            handleDeleteReview(currentUserReview.id)
+                            setDeleteFeedbackId(currentUserReview.id)
                           }
                           disabled={reviewSubmitting}
                         >
@@ -543,6 +543,42 @@ const GameDetail = () => {
           </div>
         </div>
       </section>
+
+      {deleteFeedbackId && (
+        <div
+          className="gdetail-confirm-overlay"
+          role="presentation"
+          onClick={() => setDeleteFeedbackId(null)}
+        >
+          <div
+            className="gdetail-confirm-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-review-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 id="delete-review-title">Xóa đánh giá?</h3>
+            <p>Bạn có chắc muốn xóa đánh giá này không?</p>
+            <div className="gdetail-confirm-actions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => setDeleteFeedbackId(null)}
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                className="danger"
+                onClick={() => handleDeleteReview(deleteFeedbackId)}
+                disabled={reviewSubmitting}
+              >
+                {reviewSubmitting ? "Đang xóa..." : "Xóa đánh giá"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

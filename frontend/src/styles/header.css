@@ -22,6 +22,10 @@
   gap: 20px;
 }
 
+.lucid-menu-toggle {
+  display: none;
+}
+
 /* Giao diện chữ LOGO nghệ thuật */
 .lucid-logo-text {
   font-family: "Playfair Display", serif;
@@ -296,19 +300,82 @@
 }
 
 @media (max-width: 767px) {
-  .lucid-nav-bar ul {
+  .lucid-header {
+    padding: 12px 0;
+  }
+
+  .lucid-header-container {
+    align-items: center;
     flex-wrap: wrap;
+    gap: 0;
+    padding: 0 16px;
+  }
+
+  .lucid-logo-text {
+    font-size: 30px;
+  }
+
+  .lucid-menu-toggle {
+    display: inline-flex;
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 8px 16px;
+    gap: 5px;
+    margin-left: auto;
+    margin-right: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 50%;
+    background: rgba(12, 16, 26, 0.28);
+    cursor: pointer;
+  }
+
+  .lucid-menu-toggle span {
+    width: 18px;
+    height: 2px;
+    border-radius: 2px;
+    background: #ffffff;
+  }
+
+  .lucid-nav-bar {
+    display: none;
+    width: 100%;
+    flex: 0 0 100%;
+    order: 3;
+    margin-top: 12px;
+    padding: 8px 12px;
+    border-radius: 16px;
+  }
+
+  .lucid-nav-bar.is-open {
+    display: block;
+  }
+
+  .lucid-nav-bar ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
   }
 
   .lucid-nav-bar ul li a {
-    font-size: 13px;
+    padding: 10px 4px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 0.02em;
   }
 
   .lucid-btn-account {
-    padding: 8px 16px;
+    width: 42px;
+    height: 42px;
+    justify-content: center;
+    padding: 0;
     font-size: 13px;
+  }
+
+  .lucid-btn-account span {
+    display: none;
   }
 
   .footer__about,
