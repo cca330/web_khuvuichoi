@@ -19,7 +19,7 @@ const Header = () => {
     /* THÊM CLASS anim-group-1 VÀO ĐÂY ĐỂ TOÀN BỘ HEADER XUẤT HIỆN ĐẦU TIÊN */
     <header className="lucid-header anim-group-1">
       <div className="lucid-header-container">
-        {/* LOGO CHỮ NGHỆ THUẬT KIỂU LUCID */}
+        {/* LOGO CHỮ NGHỆ THUẬT KIỂU LUCID d*/}
         <div className="lucid-logo-wrap">
           <Link to="/" className="lucid-logo-text">
             H<span>G</span>
