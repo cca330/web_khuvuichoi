@@ -300,6 +300,134 @@
     font-size: 32px;
   }
 }
+
+@media (max-width: 575.98px) {
+  .cart-list-section {
+    overflow: hidden;
+  }
+
+  .cart-list-section > .container {
+    max-width: 100%;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .modern-cart-box {
+    min-width: 0;
+    padding: 16px 12px;
+    border-radius: 18px;
+  }
+
+  .modern-cart-table {
+    width: 100%;
+    table-layout: fixed;
+  }
+
+  .modern-cart-table th,
+  .modern-cart-table td {
+    min-width: 0;
+    padding: 12px 4px;
+    overflow-wrap: anywhere;
+  }
+
+  .modern-cart-table th {
+    font-size: 10px;
+    letter-spacing: 0;
+  }
+
+  .modern-cart-table td {
+    font-size: 13px;
+  }
+
+  .ticket-options-table th:nth-child(1),
+  .ticket-options-table td:nth-child(1) {
+    width: 44%;
+  }
+
+  .ticket-options-table th:nth-child(2),
+  .ticket-options-table td:nth-child(2) {
+    width: 26%;
+    white-space: nowrap;
+  }
+
+  .ticket-options-table th:nth-child(3),
+  .ticket-options-table td:nth-child(3) {
+    width: 30%;
+  }
+
+  .selected-tickets-table th:nth-child(1),
+  .selected-tickets-table td:nth-child(1) {
+    width: 15%;
+  }
+
+  .selected-tickets-table th:nth-child(2),
+  .selected-tickets-table td:nth-child(2) {
+    width: 25%;
+  }
+
+  .selected-tickets-table th:nth-child(3),
+  .selected-tickets-table td:nth-child(3) {
+    width: 8%;
+    text-align: center;
+  }
+
+  .selected-tickets-table th:nth-child(4),
+  .selected-tickets-table td:nth-child(4) {
+    width: 23%;
+    white-space: nowrap;
+  }
+
+  .selected-tickets-table th:nth-child(5),
+  .selected-tickets-table td:nth-child(5) {
+    width: 30%;
+    text-align: center !important;
+  }
+
+  .selected-tickets-table td:nth-child(2) b {
+    display: block;
+    line-height: 1.35;
+    overflow-wrap: anywhere;
+  }
+
+  .selected-tickets-table .btn-qty-minus,
+  .selected-tickets-table .btn-qty-plus,
+  .selected-tickets-table .btn-qty-delete {
+    width: 27px;
+    height: 27px;
+    margin: 2px 1px !important;
+    padding: 0;
+    border-radius: 7px;
+    vertical-align: middle;
+  }
+
+  .booking-date-box {
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .booking-date-box input,
+  .coupon-input {
+    min-width: 0;
+  }
+
+  .coupon-form {
+    flex-wrap: wrap;
+  }
+
+  .coupon-input {
+    width: 100%;
+  }
+
+  .btn-coupon-apply {
+    width: 100%;
+    height: 40px;
+  }
+
+  .cart-list-section .col-lg-5 > .modern-cart-box {
+    position: static !important;
+    top: auto !important;
+  }
+}
 /* ─── BỔ SUNG KHU VỰC MÃ GIẢM GIÁ (COUPON) ─── */
 .coupon-box {
   margin: 18px 0;

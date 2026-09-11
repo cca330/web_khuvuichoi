@@ -232,7 +232,7 @@ const Booking = () => {
             <div className="col-lg-7 mb-4">
               <div className="modern-cart-box">
                 <h4>🎟️ Chọn loại vé</h4>
-                <table className="modern-cart-table">
+                <table className="modern-cart-table ticket-options-table">
                   <thead>
                     <tr>
                       <th>Loại vé</th>
@@ -275,7 +275,7 @@ const Booking = () => {
               {cartData && cartData.items && cartData.items.length > 0 && (
                 <div className="modern-cart-box">
                   <h4>🛒 Vé đã chọn</h4>
-                  <table className="modern-cart-table">
+                  <table className="modern-cart-table selected-tickets-table">
                     <thead>
                       <tr>
                         <th>Loại</th>
