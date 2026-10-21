@@ -1,0 +1,29 @@
+groups:
+  - name: infrastructure
+    rules:
+      - alert: HostHighCPUUsage
+        expr: 100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Host CPU usage is high
+          description: Host CPU usage has been above 80% for 5 minutes.
+
+      - alert: HostHighMemoryUsage
+        expr: 100 * (1 - node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Host memory usage is high
+          description: Host memory usage has been above 85% for 5 minutes.
+
+      - alert: MonitoringExporterDown
+        expr: up{job=~"node-exporter|cadvisor"} == 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: A monitoring exporter is unreachable
+          description: "Prometheus cannot scrape {{ $labels.job }} at {{ $labels.instance }}."
