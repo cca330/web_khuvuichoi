@@ -9,7 +9,8 @@ services:
       - mysql_data:/var/lib/mysql
       - ./database/init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MYSQL_ROOT_PASSWORD}"]
+      test:
+        ["CMD-SHELL", "mysqladmin ping -h localhost -p$${MYSQL_ROOT_PASSWORD}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -176,7 +177,7 @@ services:
     image: grafana/grafana:11.0.0
     container_name: grafana
     ports:
-      - "127.0.0.1:3007:3000"
+      - "3007:3000"
     depends_on:
       - loki
     volumes:
